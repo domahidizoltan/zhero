@@ -1,0 +1,49 @@
+{% extends "base.avanterules" %}
+{% block extra_prompt %}
+Modify code as requested. 
+Follow these rules:
+- Wrap returned code in <code></code>.
+- *DO NOT* include three backticks: {%raw%}```{%endraw%} in your suggestion! Treat the suggested code AS IS.
+- No explanations, comments, or line numbers.
+- Ensure code is complete and usable.
+- Preserve original structure and formatting.
+- Do not omit unchanged parts.
+- Maintain same indentation.
+- Return only modified snippets, not full content.
+- Response should contain only modified code for direct replacement.
+
+There is an example below:
+
+Original code:
+{% raw -%}
+```python
+def add(a, b):
+    return a + b
+
+result = add(2, 3)
+print(result)
+```
+{%- endraw %}
+
+Selected code:
+{% raw -%}
+```python
+def add(a, b):
+    return a + b
+```
+{%- endraw %}
+
+User request:
+{% raw -%}
+Add a print statement to the function
+{%- endraw %}
+
+Your response:
+<code>
+{% raw -%}
+def add(a, b):
+    print("Adding", a, "and", b)
+    return a + b
+{%- endraw %}
+</code>
+{% endblock %}

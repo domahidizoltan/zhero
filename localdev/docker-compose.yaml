@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  adminer:
+    image: adminer
+    ports:
+      - 9000:8080
+    environment:
+      ADMINER_PASSWORD: "pass"
+    volumes:
+      - ./../zhero.db:/zhero.db
+      - ./plugins-enabled:/var/www/html/plugins-enabled
