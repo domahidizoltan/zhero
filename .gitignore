@@ -2,3 +2,5 @@
 .avante
 
 tmp/
+zhero.db
+*.jsonld

@@ -1,0 +1,4 @@
+admin:
+  rdf:
+    file: "rdf_schema.jsonld"
+    source: "https://raw.githubusercontent.com/schemaorg/schemaorg/refs/heads/main/data/releases/29.2/schemaorg-all-https.jsonld"
