@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/deiu/rdf2go"
+	"github.com/domahidizoltan/zhero/config"
 	"github.com/domahidizoltan/zhero/pkg/collection"
-	"github.com/domahidizoltan/zhero/pkg/config"
 	rdfPkg "github.com/domahidizoltan/zhero/pkg/rdf"
 )
 

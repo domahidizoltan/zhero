@@ -12,7 +12,12 @@ type (
 	}
 
 	AdminConfig struct {
-		RDF RdfConfig `mapstructure:"rdf"`
+		Server AdminServerConfig `mapstructure:"server"`
+		RDF    RdfConfig         `mapstructure:"rdf"`
+	}
+
+	AdminServerConfig struct {
+		Port int `mapstructure:"port"`
 	}
 
 	RdfConfig struct {

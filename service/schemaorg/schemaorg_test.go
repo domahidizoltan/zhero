@@ -3,7 +3,7 @@ package schemaorg
 import (
 	"testing"
 
-	"github.com/domahidizoltan/zhero/pkg/config"
+	"github.com/domahidizoltan/zhero/config"
 	"github.com/stretchr/testify/assert"
 )
 
