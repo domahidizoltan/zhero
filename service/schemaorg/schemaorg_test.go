@@ -10,7 +10,7 @@ import (
 const jsonldURL = "https://raw.githubusercontent.com/schemaorg/schemaorg/refs/heads/main/data/releases/29.2/schemaorg-all-https.jsonld"
 
 func TestSchemaorg(t *testing.T) {
-	so, err := InitSchemaorg(config.RdfConfig{
+	so, err := New(config.RdfConfig{
 		Source: jsonldURL,
 		File:   "../../rdf_schema.jsonld",
 	})

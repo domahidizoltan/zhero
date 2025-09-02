@@ -13,21 +13,21 @@ import (
 )
 
 type schemaorg struct {
-	graph         *rdfPkg.RdfGraph
+	graph         *rdfPkg.Graph
 	unstableNodes map[string]struct{}
 }
 
 var once sync.Once
 
-func InitSchemaorg(cfg config.RdfConfig) (*schemaorg, error) {
+func New(cfg config.RdfConfig) (*schemaorg, error) {
 	var (
-		g             *rdfPkg.RdfGraph
+		g             *rdfPkg.Graph
 		err           error
 		unstableNodes = make(map[string]struct{}, 1000)
 	)
 
 	once.Do(func() {
-		g, err = rdfPkg.InitGraph(cfg.File, cfg.Source, false)
+		g, err = rdfPkg.Init(cfg.File, cfg.Source, false)
 		if err != nil {
 			return
 		}
@@ -116,7 +116,7 @@ func (s *schemaorg) getPropertiesOf(values []string) map[string][]ClassProperty 
 	return properties
 }
 
-func getUnstableNodes(g *rdfPkg.RdfGraph) map[string]struct{} {
+func getUnstableNodes(g *rdfPkg.Graph) map[string]struct{} {
 	triples := g.All(nil, IsPartOf, attic)
 	triples = append(triples, g.All(nil, IsPartOf, pending)...)
 

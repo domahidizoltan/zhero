@@ -9,13 +9,13 @@ import (
 	"github.com/domahidizoltan/zhero/pkg/file"
 )
 
-type RdfGraph struct {
+type Graph struct {
 	graph *rdf2go.Graph
 }
 
 var once sync.Once
 
-func InitGraph(filePath, downloadURL string, overwrite bool) (*RdfGraph, error) {
+func Init(filePath, downloadURL string, overwrite bool) (*Graph, error) {
 	// log
 	var err error
 	once.Do(func() {
@@ -38,19 +38,19 @@ func InitGraph(filePath, downloadURL string, overwrite bool) (*RdfGraph, error) 
 		return nil, err
 	}
 
-	return &RdfGraph{
+	return &Graph{
 		graph: g,
 	}, nil
 }
 
-func (s *RdfGraph) One(subject, predicate, object rdf2go.Term) *rdf2go.Triple {
+func (s *Graph) One(subject, predicate, object rdf2go.Term) *rdf2go.Triple {
 	return s.graph.One(subject, predicate, object)
 }
 
-func (s *RdfGraph) All(subject, predicate, object rdf2go.Term) []*rdf2go.Triple {
+func (s *Graph) All(subject, predicate, object rdf2go.Term) []*rdf2go.Triple {
 	return s.graph.All(subject, predicate, object)
 }
 
-func (s *RdfGraph) Remove(triple *rdf2go.Triple) {
+func (s *Graph) Remove(triple *rdf2go.Triple) {
 	s.graph.Remove(triple)
 }
