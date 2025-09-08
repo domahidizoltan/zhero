@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
-	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/config"
+	"github.com/domahidizoltan/zhero/controller"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )
@@ -48,26 +47,7 @@ func main() {
 	router.Use(zerologMiddleware(log))
 	router.Use(gin.Recovery())
 
-	template, err := raymond.ParseFile("templates/index.hbs")
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to parse template")
-	}
-
-	router.GET("/", func(c *gin.Context) {
-		data := map[string]string{
-			"Title":   "Welcome to Zhero",
-			"Message": "This is a dynamic page rendered with Handlebars!",
-		}
-
-		output, err := template.Exec(data)
-		if err != nil {
-			log.Error().Err(err).Msg("error rendering template")
-			c.String(http.StatusInternalServerError, "Error rendering template")
-			return
-		}
-
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(output))
-	})
+	controller.SetRoutes(router)
 
 	serverAddr := fmt.Sprintf(":%d", cfg.Admin.Server.Port)
 	log.Info().Int("port", cfg.Admin.Server.Port).Msg("Server starting on port")

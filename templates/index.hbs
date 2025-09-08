@@ -1,9 +1,105 @@
-<html>
+<html data-theme="light">
   <head>
-    <title>{{Title}}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{title}}</title>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.6"></script>
+    <link rel="stylesheet" href="static/index.css" />
+    <script src="static/index.js" defer></script>
   </head>
-  <body>
-    <h1>{{Title}}</h1>
-    <p>{{Message}}</p>
+  <body class="bg-base-200">
+    <div class="navbar bg-base-100 shadow-md mb-6">
+      <div class="container mx-auto max-w-5xl">
+        <div class="flex-1">
+          <a href="/" class="btn btn-ghost text-xl normal-case">{{title}}</a>
+        </div>
+      </div>
+    </div>
+
+    <main class="container mx-auto max-w-5xl">
+      <div class="bg-base-100 p-6 rounded-box shadow">
+        <h1 class="text-3xl font-bold mb-6">Contact Us</h1>
+        <form>
+          <div class="form-control w-full mb-4">
+            <label class="label">
+              <span class="label-text">Your Name</span>
+            </label>
+            <input
+              type="text"
+              placeholder="John Doe"
+              class="input input-bordered w-full"
+            />
+          </div>
+          <div class="form-control w-full mb-4">
+            <label class="label">
+              <span class="label-text">Your Email</span>
+            </label>
+            <input
+              type="email"
+              placeholder="john.doe@example.com"
+              class="input input-bordered w-full"
+            />
+          </div>
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text">Your Message</span>
+            </label>
+            <textarea
+              class="textarea textarea-bordered h-24"
+              placeholder="Your message here..."
+            ></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+
+      <div class="bg-base-100 p-6 rounded-box shadow mt-6">
+        <h1 class="text-3xl font-bold mb-6">Search</h1>
+        <form id="search-form">
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="relative w-full">
+              <input
+                id="search-input"
+                type="text"
+                placeholder="Search..."
+                class="input input-bordered w-full"
+                autocomplete="off"
+              />
+              <ul
+                id="search-results"
+                class="absolute z-10 w-full bg-base-100 border border-base-300 rounded-box mt-1 hidden shadow-lg max-h-60 overflow-y-auto"
+              >
+                <!-- list items will be populated by JS -->
+              </ul>
+            </div>
+            <button type="submit" class="btn btn-success text-white">
+              <i class="fas fa-save"></i>
+              Save
+            </button>
+          </div>
+          <div
+            id="result-display"
+            class="p-4 bg-base-200 rounded-box min-h-[50px]"
+          >
+            <!-- Result will be loaded here -->
+          </div>
+        </form>
+      </div>
+    </main>
   </body>
 </html>

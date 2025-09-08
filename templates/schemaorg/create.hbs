@@ -1,0 +1,26 @@
+<link href="static/schemaorg/schemaorg.css" rel="stylesheet" type="text/css" />
+<script src="static/schemaorg/schemaorg.js"></script>
+<div id="schemaorg-create-container">
+  <h1>{{Title}}</h1>
+
+  <div class="mb-4 search-container">
+    <label for="search">Search:</label>
+    <input
+      type="text"
+      id="search"
+      placeholder="Search for an item..."
+      hx-get="/search"
+      hx-trigger="input changed delay:500ms, search"
+      hx-target="#results"
+    />
+  </div>
+
+  <div id="results" class="mb-4">
+    <!-- Search results will be loaded here -->
+    <p>Select an item from the list below.</p>
+  </div>
+
+  <div id="detail-view">
+    <!-- Item details will be loaded here -->
+  </div>
+</div>
