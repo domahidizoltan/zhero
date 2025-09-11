@@ -15,6 +15,8 @@ var (
 
 	attic   = rdf2go.NewResource("https://attic.schema.org")
 	pending = rdf2go.NewResource("https://pending.schema.org")
+
+	RootClass = term(schema, "Thing")
 )
 
 type context string

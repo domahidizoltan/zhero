@@ -12,14 +12,14 @@ import (
 	rdfPkg "github.com/domahidizoltan/zhero/pkg/rdf"
 )
 
-type schemaorg struct {
+type Service struct {
 	graph         *rdfPkg.Graph
 	unstableNodes map[string]struct{}
 }
 
 var once sync.Once
 
-func New(cfg config.RdfConfig) (*schemaorg, error) {
+func New(cfg config.RdfConfig) (*Service, error) {
 	var (
 		g             *rdfPkg.Graph
 		err           error
@@ -38,23 +38,34 @@ func New(cfg config.RdfConfig) (*schemaorg, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &schemaorg{
+	return &Service{
 		graph:         g,
 		unstableNodes: unstableNodes,
 	}, nil
 }
 
-func (s *schemaorg) GetAllClasses() []string {
+func (s *Service) GetAllClasses() []string {
 	triples := s.graph.All(nil, Type, Class)
 	return s.prepareValues(triples, tripleSubject)
 }
 
-func (s *schemaorg) GetSubClassesOf(cls rdf2go.Term) []string {
+func (s *Service) GetSubClassesOf(cls rdf2go.Term) []string {
 	triples := s.graph.All(nil, SubClassOf, cls)
 	return s.prepareValues(triples, tripleSubject)
 }
 
-func (s *schemaorg) GetSchemaClass(cls rdf2go.Term) *SchemaClass {
+func (s *Service) GetSubClassesHierarchyOf(cls rdf2go.Term, nestingLevelMarker string, currentLevel int) []string {
+	prefix := strings.Repeat(nestingLevelMarker, currentLevel)
+	clsName := getTermName(cls, schema)
+	results := []string{prefix + clsName}
+	for _, c := range s.GetSubClassesOf(cls) {
+		res := s.GetSubClassesHierarchyOf(term(schema, c), nestingLevelMarker, currentLevel+1)
+		results = append(results, res...)
+	}
+	return results
+}
+
+func (s *Service) GetSchemaClass(cls rdf2go.Term) *SchemaClass {
 	desc := s.getDescription(cls)
 	classTerms := s.getClassHierarchy(cls, nil)
 
@@ -73,7 +84,7 @@ func (s *schemaorg) GetSchemaClass(cls rdf2go.Term) *SchemaClass {
 	}
 }
 
-func (s *schemaorg) getDescription(cls rdf2go.Term) string {
+func (s *Service) getDescription(cls rdf2go.Term) string {
 	if t := s.graph.One(cls, Comment, nil); t != nil {
 
 		lit := t.Object.(*rdf2go.Literal)
@@ -82,12 +93,12 @@ func (s *schemaorg) getDescription(cls rdf2go.Term) string {
 	return ""
 }
 
-func (s *schemaorg) getExpectedType(cls rdf2go.Term) []string {
+func (s *Service) getExpectedType(cls rdf2go.Term) []string {
 	types := s.graph.All(cls, RangeIncludes, nil)
 	return s.prepareValues(types, tripleObject)
 }
 
-func (s *schemaorg) getClassHierarchy(cls rdf2go.Term, chainItems []rdf2go.Term) []rdf2go.Term {
+func (s *Service) getClassHierarchy(cls rdf2go.Term, chainItems []rdf2go.Term) []rdf2go.Term {
 	if t := s.graph.One(cls, SubClassOf, nil); t != nil {
 		var obj rdf2go.Term = t.Object.(*rdf2go.Resource)
 		chainItems = append(chainItems, s.getClassHierarchy(obj, chainItems)...)
@@ -95,7 +106,7 @@ func (s *schemaorg) getClassHierarchy(cls rdf2go.Term, chainItems []rdf2go.Term)
 	return append(chainItems, cls)
 }
 
-func (s *schemaorg) getPropertiesOf(values []string) map[string][]ClassProperty {
+func (s *Service) getPropertiesOf(values []string) map[string][]ClassProperty {
 	properties := make(map[string][]ClassProperty, len(values))
 	for _, v := range values {
 		sc := term(schema, v)
@@ -139,7 +150,7 @@ var (
 	}
 )
 
-func (s *schemaorg) prepareValues(triples []*rdf2go.Triple, fn func(*rdf2go.Triple) rdf2go.Term) []string {
+func (s *Service) prepareValues(triples []*rdf2go.Triple, fn func(*rdf2go.Triple) rdf2go.Term) []string {
 	res := s.filterUnstableValues(mapNames(triples, fn))
 	slices.Sort(res)
 	return res
@@ -161,7 +172,7 @@ func getTermName(term rdf2go.Term, ctx context) string {
 	return strings.TrimPrefix(term.RawValue(), string(ctx))
 }
 
-func (s *schemaorg) filterUnstableValues(values []string) []string {
+func (s *Service) filterUnstableValues(values []string) []string {
 	return slices.Collect(collection.FilterValues(values, func(v string) bool {
 		_, found := s.unstableNodes[v]
 		return !found

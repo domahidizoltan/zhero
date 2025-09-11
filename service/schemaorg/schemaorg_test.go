@@ -36,6 +36,16 @@ func TestSchemaorg(t *testing.T) {
 		assert.NotElementsMatch(t, res, []string{"StupidType", "BioChemEntity", "Taxon"})
 	})
 
+	t.Run("gets_subclasses_hierarchy", func(t *testing.T) {
+		res := so.GetSubClassesHierarchyOf(term(schema, "Thing"), ">", 0)
+		assert.Greater(t, len(res), 100)
+		firstNine := []string{
+			"Thing", ">Action", ">>AchieveAction", ">>>LoseAction", ">>>TieAction",
+			">>>WinAction", ">>AssessAction", ">>>ChooseAction", ">>>>VoteAction",
+		}
+		assert.ElementsMatch(t, res[:9], firstNine)
+	})
+
 	t.Run("gets_schema_class", func(t *testing.T) {
 		res := so.GetSchemaClass(term(schema, "LiveBlogPosting"))
 

@@ -3,9 +3,11 @@ package schemaorg
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller/template"
+	"github.com/domahidizoltan/zhero/service/schemaorg"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -25,7 +27,18 @@ func init() {
 	}
 }
 
-func Create(c *gin.Context) {
+type SchemaorgCtrl struct {
+	schemaorgSvc   schemaorg.Service
+	classHierarchy [][]string
+}
+
+func New(schemaorgSvc schemaorg.Service) SchemaorgCtrl {
+	return SchemaorgCtrl{
+		schemaorgSvc: schemaorgSvc,
+	}
+}
+
+func (sc *SchemaorgCtrl) Create(c *gin.Context) {
 	body, err := createTpl.Exec(nil)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "error rendering template")
@@ -43,6 +56,31 @@ func Create(c *gin.Context) {
 	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
 }
 
-func Search(c *gin.Context) {
-	c.Data(http.StatusOK, gin.MIMEHTML, []byte("<p>testing1</p><br/><p>testing2"))
+func (sc *SchemaorgCtrl) GetClassHierarchy(c *gin.Context) {
+	marker := ">"
+
+	if len(sc.classHierarchy) == 0 {
+		lines := sc.schemaorgSvc.GetSubClassesHierarchyOf(schemaorg.RootClass, marker, 0)
+		parents := []string{lines[0]}
+		sc.classHierarchy = append(sc.classHierarchy, []string{lines[0]})
+
+		for _, l := range lines[1:] {
+			level := strings.Count(l, marker)
+			switch {
+			case level == len(parents):
+				parents = append(parents, l[level:])
+			case level == len(parents)-1:
+				parents[len(parents)-1] = l[level:]
+			case level < len(parents)-1:
+				parents = parents[:level]
+				parents = append(parents, l[level:])
+			}
+
+			tmp := make([]string, len(parents))
+			copy(tmp, parents)
+			sc.classHierarchy = append(sc.classHierarchy, tmp)
+		}
+	}
+
+	c.JSON(http.StatusOK, sc.classHierarchy)
 }

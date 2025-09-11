@@ -1,26 +1,43 @@
-<link href="static/schemaorg/schemaorg.css" rel="stylesheet" type="text/css" />
+<link
+  href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
+  rel="stylesheet"
+/>
+<script
+  src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"
+></script>
 <script src="static/schemaorg/schemaorg.js"></script>
-<div id="schemaorg-create-container">
-  <h1>{{Title}}</h1>
+<style>
+  .ts-control {
+    padding: 10px;
+    padding-left: 12px;
+    input {
+      font-size: 14px;
+    }
+  }
+</style>
 
-  <div class="mb-4 search-container">
-    <label for="search">Search:</label>
-    <input
-      type="text"
-      id="search"
-      placeholder="Search for an item..."
-      hx-get="/search"
-      hx-trigger="input changed delay:500ms, search"
-      hx-target="#results"
-    />
-  </div>
+<div class="bg-base-100 p-6 rounded-box shadow mt-6">
+  <h1 class="text-3xl font-bold mb-6">Create schema</h1>
+  <span id="classHierarchy" style="display:none"></span>
 
-  <div id="results" class="mb-4">
-    <!-- Search results will be loaded here -->
-    <p>Select an item from the list below.</p>
-  </div>
+  <div class="flex items-center space-x-2 mb-4">
+    <div class="relative w-full">
+      <span
+        id="schema-class-loading"
+        class="input input-bordered w-full"
+      >Loading Schema classes...</span>
+      <select
+        id="schema-class"
+        placeholder="Select a Schema class..."
+        autocomplete="off"
+        class="hidden"
+      >
+      </select>
 
-  <div id="detail-view">
-    <!-- Item details will be loaded here -->
+    </div>
+    <button type="submit" class="btn btn-success">
+      <i class="fas fa-save"></i>
+      Create
+    </button>
   </div>
 </div>
