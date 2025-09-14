@@ -18,6 +18,6 @@ func SetRoutes(router *gin.Engine) {
 	}
 	schemaorgCtrl := schemaorgCtrl.New(*svc)
 
-	router.GET("/", schemaorgCtrl.Create)
+	router.GET("/", schemaorgCtrl.SearchSchema)
 	router.GET("/class-hierarchy", schemaorgCtrl.GetClassHierarchy)
 }

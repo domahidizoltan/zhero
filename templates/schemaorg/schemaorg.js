@@ -43,3 +43,16 @@ function fillSchemaClasses(classHierarchy) {
 
   htmx.remove(htmx.find(`#${id}-loading`));
 }
+
+function navigateToEditSchemaPage() {
+  let schemaClass = document.getElementById("schema-class").value;
+  if (!schemaClass) {
+    popup("No schema selected!");
+  } else {
+    let slug = schemaClass
+      .replace(/([A-Z])/g, "-$1")
+      .toLowerCase()
+      .substring(1);
+    window.location.href = `/schema/${slug}/edit`;
+  }
+}

@@ -14,14 +14,14 @@ import (
 
 const (
 	tpl       = template.TemplatesPath + "schemaorg/"
-	tplCreate = tpl + "create.hbs"
+	tplSearch = tpl + "search-schema.hbs"
 )
 
-var createTpl *raymond.Template
+var searchTpl *raymond.Template
 
 func init() {
 	var err error
-	createTpl, err = raymond.ParseFile(tplCreate)
+	searchTpl, err = raymond.ParseFile(tplSearch)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to parse template")
 	}
@@ -38,8 +38,8 @@ func New(schemaorgSvc schemaorg.Service) SchemaorgCtrl {
 	}
 }
 
-func (sc *SchemaorgCtrl) Create(c *gin.Context) {
-	body, err := createTpl.Exec(nil)
+func (sc *SchemaorgCtrl) SearchSchema(c *gin.Context) {
+	body, err := searchTpl.Exec(nil)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "error rendering template")
 	}

@@ -17,26 +17,26 @@
 </style>
 
 <div class="bg-base-100 p-6 rounded-box shadow mt-6">
-  <h1 class="text-3xl font-bold mb-6">Create schema</h1>
+  <h1 class="text-3xl font-bold mb-6">Search schema</h1>
   <span id="classHierarchy" style="display:none"></span>
 
   <div class="flex items-center space-x-2 mb-4">
     <div class="relative w-full">
-      <span
-        id="schema-class-loading"
-        class="input input-bordered w-full"
-      >Loading Schema classes...</span>
+      <span id="schema-class-loading" class="input input-bordered w-full">
+        Loading Schema classes
+        <span class="loading loading-ring loading-sm"></span>
+      </span>
       <select
         id="schema-class"
-        placeholder="Select a Schema class..."
+        placeholder="Select a Schema class"
         autocomplete="off"
         class="hidden"
       >
       </select>
 
     </div>
-    <button type="submit" class="btn btn-success">
-      <i class="fas fa-save"></i>
+    <button onclick="navigateToEditSchemaPage()" class="btn btn-success">
+      <i class="fas fa-circle-plus"></i>
       Create
     </button>
   </div>
