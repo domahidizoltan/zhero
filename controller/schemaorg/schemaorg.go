@@ -14,14 +14,22 @@ import (
 
 const (
 	tpl       = template.TemplatesPath + "schemaorg/"
-	tplSearch = tpl + "search-schema.hbs"
+	tplSearch = tpl + "search.hbs"
+	tplEdit   = tpl + "edit.hbs"
 )
 
-var searchTpl *raymond.Template
+var (
+	searchTpl *raymond.Template
+	editTpl   *raymond.Template
+)
 
 func init() {
 	var err error
 	searchTpl, err = raymond.ParseFile(tplSearch)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to parse template")
+	}
+	editTpl, err = raymond.ParseFile(tplEdit)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to parse template")
 	}
@@ -38,8 +46,32 @@ func New(schemaorgSvc schemaorg.Service) SchemaorgCtrl {
 	}
 }
 
-func (sc *SchemaorgCtrl) SearchSchema(c *gin.Context) {
+func (sc *SchemaorgCtrl) Search(c *gin.Context) {
 	body, err := searchTpl.Exec(nil)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "error rendering template")
+	}
+
+	output, err := template.Index(c, template.Content{
+		Title: "Welcome to Zhero",
+		Body:  raymond.SafeString(body),
+	})
+	if err != nil {
+		c.String(http.StatusInternalServerError, "error rendering template")
+		return
+	}
+
+	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
+}
+
+func (sc *SchemaorgCtrl) Edit(c *gin.Context) {
+	cls := c.Param("class")
+	if cls == "" {
+		c.String(http.StatusBadRequest, "missing class")
+		return
+	}
+
+	body, err := editTpl.Exec(nil)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "error rendering template")
 	}
