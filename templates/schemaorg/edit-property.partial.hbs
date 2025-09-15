@@ -1,0 +1,58 @@
+<div
+  class="border-2 border-base-300 bg-base-200 rounded-box p-3 relative property-item text-sm mb-2"
+  data-property-name="{{property}}"
+>
+  <div class="absolute top-4 right-4 flex items-center space-x-4">
+    <label class="label cursor-pointer">
+      <span class="label-text mr-2">Hide</span>
+      <input type="checkbox" class="toggle toggle-sm hide-toggle" />
+    </label>
+    <label class="label cursor-pointer">
+      <span class="label-text mr-2">Mandatory</span>
+      <input
+        type="checkbox"
+        class="checkbox checkbox-sm"
+        id="mandatory-prop-{{property}}"
+      />
+    </label>
+    <label class="label cursor-pointer">
+      <span class="label-text mr-2">Searchable</span>
+      <input
+        type="checkbox"
+        class="checkbox checkbox-sm"
+        id="searchable-prop-{{property}}"
+      />
+    </label>
+  </div>
+  <h3 class="text-lg font-semibold">{{property}}<a
+      href="{{canonicalURL}}"
+      target="_blank"
+    ><sup
+        class="fa-solid fa-arrow-up-right-from-square text-xs ml-2 text-gray-400"
+      ></sup></a></h3>
+  <p class="text-sm text-base-content/70 mb-2">{{description}}</p>
+  <div class="grid grid-cols-2 gap-4">
+    <div class="flex items-center gap-x-2">
+      <label class="label-text" for="prop-type-{{property}}">Type</label>
+      <select id="prop-type-{{property}}" class="select select-bordered w-full">
+        {{#each expectedTypes}}
+          <option>{{.}}</option>
+        {{/each}}
+      </select>
+    </div>
+    <div class="flex items-center gap-x-2">
+      <label
+        class="label-text"
+        for="prop-component-{{property}}"
+      >HTML&nbsp;Component</label>
+      <select
+        id="prop-component-{{property}}"
+        class="select select-bordered w-full"
+      >
+        {{#each components}}
+          <option>{{component}}</option>
+        {{/each}}
+      </select>
+    </div>
+  </div>
+</div>

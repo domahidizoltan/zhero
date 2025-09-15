@@ -6,3 +6,4 @@ zhero.db
 *.jsonld
 .aider*
 .env*
+.air.toml

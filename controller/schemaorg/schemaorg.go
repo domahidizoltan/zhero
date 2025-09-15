@@ -13,26 +13,36 @@ import (
 )
 
 const (
-	tpl       = template.TemplatesPath + "schemaorg/"
-	tplSearch = tpl + "search.hbs"
-	tplEdit   = tpl + "edit.hbs"
+	tpl                    = template.TemplatesPath + "schemaorg/"
+	tplSearch              = tpl + "search.hbs"
+	tplEdit                = tpl + "edit.hbs"
+	tplEditPropertyPartial = tpl + "edit-property.partial.hbs"
 )
 
 var (
-	searchTpl *raymond.Template
-	editTpl   *raymond.Template
+	searchTpl        *raymond.Template
+	editTpl          *raymond.Template
+	editPropertyPart *raymond.Template
 )
 
 func init() {
 	var err error
+
 	searchTpl, err = raymond.ParseFile(tplSearch)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to parse template")
 	}
+
 	editTpl, err = raymond.ParseFile(tplEdit)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to parse template")
 	}
+
+	editPropertyPart, err = raymond.ParseFile(tplEditPropertyPartial)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to parse template")
+	}
+	editTpl.RegisterPartialTemplate("editProperty", editPropertyPart)
 }
 
 type SchemaorgCtrl struct {
@@ -65,13 +75,31 @@ func (sc *SchemaorgCtrl) Search(c *gin.Context) {
 }
 
 func (sc *SchemaorgCtrl) Edit(c *gin.Context) {
-	cls := c.Param("class")
-	if cls == "" {
+	clsName := c.Param("class")
+	if clsName == "" {
 		c.String(http.StatusBadRequest, "missing class")
 		return
 	}
 
-	body, err := editTpl.Exec(nil)
+	cls := sc.schemaorgSvc.GetSchemaClassByName(clsName)
+	sc.initClassHierarchy()
+	var breadcrumbs []string
+	for _, ch := range sc.classHierarchy {
+		if ch[len(ch)-1] == clsName {
+			breadcrumbs = append(breadcrumbs, ch...)
+			break
+		}
+	}
+
+	ctx := map[string]any{
+		"class":       cls,
+		"breadcrumbs": breadcrumbs,
+		"schemaProperties": []map[string]map[string]string{
+			{"item": {"name": "asd"}},
+			{"item": {"name": "vds"}},
+		},
+	}
+	body, err := editTpl.Exec(ctx)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "error rendering template")
 	}
@@ -88,7 +116,7 @@ func (sc *SchemaorgCtrl) Edit(c *gin.Context) {
 	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
 }
 
-func (sc *SchemaorgCtrl) GetClassHierarchy(c *gin.Context) {
+func (sc *SchemaorgCtrl) initClassHierarchy() {
 	marker := ">"
 
 	if len(sc.classHierarchy) == 0 {
@@ -113,6 +141,9 @@ func (sc *SchemaorgCtrl) GetClassHierarchy(c *gin.Context) {
 			sc.classHierarchy = append(sc.classHierarchy, tmp)
 		}
 	}
+}
 
+func (sc *SchemaorgCtrl) GetClassHierarchy(c *gin.Context) {
+	sc.initClassHierarchy()
 	c.JSON(http.StatusOK, sc.classHierarchy)
 }

@@ -65,6 +65,10 @@ func (s *Service) GetSubClassesHierarchyOf(cls rdf2go.Term, nestingLevelMarker s
 	return results
 }
 
+func (s *Service) GetSchemaClassByName(cls string) *SchemaClass {
+	return s.GetSchemaClass(term(schema, cls))
+}
+
 func (s *Service) GetSchemaClass(cls rdf2go.Term) *SchemaClass {
 	desc := s.getDescription(cls)
 	classTerms := s.getClassHierarchy(cls, nil)

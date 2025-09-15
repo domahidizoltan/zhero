@@ -1,29 +1,23 @@
-<link
-  href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
-  rel="stylesheet"
-/>
-<script
-  src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"
-></script>
 <script
   src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"
 ></script>
+<script src="/static/schemaorg/schemaorg.js"></script>
 
 <div class="bg-base-100 p-6 rounded-box shadow mt-6">
   <form>
     <div class="mb-6">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-3xl font-bold">Schema Name</h1>
+          <h1 class="text-3xl font-bold">Schema: {{class.name}}<a href="{{class.canonicalURL}}" target="_blank"><sup class="fa-solid fa-arrow-up-right-from-square text-xs ml-2 text-gray-400"></sup></a></h1>
           <div class="text-sm breadcrumbs">
             <ul>
-              <li>Thing</li>
-              <li>CreativeWork</li>
-              <li>Schema Name</li>
+              {{#each breadcrumbs}}
+                <li>{{.}}</li>
+              {{/each}}
             </ul>
           </div>
         </div>
-        <div class="form-control">
+        <div class="form-control text-sm">
           <label class="label cursor-pointer">
             <span class="label-text mr-2">Show hidden properties</span>
             <input
@@ -34,134 +28,19 @@
           </label>
         </div>
       </div>
-      <p class="text-base-content/70">A short description of the schema class.</p>
+      <p class="text-base-content/70">{{class.description}}</p>
     </div>
 
-    <h2 class="text-2xl font-bold mb-2">Properties</h2>
+
     <div class="space-y-2">
-      <!-- Property 1 -->
-      <div
-        class="border-2 border-base-300 bg-base-200 rounded-box p-3 relative property-item"
-        data-property-name="property1"
-      >
-        <div class="absolute top-4 right-4 flex items-center space-x-4">
-          <label class="label cursor-pointer">
-            <span class="label-text mr-2">Hide</span>
-            <input type="checkbox" class="toggle toggle-sm hide-toggle" />
-          </label>
-          <label class="label cursor-pointer">
-            <span class="label-text mr-2">Mandatory</span>
-            <input
-              type="checkbox"
-              class="checkbox checkbox-sm"
-              id="mandatory-prop1"
-            />
-          </label>
-          <label class="label cursor-pointer">
-            <span class="label-text mr-2">Searchable</span>
-            <input
-              type="checkbox"
-              class="checkbox checkbox-sm"
-              id="searchable-prop1"
-            />
-          </label>
-        </div>
-        <h3 class="text-lg font-semibold">property1</h3>
-        <p class="text-sm text-base-content/70 mb-2">Short description for
-          property1</p>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex items-center gap-x-2">
-            <label class="label-text" for="type-prop1">Type</label>
-            <select
-              id="type-prop1"
-              class="select select-bordered select-sm w-full"
-            >
-              <option>Boolean</option>
-              <option>Date</option>
-              <option>DateTime</option>
-              <option>Number</option>
-              <option selected>Text</option>
-              <option>Time</option>
-            </select>
-          </div>
-          <div class="flex items-center gap-x-2">
-            <label class="label-text" for="component-prop1">HTML Component</label>
-            <select
-              id="component-prop1"
-              class="select select-bordered select-sm w-full"
-            >
-              <option>Input</option>
-              <option>Textarea</option>
-              <option>Select</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Property 2 -->
-      <div
-        class="border-2 border-base-300 bg-base-200 rounded-box p-3 relative property-item"
-        data-property-name="property2"
-      >
-        <div class="absolute top-4 right-4 flex items-center space-x-4">
-          <label class="label cursor-pointer">
-            <span class="label-text mr-2">Hide</span>
-            <input type="checkbox" class="toggle toggle-sm hide-toggle" />
-          </label>
-          <label class="label cursor-pointer">
-            <span class="label-text mr-2">Mandatory</span>
-            <input
-              type="checkbox"
-              class="checkbox checkbox-sm"
-              id="mandatory-prop2"
-              checked
-            />
-          </label>
-          <label class="label cursor-pointer">
-            <span class="label-text mr-2">Searchable</span>
-            <input
-              type="checkbox"
-              class="checkbox checkbox-sm"
-              id="searchable-prop2"
-            />
-          </label>
-        </div>
-        <h3 class="text-lg font-semibold">property2</h3>
-        <p class="text-sm text-base-content/70 mb-2">Short description for
-          property2</p>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex items-center gap-x-2">
-            <label class="label-text" for="type-prop2">Type</label>
-            <select
-              id="type-prop2"
-              class="select select-bordered select-sm w-full"
-            >
-              <option>Boolean</option>
-              <option selected>Date</option>
-              <option>DateTime</option>
-              <option>Number</option>
-              <option>Text</option>
-              <option>Time</option>
-            </select>
-          </div>
-          <div class="flex items-center gap-x-2">
-            <label class="label-text" for="component-prop2">HTML Component</label>
-            <select
-              id="component-prop2"
-              class="select select-bordered select-sm w-full"
-            >
-              <option>Input</option>
-              <option>Textarea</option>
-              <option>Select</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
+    {{#each class.properties}}
+      {{>editProperty}}
+    {{/each}}
+   </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
       <!-- Left Column: Property Order -->
-      <div class="rounded-box p-3 bg-orange-50">
+      <div class="rounded-box p-3 border-2 border-orange-100 bg-orange-50">
         <h2 class="text-xl font-bold mb-2">Property Order</h2>
         <p class="text-sm text-base-content/70 mb-2">Drag and drop to reorder
           the visible properties.</p>
@@ -172,7 +51,9 @@
 
       <!-- Right Column: Meta Info and Actions -->
       <div>
-        <div class="rounded-box p-3 mb-4 bg-orange-50">
+        <div
+          class="rounded-box p-3 mb-4 border-2 border-orange-100 bg-orange-50"
+        >
           <h2 class="text-xl font-bold mb-2">Meta Information</h2>
           <div class="grid grid-cols-1 gap-4">
             <div>
@@ -243,83 +124,6 @@
     cursor: grabbing;
   }
 </style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const showHiddenToggle = document.getElementById('show-hidden-properties-toggle');
-    const propertyItems = document.querySelectorAll('.property-item');
-    const propertyOrderList = document.getElementById('property-order-list');
-    const identifierSelect = document.getElementById('identifier');
-    const secondaryIdentifierSelect = document.getElementById('secondary-identifier');
-
-    const updateUI = () => {
-      const showAll = showHiddenToggle.checked;
-      const selectedIdentifier = identifierSelect.value;
-      const selectedSecondaryIdentifier = secondaryIdentifierSelect.value;
-
-      // 1. Clear dynamic lists
-      propertyOrderList.innerHTML = '';
-      while (identifierSelect.options.length > 1) {
-        identifierSelect.remove(1);
-      }
-      while (secondaryIdentifierSelect.options.length > 1) {
-        secondaryIdentifierSelect.remove(1);
-      }
-
-      // 2. Iterate over each property to update its state
-      propertyItems.forEach(item => {
-        const hideToggle = item.querySelector('.hide-toggle');
-        const propertyName = item.dataset.propertyName;
-
-        if (!hideToggle || !propertyName) return;
-
-        // Update visibility based on its own toggle and the main toggle
-        if (hideToggle.checked && !showAll) {
-          item.classList.add('is-hidden');
-        } else {
-          item.classList.remove('is-hidden');
-        }
-
-        // Update order list and identifier lists if property is NOT hidden by its own toggle
-        if (!hideToggle.checked) {
-          // Add to Property Order list
-          const listItem = document.createElement('div');
-          listItem.classList.add('bg-base-100', 'border', 'border-base-300', 'p-2', 'rounded-md', 'flex', 'items-center');
-          listItem.dataset.propertyName = propertyName;
-          listItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 handle"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg> <span>${propertyName}</span>`;
-          propertyOrderList.appendChild(listItem);
-
-          // Add to Identifier dropdowns
-          const option = document.createElement('option');
-          option.value = propertyName;
-          option.textContent = propertyName;
-          identifierSelect.appendChild(option.cloneNode(true));
-          secondaryIdentifierSelect.appendChild(option.cloneNode(true));
-        }
-      });
-
-      // 3. Restore selections in dropdowns
-      identifierSelect.value = selectedIdentifier;
-      secondaryIdentifierSelect.value = selectedSecondaryIdentifier;
-    };
-
-    // Attach event listeners
-    showHiddenToggle.addEventListener('change', updateUI);
-    propertyItems.forEach(item => {
-      const hideToggle = item.querySelector('.hide-toggle');
-      if (hideToggle) {
-        hideToggle.addEventListener('change', updateUI);
-      }
-    });
-
-    // Initial UI setup on page load
-    updateUI();
-
-    // Initialize SortableJS
-    new Sortable(propertyOrderList, {
-      animation: 150,
-      ghostClass: 'sortable-ghost',
-      handle: '.handle',
-    });
-  });
+<script defer>
+  document.addEventListener("DOMContentLoaded", initPropertyOrderWidget);
 </script>
