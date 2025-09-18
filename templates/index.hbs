@@ -16,6 +16,11 @@
       rel="stylesheet"
       type="text/css"
     />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css"
+      rel="stylesheet"
+      type="text/css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@2.0.6"></script>
@@ -24,9 +29,16 @@
   </head>
   <body class="bg-base-200">
     <div class="navbar bg-base-100 shadow-md mb-6">
-      <div class="container mx-auto max-w-5xl">
+      <div class="container mx-auto max-w-5xl flex">
         <div class="flex-1">
           <a href="/" class="btn btn-ghost text-xl normal-case">{{title}}</a>
+        </div>
+        <div class="flex-none">
+          <label class="toggle text-base-content">
+            <input type="checkbox" value="dracula" class="theme-controller" />
+            <i class="fa-regular fa-sun"></i>
+            <i class="fa-regular fa-moon"></i>
+          </label>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ package schemaorg
 
 import (
 	"slices"
+	"sort"
 	"strings"
 	"sync"
 
@@ -79,6 +80,10 @@ func (s *Service) GetSchemaClass(cls rdf2go.Term) *SchemaClass {
 	for _, p := range props {
 		allProps = append(allProps, p...)
 	}
+
+	sort.SliceStable(allProps, func(i, j int) bool {
+		return strings.Compare(allProps[i].Property, allProps[j].Property) <= 0
+	})
 
 	return &SchemaClass{
 		Name:         getTermName(cls, schema),

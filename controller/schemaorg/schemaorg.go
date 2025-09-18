@@ -7,6 +7,7 @@ import (
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller/template"
+	"github.com/domahidizoltan/zhero/pkg/handlebars"
 	"github.com/domahidizoltan/zhero/service/schemaorg"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -43,6 +44,8 @@ func init() {
 		log.Fatal().Err(err).Msg("failed to parse template")
 	}
 	editTpl.RegisterPartialTemplate("editProperty", editPropertyPart)
+
+	handlebars.InitHelpers()
 }
 
 type SchemaorgCtrl struct {
@@ -94,10 +97,7 @@ func (sc *SchemaorgCtrl) Edit(c *gin.Context) {
 	ctx := map[string]any{
 		"class":       cls,
 		"breadcrumbs": breadcrumbs,
-		"schemaProperties": []map[string]map[string]string{
-			{"item": {"name": "asd"}},
-			{"item": {"name": "vds"}},
-		},
+		"components":  []string{"TODO"},
 	}
 	body, err := editTpl.Exec(ctx)
 	if err != nil {

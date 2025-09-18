@@ -7,6 +7,7 @@ require (
 	github.com/deiu/rdf2go v0.0.0-20241212211204-b661ba0dfd25
 	github.com/gin-gonic/gin v1.10.1
 	github.com/rs/zerolog v1.34.0
+	github.com/russross/blackfriday v1.6.0
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 )

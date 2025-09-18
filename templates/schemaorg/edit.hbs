@@ -28,7 +28,7 @@
           </label>
         </div>
       </div>
-      <p class="text-base-content/70">{{class.description}}</p>
+      <div class="text-base-content/70 description">{{{beautify class.description}}}</div>
     </div>
 
 
@@ -40,7 +40,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
       <!-- Left Column: Property Order -->
-      <div class="rounded-box p-3 border-2 border-orange-100 bg-orange-50">
+      <div class="rounded-box p-3 border-2 border-primary-content bg-primary-content/70">
         <h2 class="text-xl font-bold mb-2">Property Order</h2>
         <p class="text-sm text-base-content/70 mb-2">Drag and drop to reorder
           the visible properties.</p>
@@ -52,7 +52,7 @@
       <!-- Right Column: Meta Info and Actions -->
       <div>
         <div
-          class="rounded-box p-3 mb-4 border-2 border-orange-100 bg-orange-50"
+          class="rounded-box p-3 mb-4 border-2 border-primary-content bg-primary-content/70"
         >
           <h2 class="text-xl font-bold mb-2">Meta Information</h2>
           <div class="grid grid-cols-1 gap-4">
@@ -84,7 +84,7 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end space-x-2">
-          <button type="button" class="btn btn-error">
+          <button type="button" class="btn btn-error" onclick="window.location.href = '/'">
             <i class="fas fa-circle-xmark"></i>
             Cancel</button>
           <button type="submit" class="btn btn-success">
@@ -122,6 +122,10 @@
   }
   .handle:active {
     cursor: grabbing;
+  }
+  .description a {
+      text-decoration: underline;
+    }
   }
 </style>
 <script defer>
