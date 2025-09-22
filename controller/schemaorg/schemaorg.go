@@ -8,6 +8,7 @@ import (
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/pkg/handlebars"
+	"github.com/domahidizoltan/zhero/service/schemametadata"
 	"github.com/domahidizoltan/zhero/service/schemaorg"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -49,13 +50,15 @@ func init() {
 }
 
 type SchemaorgCtrl struct {
-	schemaorgSvc   schemaorg.Service
-	classHierarchy [][]string
+	schemaorgSvc      schemaorg.Service
+	schemametadataSvc schemametadata.Service
+	classHierarchy    [][]string
 }
 
-func New(schemaorgSvc schemaorg.Service) SchemaorgCtrl {
+func New(schemaorgSvc schemaorg.Service, schemametadataSvc schemametadata.Service) SchemaorgCtrl {
 	return SchemaorgCtrl{
-		schemaorgSvc: schemaorgSvc,
+		schemaorgSvc:      schemaorgSvc,
+		schemametadataSvc: schemametadataSvc,
 	}
 }
 
@@ -146,4 +149,114 @@ func (sc *SchemaorgCtrl) initClassHierarchy() {
 func (sc *SchemaorgCtrl) GetClassHierarchy(c *gin.Context) {
 	sc.initClassHierarchy()
 	c.JSON(http.StatusOK, sc.classHierarchy)
+}
+
+// Schema represents a schema definition to be saved
+type Schema struct {
+	Name                string
+	Identifier          string
+	SecondaryIdentifier string
+	Properties          []Property
+}
+
+// Property represents a schema property to be saved
+type Property struct {
+	Name       string
+	Mandatory  bool
+	Searchable bool
+	Type       string
+	Component  string
+	Order      int
+}
+
+func (sc *SchemaorgCtrl) Save(c *gin.Context) {
+	if err := c.Request.ParseForm(); err != nil {
+		c.String(http.StatusBadRequest, "invalid form")
+		return
+	}
+
+	clsName := c.Param("class")
+	if clsName == "" {
+		c.String(http.StatusBadRequest, "missing class name")
+		return
+	}
+	schemaToSave := Schema{
+		Name:                clsName,
+		Identifier:          c.PostForm("identifier"),
+		SecondaryIdentifier: c.PostForm("secondary-identifier"),
+	}
+
+	orderedProperties := strings.Split(c.PostForm("property-order"), ",")
+	for i, propName := range orderedProperties {
+		if propName == "" {
+			continue
+		}
+
+		if c.PostForm(propName+"-hide") == "true" {
+			continue
+		}
+
+		prop := Property{
+			Name:       propName,
+			Mandatory:  c.PostForm(propName+"-mandatory") == "true",
+			Searchable: c.PostForm(propName+"-searchable") == "true",
+			Type:       c.PostForm(propName + "-type"),
+			Component:  c.PostForm(propName + "-component"),
+			Order:      i,
+		}
+		schemaToSave.Properties = append(schemaToSave.Properties, prop)
+	}
+
+	repoSchema := schemametadata.Schema{
+		Name:                schemaToSave.Name,
+		Identifier:          schemaToSave.Identifier,
+		SecondaryIdentifier: schemaToSave.SecondaryIdentifier,
+	}
+	for _, p := range schemaToSave.Properties {
+		repoSchema.Properties = append(repoSchema.Properties, schemametadata.Property{
+			Name:       p.Name,
+			Mandatory:  p.Mandatory,
+			Searchable: p.Searchable,
+			Type:       p.Type,
+			Component:  p.Component,
+			Order:      p.Order,
+		})
+	}
+	saveErr := sc.schemametadataSvc.Save(repoSchema)
+
+	if saveErr == nil {
+		c.Redirect(http.StatusSeeOther, "/")
+	} else {
+		log.Err(saveErr).Msg("failed to save schema")
+		cls := sc.schemaorgSvc.GetSchemaClassByName(clsName)
+		sc.initClassHierarchy()
+		var breadcrumbs []string
+		for _, ch := range sc.classHierarchy {
+			if ch[len(ch)-1] == clsName {
+				breadcrumbs = append(breadcrumbs, ch...)
+				break
+			}
+		}
+		ctx := map[string]any{
+			"class":       cls,
+			"breadcrumbs": breadcrumbs,
+			"components":  []string{"TODO"},
+		}
+		body, err := editTpl.Exec(ctx)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "error rendering template")
+		}
+
+		output, err := template.Index(c, template.Content{
+			Title:    "Welcome to Zhero",
+			Body:     raymond.SafeString(body),
+			ErrorMsg: "Failed to save schema: " + saveErr.Error(),
+		})
+		if err != nil {
+			c.String(http.StatusInternalServerError, "error rendering template")
+			return
+		}
+
+		c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
+	}
 }

@@ -8,10 +8,11 @@ import (
 )
 
 type Content struct {
-	Title  string
-	Style  string
-	Script string
-	Body   raymond.SafeString
+	Title    string
+	Style    string
+	Script   string
+	Body     raymond.SafeString
+	ErrorMsg string
 }
 
 const (

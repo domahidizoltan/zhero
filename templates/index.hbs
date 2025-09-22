@@ -55,6 +55,20 @@
     </dialog>
 
     <main class="container mx-auto max-w-5xl">
+      {{#if errorMsg}}
+        <div role="alert" class="alert alert-error">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>{{errorMsg}}</span>
+        </div>
+      {{/if}}
+
+      <!-- TODO hide after 5 sec -->
+      {{#if successMsg}}
+        <div role="alert" class="alert alert-success alert-outline">
+          <i class="fa-solid fa-check"></i><span>{{successMsg}}</span>
+        </div>
+      {{/if}}
+
       {{body}}
     </main>
   </body>

@@ -4,7 +4,8 @@
 <script src="/static/schemaorg/schemaorg.js"></script>
 
 <div class="bg-base-100 p-6 rounded-box shadow mt-6">
-  <form>
+  <form method="POST" action="/schema/{{class.name}}/save">
+    <input type="hidden" name="property-order" id="property-order" />
     <div class="mb-6">
       <div class="flex justify-between items-center">
         <div>
@@ -60,7 +61,7 @@
               <label class="label" for="identifier">
                 <span class="label-text">Identifier</span>
               </label>
-              <select id="identifier" class="select select-bordered w-full">
+              <select id="identifier" name="identifier" class="select select-bordered w-full">
                 <option disabled selected>Select an identifier</option>
                 <option>property1</option>
                 <option>property2</option>
@@ -72,6 +73,7 @@
               </label>
               <select
                 id="secondary-identifier"
+                name="secondary-identifier"
                 class="select select-bordered w-full"
               >
                 <option disabled selected>Select a secondary identifier</option>

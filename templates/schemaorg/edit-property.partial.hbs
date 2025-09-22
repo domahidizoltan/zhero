@@ -5,7 +5,7 @@
   <div class="absolute top-4 right-4 flex items-center space-x-4">
     <label class="label cursor-pointer">
       <span class="label-text mr-2">Hide</span>
-      <input type="checkbox" class="toggle toggle-sm hide-toggle" />
+      <input type="checkbox" class="toggle toggle-sm hide-toggle" name="{{property}}-hide" value="true" />
     </label>
     <label class="label cursor-pointer">
       <span class="label-text mr-2">Mandatory</span>
@@ -13,6 +13,8 @@
         type="checkbox"
         class="checkbox checkbox-sm"
         id="mandatory-prop-{{property}}"
+        name="{{property}}-mandatory"
+        value="true"
       />
     </label>
     <label class="label cursor-pointer">
@@ -21,6 +23,8 @@
         type="checkbox"
         class="checkbox checkbox-sm"
         id="searchable-prop-{{property}}"
+        name="{{property}}-searchable"
+        value="true"
       />
     </label>
   </div>
@@ -34,7 +38,7 @@
   <div class="grid grid-cols-2 gap-4">
     <div class="flex items-center gap-x-2">
       <label class="label-text" for="prop-type-{{property}}">Type</label>
-      <select id="prop-type-{{property}}" class="select select-bordered w-full">
+      <select id="prop-type-{{property}}" name="{{property}}-type" class="select select-bordered w-full">
         {{#each expectedTypes}}
           <option>{{.}}</option>
         {{/each}}
@@ -47,6 +51,7 @@
       >HTML&nbsp;Component</label>
       <select
         id="prop-component-{{property}}"
+        name="{{property}}-component"
         class="select select-bordered w-full"
       >
         {{#each components}}

@@ -145,4 +145,15 @@ function initPropertyOrderWidget(evt) {
     ghostClass: "sortable-ghost",
     handle: ".handle",
   });
+
+  const form = document.querySelector("form");
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      const orderedProperties = Array.from(propertyOrderList.children).map(
+        (item) => item.dataset.propertyName,
+      );
+      document.getElementById("property-order").value =
+        orderedProperties.join(",");
+    });
+  }
 }
