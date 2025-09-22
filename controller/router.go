@@ -2,31 +2,21 @@
 package controller
 
 import (
-	"github.com/domahidizoltan/zhero/config"
-	schemaorgCtrl "github.com/domahidizoltan/zhero/controller/schemaorg"
-	metaRepo "github.com/domahidizoltan/zhero/repository/schemametadata"
-	metaSvc "github.com/domahidizoltan/zhero/service/schemametadata"
-	schemaorgSvc "github.com/domahidizoltan/zhero/service/schemaorg"
+	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/schemaorg"
+	"github.com/domahidizoltan/zhero/domain/schemametadata"
+	"github.com/domahidizoltan/zhero/domain/schemaorg"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 )
 
-func SetRoutes(router *gin.Engine) {
+type Services struct {
+	Schemaorg      schemaorg.Service
+	SchemaMetadata schemametadata.Service
+}
+
+func SetRoutes(router *gin.Engine, svc Services) {
 	router.Static("/static", "./templates")
 
-	schemaorgSvc, err := schemaorgSvc.New(config.RdfConfig{File: "rdf_schema.jsonld"})
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create Schema.org service")
-	}
-
-	mRepo, err := metaRepo.New("zhero.db")
-	// defer mRepo.Close()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create schema metadata repository")
-	}
-	metaSvc := metaSvc.New(mRepo)
-	schemaorgCtrl := schemaorgCtrl.New(*schemaorgSvc, metaSvc)
-
+	schemaorgCtrl := schemaorg_ctrl.NewController(svc.Schemaorg, svc.SchemaMetadata)
 	router.GET("/", schemaorgCtrl.Search)
 	router.GET("/schema/:class/edit", schemaorgCtrl.Edit)
 	router.POST("/schema/:class/save", schemaorgCtrl.Save)

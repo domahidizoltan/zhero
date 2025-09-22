@@ -1,3 +1,4 @@
+// Package handlebars is for Handlebars helpers and variables
 package handlebars
 
 import (

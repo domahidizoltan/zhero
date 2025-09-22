@@ -8,7 +8,22 @@ import (
 
 type (
 	Config struct {
+		Log   LogConfig   `mapstructure:"log"`
+		DB    DBConfig    `mapstructure:"database"`
 		Admin AdminConfig `mapstructure:"admin"`
+	}
+
+	LogConfig struct {
+		Format string `mapstructure:"format"`
+		Level  string `mapstructure:"level"`
+	}
+
+	DBConfig struct {
+		SQLite SQLiteConfig `mapstructure:"sqlite"`
+	}
+
+	SQLiteConfig struct {
+		File string `mapstructure:"file"`
 	}
 
 	AdminConfig struct {

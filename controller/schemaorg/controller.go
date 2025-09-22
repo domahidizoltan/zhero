@@ -7,9 +7,9 @@ import (
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller/template"
+	"github.com/domahidizoltan/zhero/domain/schemametadata"
+	"github.com/domahidizoltan/zhero/domain/schemaorg"
 	"github.com/domahidizoltan/zhero/pkg/handlebars"
-	"github.com/domahidizoltan/zhero/service/schemametadata"
-	"github.com/domahidizoltan/zhero/service/schemaorg"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -49,20 +49,20 @@ func init() {
 	handlebars.InitHelpers()
 }
 
-type SchemaorgCtrl struct {
+type Controller struct {
 	schemaorgSvc      schemaorg.Service
 	schemametadataSvc schemametadata.Service
 	classHierarchy    [][]string
 }
 
-func New(schemaorgSvc schemaorg.Service, schemametadataSvc schemametadata.Service) SchemaorgCtrl {
-	return SchemaorgCtrl{
+func NewController(schemaorgSvc schemaorg.Service, schemametadataSvc schemametadata.Service) Controller {
+	return Controller{
 		schemaorgSvc:      schemaorgSvc,
 		schemametadataSvc: schemametadataSvc,
 	}
 }
 
-func (sc *SchemaorgCtrl) Search(c *gin.Context) {
+func (sc *Controller) Search(c *gin.Context) {
 	body, err := searchTpl.Exec(nil)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "error rendering template")
@@ -80,7 +80,7 @@ func (sc *SchemaorgCtrl) Search(c *gin.Context) {
 	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
 }
 
-func (sc *SchemaorgCtrl) Edit(c *gin.Context) {
+func (sc *Controller) Edit(c *gin.Context) {
 	clsName := c.Param("class")
 	if clsName == "" {
 		c.String(http.StatusBadRequest, "missing class")
@@ -119,7 +119,7 @@ func (sc *SchemaorgCtrl) Edit(c *gin.Context) {
 	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
 }
 
-func (sc *SchemaorgCtrl) initClassHierarchy() {
+func (sc *Controller) initClassHierarchy() {
 	marker := ">"
 
 	if len(sc.classHierarchy) == 0 {
@@ -146,7 +146,7 @@ func (sc *SchemaorgCtrl) initClassHierarchy() {
 	}
 }
 
-func (sc *SchemaorgCtrl) GetClassHierarchy(c *gin.Context) {
+func (sc *Controller) GetClassHierarchy(c *gin.Context) {
 	sc.initClassHierarchy()
 	c.JSON(http.StatusOK, sc.classHierarchy)
 }
@@ -169,7 +169,7 @@ type Property struct {
 	Order      int
 }
 
-func (sc *SchemaorgCtrl) Save(c *gin.Context) {
+func (sc *Controller) Save(c *gin.Context) {
 	if err := c.Request.ParseForm(); err != nil {
 		c.String(http.StatusBadRequest, "invalid form")
 		return
@@ -222,7 +222,8 @@ func (sc *SchemaorgCtrl) Save(c *gin.Context) {
 			Order:      p.Order,
 		})
 	}
-	saveErr := sc.schemametadataSvc.Save(repoSchema)
+
+	saveErr := sc.schemametadataSvc.Save(c.Request.Context(), repoSchema)
 
 	if saveErr == nil {
 		c.Redirect(http.StatusSeeOther, "/")

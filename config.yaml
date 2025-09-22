@@ -1,3 +1,10 @@
+log:
+  # format: json
+  level: debug
+database:
+  sqlite:
+    file: zhero.db
+
 admin:
   server:
     port: 8081

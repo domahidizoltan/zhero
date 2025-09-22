@@ -6,12 +6,13 @@ import (
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/rs/zerolog/log"
 )
 
 func DownloadToPath(path, url string, owerwrite bool) error {
 	if _, err := os.Stat(path); err == nil && !owerwrite {
-		// log
-		fmt.Println("file already downladed")
+		log.Debug().Str("file", path).Msg("file already downladed")
 		return nil
 	}
 

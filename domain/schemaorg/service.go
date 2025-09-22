@@ -1,4 +1,3 @@
-// Package schemaorg is a package to help process the RDF graph from Schema.org
 package schemaorg
 
 import (
@@ -20,7 +19,7 @@ type Service struct {
 
 var once sync.Once
 
-func New(cfg config.RdfConfig) (*Service, error) {
+func NewService(cfg config.RdfConfig) (*Service, error) {
 	var (
 		g             *rdfPkg.Graph
 		err           error

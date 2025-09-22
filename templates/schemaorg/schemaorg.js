@@ -49,11 +49,7 @@ function navigateToEditSchemaPage() {
   if (!schemaClass) {
     popup("No schema selected!");
   } else {
-    let slug = schemaClass
-      .replace(/([A-Z])/g, "-$1")
-      .toLowerCase()
-      .substring(1);
-    window.location.href = `/schema/${slug}/edit`;
+    window.location.href = `/schema/${schemaClass}/edit`;
   }
 }
 

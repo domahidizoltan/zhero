@@ -1,3 +1,4 @@
+// Package schemaorg is a package to help process the RDF graph from Schema.org
 package schemaorg
 
 import (
