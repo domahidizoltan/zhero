@@ -1,5 +1,5 @@
-// Package schemametadata manages the data blueprint.
-package schemametadata
+// Package schema manages the data blueprint.
+package schema
 
 type Schema struct {
 	Name                string

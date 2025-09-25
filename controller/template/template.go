@@ -3,38 +3,42 @@ package template
 
 import (
 	"github.com/aymerick/raymond"
+	"github.com/domahidizoltan/zhero/pkg/session"
+	"github.com/domahidizoltan/zhero/templates"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
 
 type Content struct {
-	Title    string
 	Style    string
 	Script   string
+	Title    string
 	Body     raymond.SafeString
 	ErrorMsg string
-}
-
-const (
-	TemplatesPath = "templates/"
-	tplIndex      = TemplatesPath + "index.hbs"
-)
-
-var indexTpl *raymond.Template
-
-func init() {
-	var err error
-	indexTpl, err = raymond.ParseFile(tplIndex)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to parse template")
-	}
+	FlashMsg string
 }
 
 func Index(c *gin.Context, content Content) (string, error) {
-	output, err := indexTpl.Exec(content)
+	handleFlash(c, &content)
+	output, err := templates.Index.Exec(content)
 	if err != nil {
 		log.Error().Err(err).Msg("error rendering template")
 		return "", err
 	}
 	return output, nil
+}
+
+func handleFlash(c *gin.Context, content *Content) {
+	if len(content.FlashMsg) != 0 {
+		if err := session.SetFlash(c, content.FlashMsg); err != nil {
+			log.Error().Err(err).Msg("failed to save flash message")
+		}
+		content.FlashMsg = ""
+	} else {
+		var err error
+		content.FlashMsg, err = session.GetFlash(c)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to update flash session")
+		}
+	}
 }

@@ -6,16 +6,17 @@ import (
 	"fmt"
 
 	"github.com/domahidizoltan/zhero/config"
-	"github.com/domahidizoltan/zhero/controller"
+	"github.com/domahidizoltan/zhero/controller/router"
 	"github.com/domahidizoltan/zhero/data/db/sqlite"
 	"github.com/domahidizoltan/zhero/pkg/database"
 	"github.com/domahidizoltan/zhero/pkg/logging"
+	"github.com/domahidizoltan/zhero/pkg/session"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/domahidizoltan/zhero/domain/schemametadata"
+	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/domain/schemaorg"
-	meta_repo "github.com/domahidizoltan/zhero/repository/schemametadata"
+	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
 )
 
 func main() {
@@ -24,13 +25,16 @@ func main() {
 	cfg, err := config.LoadConfig()
 	logging.ConfigureLogging(cfg)
 
-	router := gin.New()
-	router.Use(logging.ZerologMiddleware(log.Logger), gin.Recovery())
+	r := gin.New()
+	r.Use(
+		gin.Recovery(),
+		logging.ZerologMiddleware(log.Logger),
+		session.SessionMiddleware(),
+	)
 
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load config")
 	}
-
 	if err := database.InitSqliteDB(cfg.DB.SQLite.File); err != nil {
 		log.Fatal().Err(err).Msg("failed to connect to database")
 	}
@@ -46,26 +50,25 @@ func main() {
 	}
 
 	services := getRouterServices(database.GetDB(), *cfg)
-	controller.SetRoutes(router, services)
+	router.SetRoutes(r, services)
 
 	serverAddr := fmt.Sprintf(":%d", cfg.Admin.Server.Port)
 	log.Info().Int("port", cfg.Admin.Server.Port).Msg("server started on port")
-	if err := router.Run(serverAddr); err != nil {
+	if err := r.Run(serverAddr); err != nil {
 		log.Fatal().Err(err).Msg("failed to start server")
 	}
 }
 
-func getRouterServices(db *sql.DB, cfg config.Config) controller.Services {
+func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
 	schemaorgSvc, err := schemaorg.NewService(cfg.Admin.RDF)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create Schema.org service")
 	}
 
 	mRepo := meta_repo.NewRepo(db)
-	metaSvc := schemametadata.NewService(mRepo)
+	metaSvc := schema.NewService(mRepo, schemaorgSvc)
 
-	return controller.Services{
-		Schemaorg:      *schemaorgSvc,
-		SchemaMetadata: metaSvc,
+	return router.Services{
+		Schema: metaSvc,
 	}
 }

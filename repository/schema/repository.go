@@ -1,5 +1,5 @@
-// Package schemametadata is the repository to manage data blueprint.
-package schemametadata
+// Package schemam is the repository to manage data blueprint.
+package schema
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
-	domain "github.com/domahidizoltan/zhero/domain/schemametadata"
+	domain "github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/database"
 )
 
