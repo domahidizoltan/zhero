@@ -1,0 +1,933 @@
+richResuls:
+  - feature: Article
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/article"
+    schemas:
+      - name: [Article, NewsArticle, BlogPosting]
+        properties:
+          - recommended:
+              - author
+              - author.name
+              - author.url
+              - dateModified
+              - datePublished
+              - headline
+              - image
+
+  - feature: Breadcrumb
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/breadcrumb"
+    schemas:
+      - name: [BreadcrumbList]
+        properties:
+          - required: [itemListElement]
+      - name: [ListItem]
+        properties:
+          - required: [item, name, position]
+
+  - feature: Carousel
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/carousel"
+    combineWith: ["Course list", Movie, Recipe, Restaurant]
+    schemas:
+      - name: [ItemList]
+        properties:
+          - required: [itemListElement]
+      - name: [ListItem]
+        properties:
+          - required: [position, url]
+
+  - feature: "Course list"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/course"
+    schemas:
+      - name: [Course]
+        properties:
+          - required: [description, name]
+            recommended: [provider]
+      - name: [ItemList]
+        properties:
+          - required: [itemListElement]
+      - name: [ListItem]
+        properties:
+          - required: [position, url]
+
+  - feature: Dataset
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/dataset"
+    schemas:
+      - name: [Dataset]
+        properties:
+          - required: [description, name]
+            recommended:
+              [
+                alternateName,
+                creator,
+                citation,
+                funder,
+                identifier,
+                isAccessibleForFree,
+                keywords,
+                license,
+                measurementTechnique,
+                sameAs,
+                spatialCoverage,
+                temporalCoverage,
+                variableMeasured,
+                version,
+                url,
+              ]
+            recommendedOneOf: [[hasPart, isPartOf]]
+      - name: [DataCatalog]
+        properties:
+          - recommended: [includedInDataCatalog]
+      - name: [DataDownload]
+        properties:
+          - required: ["distribution.contentUrl"]
+            recommended: [distribution, "distribution.encodingFormat"]
+
+  - feature: "Discussion forum"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/discussion-forum"
+    schemas:
+      - name: [DiscussionForumPosting]
+        properties:
+          - required: [author, "author.name", datePublished]
+            requiredOneOf: [[text, image, video]]
+            recommended:
+              [
+                "author.url",
+                comment,
+                creativeWorkStatus,
+                dateModified,
+                headline,
+                image,
+                interactionStatistic,
+                isPartOf,
+                sharedContent,
+                text,
+                url,
+                video,
+              ]
+      - name: [Comment]
+        properties:
+          - required: [author, datePublished]
+            requiredOneOf: [[text, image, video]]
+            recommended:
+              [
+                "author.url",
+                comment,
+                creativeWorkStatus,
+                dateModified,
+                image,
+                interactionStatistic,
+                sharedContent,
+                url,
+                video,
+              ]
+      - name: [InteractionCounter]
+        properties:
+          - required: [userInteractionCount, interactionType]
+
+  - feature: "Education Q&A"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/education-qa"
+    schemas:
+      - name: [Quiz]
+        properties:
+          - required: [hasPart]
+            recommended:
+              [
+                about,
+                "about.name",
+                educationalAlignment,
+                "educationalAlignment.alignmentType",
+                "educationalAlignment.targetName",
+              ]
+      - name: [Question]
+        properties:
+          - required: [acceptedAnswer, eduQuestionType, text]
+      - name: [Answer]
+
+  - feature: "Employer aggregate rating"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/employer-rating"
+    schemas:
+      - name: [EmployerAggregateRating]
+        properties:
+          - required: [itemReviewed, ratingCount, ratingValue, reviewCount]
+            recommended: [bestRating, worstRating]
+
+  - feature: Event
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/event"
+    schemas:
+      - name: [Event]
+        properties:
+          - required: [location, "location.address", name, startDate]
+            recommended:
+              [
+                description,
+                endDate,
+                eventStatus,
+                image,
+                "location.name",
+                offers,
+                "offers.availability",
+                "offers.price",
+                "offers.priceCurrency",
+                "offers.validFrom",
+                "offers.url",
+                organizer,
+                "organizer.name",
+                "organizer.url",
+                performer,
+                "performer.name",
+                previousStartDate,
+              ]
+
+  - feature: FAQ
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/faqpage"
+    schemas:
+      - name: [FAQPage]
+        properties:
+          - required: [mainEntity]
+      - name: [Question]
+        properties:
+          - required: [acceptedAnswer, name]
+      - name: [Answer]
+        properties:
+          - required: [text]
+
+  - feature: "Image metadata"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/image-license-metadata"
+    schemas:
+      - name: [ImageObject]
+        properties:
+          - required: [contentUrl]
+            requiredOneOf: [[creator, creditText, copyrightNotice, license]]
+            recommended:
+              [
+                acquireLicensePage,
+                creator,
+                "creator.name",
+                creditText,
+                copyrightNotice,
+                license,
+              ]
+
+  - feature: "Job posting"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/job-posting"
+    schemas:
+      - name: [JobPosting]
+        properties:
+          - required:
+              [datePosted, description, hiringOrganization, jobLocation, title]
+            recommended:
+              [
+                applicantLocationRequirements,
+                baseSalary,
+                directApply,
+                employmentType,
+                identifier,
+                jobLocationType,
+                validThrough,
+              ]
+
+  - feature: "Local business"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/local-business"
+    schemas:
+      - name: [LocalBusiness]
+        properties:
+          - required: [address, name]
+            recommended:
+              [
+                aggregateRating,
+                department,
+                geo,
+                "geo.latitude",
+                "geo.longitude",
+                "menu",
+                openingHoursSpecification,
+                "openingHoursSpecification.closes",
+                "openingHoursSpecification.dayOfWeek",
+                "openingHoursSpecification.opens",
+                "openingHoursSpecification.validFrom",
+                "openingHoursSpecification.validThrough",
+                priceRange,
+                review,
+                servesCuisine,
+                telephone,
+                url,
+              ]
+
+  - feature: "Math solver"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/math-solvers"
+    schemas:
+      - name: [MathSolver]
+        properties:
+          - required:
+              [
+                potentialAction,
+                "potentialAction.mathExpression-input",
+                url,
+                usageInfo,
+                "potentialAction.target",
+              ]
+            recommended:
+              [inLanguage, assesses, "potentialAction.eduQuestionType"]
+      - name: [LearningResource]
+        properties:
+          - required: [learningResourceType]
+
+  - feature: Movie
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/movie"
+    schemas:
+      - name: [Movie]
+        properties:
+          - required: [image, name]
+            recommended: [aggregateRating, dateCreated, director, review]
+
+  - feature: Organization
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/organization"
+    schemas:
+      - name: [Organization]
+        properties:
+          - required: []
+            recommended:
+              [
+                address,
+                "address.addressCountry",
+                "address.addressLocality",
+                "address.addressRegion",
+                "address.postalCode",
+                "address.streetAddress",
+                alternateName,
+                contactPoint,
+                "contactPoint.email",
+                "contactPoint.telephone",
+                description,
+                duns,
+                email,
+                foundingDate,
+                globalLocationNumber,
+                hasMerchantReturnPolicy,
+                hasMemberProgram,
+                iso6532Code,
+                legalName,
+                leiCode,
+                logo,
+                naics,
+                name,
+                numberOfEmployees,
+                sameAs,
+                taxID,
+                telephone,
+                url,
+                vatID,
+              ]
+
+  - feature: "Practice problem"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/practice-problems"
+    schemas:
+      - name: [Quiz]
+        properties:
+          - required:
+              [
+                about,
+                "about.name",
+                hasPart,
+                "hasPart.acceptedAnswer",
+                "hasPart.eduQuestionType",
+                "hasPart.learningResourceType",
+                "hasPart.suggestedAnswer",
+                "hasPart.suggestedAnswer.text",
+                "hasPart.text",
+              ]
+            recommended:
+              [
+                educationalAlignment,
+                "educationalAlignment.alignmentType",
+                "educationalAlignment.educationalFramework",
+                "educationalAlignment.targetName",
+                "educationalAlignment.targetUrl",
+                educationalLevel,
+                "hasPart.about",
+                "hasPart.about.name",
+                "hasPart.acceptedAnswer.answerExplanation",
+                "hasPart.acceptedAnswer.answerExplanation.text",
+                "hasPart.acceptedAnswer.comment",
+                "hasPart.acceptedAnswer.comment.text",
+                "hasPart.acceptedAnswer.position",
+                "hasPart.assesses",
+                "hasPart.comment",
+                "hasPart.comment.text",
+                "hasPart.educationalAlignment",
+                "hasPart.educationalAlignment.alignmentType",
+                "hasPart.educationalAlignment.educationalFramework",
+                "hasPart.educationalAlignment.targetName",
+                "hasPart.educationalAlignment.targetUrl",
+                "hasPart.educationalLevel",
+                "hasPart.name",
+                "hasPart.suggestedAnswer.comment",
+                "hasPart.suggestedAnswer.comment.text",
+                "hasPart.suggestedAnswer.encodingFormat",
+                "hasPart.suggestedAnswer.position",
+                "hasPart.typicalAgeRange",
+                name,
+                typicalAgeRange,
+              ]
+
+  - feature: Product
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/product"
+    combineWith:
+      [
+        "Product snippet",
+        "Merchant listing",
+        "Merchant return policy",
+        "Loyalty program",
+      ]
+
+  - feature: "Product snippet"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/product-snippet"
+    schemas:
+      - name: [Product]
+        properties:
+          - required: [name]
+            requiredOneOf: [[review, aggregateRating, offers]]
+            recommended: [aggregateRating, offers, review]
+      - name: [Review]
+        properties:
+          - required: [negativeNotes, positiveNotes]
+            recommended: [negativeNotes, positiveNotes]
+      - name: [ItemList]
+        properties:
+          - required: [itemListElement, "itemListElement.name"]
+            recommended: ["itemListElement.position"]
+      - name: [Offer]
+        properties:
+          - requiredOneOf: [[price, "priceSpecification.price"]]
+            recommended: [availability, priceValidUntil]
+            recommendedOneOf:
+              [[priceCurrency, "priceSpecification.priceCurrency"]]
+      - name: [UnitPriceSpecification]
+        properties:
+          - required: [price]
+            recommended: [priceCurrency]
+      - name: [AggregateOffer]
+        properties:
+          - required: [lowPrice, priceCurrency]
+            recommended: [highPrice, offerCount]
+
+  - feature: "Merchant listing"
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/merchant-listing"
+    schemas:
+      - name: [Product]
+        properties:
+          - required: [name, image, offers]
+            recommended:
+              [
+                aggregateRating,
+                audience,
+                "brand.name",
+                color,
+                description,
+                hasCertification,
+                inProductGroupWithID,
+                isVariantOf,
+                material,
+                mpn,
+                pattern,
+                review,
+                size,
+                sku,
+                subjectOf,
+              ]
+            recommendedOneOf: [[gtin, gtin8, gtin12, gtin13, gtin14, isbn]]
+      - name: [3DModel]
+        properties:
+          - required: [encoding, "encoding.contentUrl"]
+      - name: [Offer]
+        properties:
+          - required: [priceSpecification]
+            requiredOneOf:
+              [
+                [price, "priceSpecification.price"],
+                [priceCurrency, "priceSpecification.priceCurrency"],
+              ]
+            recommended:
+              [
+                availability,
+                hasMerchantReturnPolicy,
+                itemCondition,
+                shippingDetails,
+                url,
+              ]
+      - name: [UnitPriceSpecification]
+        properties:
+          - required: [price, priceCurrency]
+            recommended:
+              [
+                membershipPointsEarned,
+                priceType,
+                referenceQuantity,
+                validForMemberTier,
+              ]
+      - name: [QuantitativeValue]
+        properties:
+          - required: [unitCode, value]
+            recommended: [valueReference]
+      - name: [SizeSpecification]
+        properties:
+          - recommended: [name, sizeGroup, sizeSystem]
+      - name: [PeopleAudience]
+        properties:
+          - recommended: [suggestedGender]
+            recommendedOneOf:
+              [
+                [suggestedMaxAge, "suggestedAge.maxValue"],
+                [suggestedMinAge, "suggestedAge.minValue"],
+              ]
+      - name: [Certification]
+        properties:
+          - required: [issuedBy, name]
+            recommended: [certificationIdentification, certificationRating]
+      - name: [OfferShippingDetails]
+        properties:
+          - required:
+              [
+                deliveryTime,
+                shippingDestination,
+                shippingRate,
+                "shippingRate.currency",
+              ]
+            requiredOneOf: [["shippingRate.value", "shippingRate.maxValue"]]
+      - name: [DefineRegion]
+        properties:
+          - required: [addressCountry]
+            recommendedOneOf: [[addressRegion, postalCode]]
+            recommended: [addressRegion, postalCode]
+      - name: [ShippingDeliveryTime]
+        properties:
+          - recommended: [handlingTime, transitTime]
+      - name: [QuantitativeValue]
+        properties:
+          - required: [maxValue, minValue, unitCode]
+      - name: [MerchantReturnPolicy]
+        properties:
+          - required: [applicableCountry, returnPolicyCategory]
+            recommended:
+              [
+                merchantReturnDays,
+                returnFees,
+                returnMethod,
+                returnShippingFeesAmount,
+              ]
+
+  - feature: ["Marchant return policy"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/return-policy"
+    schemas:
+      - name: [MerchantReturnPolicy]
+        properties:
+          - required:
+              [applicableCountry, returnPolicyCategory, merchantReturnLink]
+      - name: [MerchantReturnFiniteReturnWindow, MerchantReturnUnlimitedWindow]
+        properties:
+          - required:
+              [
+                returnPolicySeasonalOverride,
+                "returnPolicySeasonalOverride.returnPolicyCategory",
+              ]
+            recommended:
+              [
+                merchantReturnDays,
+                returnFees,
+                returnMethod,
+                returnShippingFeesAmount,
+                customerRemorseReturnFees,
+                customerRemorseReturnLabelSource,
+                customerRemorseReturnShippingFeesAmount,
+                itemCondition,
+                itemDefectReturnFees,
+                itemDefectReturnLabelSource,
+                itemDefectReturnShippingFeesAmount,
+                refundType,
+                restockingFee,
+                returnLabelSource,
+                returnPolicyCountry,
+                "returnPolicySeasonalOverride.endDate",
+                "returnPolicySeasonalOverride.merchantReturnDays",
+                "returnPolicySeasonalOverride.startDate",
+              ]
+
+  - feature: ["Loyalty program"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/loyalty-program"
+    schemas:
+      - name: [MemberProgram]
+        properties:
+          - required: [description, hasTiers, name]
+            recommended: [url]
+      - name: [MemberProgramTier]
+        properties:
+          - required: [hasTierBenefit, name]
+            recommended: [hasTierRequirement, membershipPointsEarned, url]
+
+  - feature: ["Profile page"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/profile-page"
+    schemas:
+      - name: [ProfilePage]
+        properties:
+          - required: [mainEntity]
+            recommended: [dateCreated, dateModified]
+      - name: [Person, Organization]
+        properties:
+          - required: [name]
+            recommended:
+              [
+                agentInteractionStatistic,
+                alternateName,
+                description,
+                identifier,
+                image,
+                interactionStatistic,
+                sameAs,
+              ]
+
+  - feature: ["Q&A"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/qapage"
+    schemas:
+      - name: [QAPage]
+        properties:
+          - required: [mainEntity]
+      - name: [Question]
+        properties:
+          - required: [answerCount, name]
+            requiredOneOf: [[acceptedAnswer, suggestedAnswer]]
+            recommended:
+              [
+                author,
+                "author.url",
+                comment,
+                dateModified,
+                datePublished,
+                image,
+                text,
+                upvoteCount,
+                video,
+              ]
+      - name: [Answer]
+        properties:
+          - required: [text]
+            recommended:
+              [
+                author,
+                "author.url",
+                comment,
+                dateModified,
+                datePublished,
+                image,
+                upvoteCount,
+                url,
+                video,
+              ]
+      - name: [Comment]
+        properties:
+          - required: [text]
+            recommended:
+              [
+                author,
+                "author.url",
+                comment,
+                dateModified,
+                datePublished,
+                image,
+                video,
+              ]
+
+  - feature: [Recipe]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/recipe"
+    schemas:
+      - name: [Recipe]
+        properties:
+          - required: [image, name]
+            recommended:
+              [
+                aggregateRating,
+                author,
+                cookTime,
+                datePublished,
+                description,
+                keywords,
+                "nutrition.calories",
+                prepTime,
+                recipeCategory,
+                recipeCuisine,
+                recipeIngredient,
+                recipeInstructions,
+                recipeYield,
+                totalTime,
+                video,
+              ]
+      - name: [HowToSection]
+        properties:
+          - required: [itemListElement, name]
+      - name: [HowToStep]
+        properties:
+          - required: [itemListElement, text]
+            recommended: [image, name, url, video]
+      - name: [HowToDirection, HowToTip]
+        properties:
+          - required: [text]
+      - name: [ItemList]
+        properties:
+          - required: [itemListElement, "ListItem.position", "ListItem.url"]
+
+  - feature: ["Review snippet"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/review-snippet"
+    combineWith:
+      [
+        Book,
+        "Course list",
+        Event,
+        "Local business",
+        Movie,
+        Product,
+        Recipe,
+        "Software App",
+        CreativeWorkSeason,
+        CreativeWorkSeries,
+        Episode,
+        Game,
+        MediaObject,
+        MusicPlaylist,
+        MusicRecording,
+        Organization,
+      ]
+    schemas:
+      - name: [Review]
+        properties:
+          - required:
+              [
+                author,
+                itemReviewed,
+                "itemReviewed.name",
+                reviewRating,
+                "reviewRating.ratingValue",
+              ]
+            recommended:
+              [
+                datePublished,
+                "reviewRating.bestRating",
+                "reviewRating.worstRating",
+              ]
+      - name: [AggregateReview]
+        properties:
+          - required:
+              [
+                itemReviewed,
+                "itemReviewed.name",
+                ratingCount,
+                reviewCount,
+                ratingValue,
+              ]
+            recommended: [bestRating, worstRating]
+
+  - feature: [Book]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/book"
+    schemas:
+      - name: [DataFeed]
+        properties:
+          - required: ["@context", "@type", dataFeedElement, dateModified]
+      - name: [Book]
+        properties:
+          - required:
+              ["@context", "@id", "@type", author, name, url, workExample]
+            recommended: [sameAs]
+          - required:
+              ["@id", "@type", bookFormat, inLanguage, isbn, potentialAction]
+            recommended:
+              [
+                author,
+                bookEdition,
+                datePublished,
+                identifier,
+                name,
+                sameAs,
+                url,
+              ]
+      - name: [Person, Organization]
+        properties:
+          - required: ["@type", name]
+            recommended: [sameAs]
+      - name: [PropertyValue]
+        properties:
+          - required: ["@type", propertyID, value]
+      - name: [ReadAction]
+        properties:
+          - required:
+              [
+                "@type",
+                expectsAcceptanceOf,
+                "expectsAcceptanceOf.@type",
+                "expectsAcceptanceOf.eligibleRegion",
+                "expectsAcceptanceOf.eligibleRegion.name",
+                target,
+                "target.@type",
+                "target.actionPlatform",
+                "target.urlTemplate",
+              ]
+            recommended:
+              [
+                "expectsAcceptanceOf.availabilityEnds",
+                "expectsAcceptanceOf.availabilityStarts",
+                "expectsAcceptanceOf.price",
+                "expectsAcceptanceOf.priceCurrency",
+              ]
+      - name: [BorrowAction]
+        properties:
+          - required:
+              [
+                "@type",
+                lender,
+                "lender.@id",
+                "lender.@type",
+                target,
+                "target.@type",
+                "target.actionPlatform",
+                "target.urlTemplate",
+              ]
+      - name: [LibrarySystem]
+        properties:
+          - required:
+              [
+                "@context",
+                "@id",
+                "@type",
+                additionalProperty,
+                "additionalProperty.@type",
+                "additionalProperty.name",
+                "additionalProperty.value",
+                member,
+                name,
+                url,
+              ]
+      - name: [Library]
+        properties:
+          - required:
+              [
+                "@id",
+                "@type",
+                location,
+                "location.@type",
+                "location.addressCountry",
+                "location.addressLocality",
+                "location.addressRegion",
+                "location.postalCode",
+                "location.streetAddress",
+                name,
+              ]
+
+  - feature: ["Software App"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/software-app"
+    schemas:
+      - name: [SoftwareApplication]
+        properties:
+          - required: [name, "offers.price"]
+            requiredOneOf: [aggregateRating, review]
+            recommended: [applicableCategory, operatingSystem]
+
+  - feature: [Speakable]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/speakable"
+    schemas:
+      - name: [Article, Webpage]
+        properties:
+          - required: [cssSelector, xPath]
+
+  - feature: ["Subscription and paywalled content"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/paywalled-content"
+    schemas:
+      - name: [CreativeWork]
+        properties:
+          - required: [isAccessibleForFree]
+            recommended:
+              [
+                "hasPart.cssSelector",
+                "hasPart.@type",
+                "hasPart.isAccessibleForFree",
+              ]
+
+  - feature: ["Vacation rental"]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/vacation-rental"
+    schemas:
+      - name: [VacationRental]
+        properties:
+          - required:
+              [
+                containsPlace,
+                "containsPlace.occupancy",
+                "containsPlace.occupancy.value",
+                identifier,
+                image,
+                name,
+              ]
+            requiredOneOf:
+              [[latitude, "geo.latitude"], [longitude, "geo.longitude"]]
+            recommended:
+              [
+                additionalType,
+                address,
+                "address.addressCountry",
+                "address.addressLocality",
+                "address.addressRegion",
+                "address.postalCode",
+                "address.streetAddress",
+                aggregateRating,
+                brand,
+                checkinTime,
+                checkoutTime,
+                "containsPlace.additionalType",
+                "containsPlace.amenityFeature",
+                "containsPlace.bed",
+                "containsPlace.bed.numberOfBeds",
+                "containsPlace.bed.typeOfBed",
+                "containsPlace.floor.Size",
+                "containsPlace.numberOfBathroomsTotal",
+                "containsPlace.numberOfBathrooms",
+                "containsPlace.numberOfRooms",
+                description,
+                knowsLanguage,
+                review,
+                "review.contentReferenceTime",
+              ]
+
+  - feature: [Video]
+    docLink: "https://developers.google.com/search/docs/appearance/structured-data/video"
+    schemas:
+      - name: [VideoObject]
+        properties:
+          - required: [name, thumnailUrl, uploadDate]
+            recommended:
+              [
+                contentUrl,
+                description,
+                duration,
+                embedUrl,
+                expires,
+                hasPart,
+                ineligibleRegion,
+                interactionStatistic,
+                publication,
+                regionsAllowed,
+              ]
+      - name: [BroadcastEvent]
+        properties:
+          - required:
+              [
+                publication,
+                "publication.endDate",
+                "publication.isLiveBroadcast",
+                "publication.startDate",
+              ]
+      - name: [Clip]
+        properties:
+          - required: [name, startOffset, url]
+            recommended: [endOffset]
+      - name: [SeekToAction]
+        properties:
+          - required:
+              [
+                potentialAction,
+                "potentialAction.startOffset-input",
+                "potentialAction.target",
+              ]
