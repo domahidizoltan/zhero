@@ -41,7 +41,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
       <!-- Left Column: Property Order -->
-      <div class="rounded-box p-3 border-2 border-primary-content bg-primary-content/70">
+      <div class="rounded-box p-3 border-2 border-secondary-content bg-secondary-content/70">
         <h2 class="text-xl font-bold mb-2">Property Order</h2>
         <p class="text-sm text-base-content/70 mb-2">Drag and drop to reorder
           the visible properties.</p>
@@ -53,7 +53,7 @@
       <!-- Right Column: Meta Info and Actions -->
       <div>
         <div
-          class="rounded-box p-3 mb-4 border-2 border-primary-content bg-primary-content/70"
+          class="rounded-box p-3 mb-4 border-2 border-secondary-content bg-secondary-content/70"
         >
           <h2 class="text-xl font-bold mb-2">Meta Information</h2>
           <div class="grid grid-cols-1 gap-4">
@@ -110,13 +110,6 @@
       border-width 0.2s ease-out;
     max-height: 500px; /* Should be larger than any property item's height */
     overflow: hidden;
-  }
-  .property-item.is-hidden {
-    opacity: 0;
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    border-width: 0;
   }
   .sortable-ghost {
     opacity: 0.4;

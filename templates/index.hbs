@@ -1,4 +1,4 @@
-<html data-theme="light">
+<html data-theme="fantasy">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,7 +35,7 @@
         </div>
         <div class="flex-none">
           <label class="toggle text-base-content">
-            <input type="checkbox" value="dracula" class="theme-controller" />
+            <input type="checkbox" value="night" class="theme-controller" />
             <i class="fa-regular fa-sun"></i>
             <i class="fa-regular fa-moon"></i>
           </label>
@@ -71,4 +71,22 @@
       {{body}}
     </main>
   </body>
+  <style>
+    .alert-success {
+      transition:
+        max-height 0.2s ease-out,
+        opacity 0.2s ease-out,
+        padding 0.2s ease-out,
+        border-width 0.2s ease-out;
+      overflow: hidden;
+    }
+
+    .hide {
+      opacity: 0;
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-width: 0;
+    }
+  </style>
 </html>

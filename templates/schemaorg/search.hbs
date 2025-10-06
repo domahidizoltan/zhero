@@ -8,11 +8,28 @@
 <script src="static/schemaorg/schemaorg.js"></script>
 <style>
   .ts-control {
-    padding: 10px;
-    padding-left: 12px;
+    padding-left: 0px;
+    border-width: 0px;
+    flex-wrap: nowrap;
     input {
       font-size: 14px;
+      color: inherit;
     }
+  }
+  .ts-control,
+  .ts-wrapper.single.input-active .ts-control,
+  .full .ts-control,
+  .ts-dropdown,
+  .ts-dropdown .active {
+    background: inherit;
+    border-color: inherit;
+    color: inherit;
+  }
+  .ts-dropdown .active {
+    background: var(--color-secondary-content);
+  }
+  .has-items .ts-control > input {
+    margin-left: 0px !important;
   }
 </style>
 
@@ -30,7 +47,7 @@
         id="schema-class"
         placeholder="Select a Schema class"
         autocomplete="off"
-        class="hidden"
+        class="hidden input input-bordered w-full text-base-content"
       >
       </select>
 

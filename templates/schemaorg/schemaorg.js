@@ -31,8 +31,8 @@ function fillSchemaClasses(classHierarchy) {
     render: {
       option: function (data, escape) {
         return `<div>
-          <div class="text-base">${data.class}</div>
-          <div class="test-xs text-gray-500">${escape(data.breadcrumb)}</div>
+          <div class="text-base text-base-content">${data.class}</div>
+          <div class="test-xs text-base-content/60">${escape(data.breadcrumb)}</div>
           </div>`;
       },
       item: function (data, escape) {
@@ -92,9 +92,9 @@ function initPropertyOrderWidget(evt) {
 
       // Update visibility based on its own toggle and the main toggle
       if (hideToggle.checked && !showAll) {
-        item.classList.add("is-hidden");
+        item.classList.add("hide");
       } else {
-        item.classList.remove("is-hidden");
+        item.classList.remove("hide");
       }
 
       // Update order list and identifier  lists if property is NOT hidden by its own toggle
