@@ -2,6 +2,7 @@
 package handlebars
 
 import (
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
@@ -18,7 +19,9 @@ var (
 	schemaLinkReplacer    = strings.NewReplacer("(/docs/", "(https://schema.org/docs/")
 
 	helpers = map[string]any{
-		"beautify": beautify,
+		"beautify":   beautify,
+		"isChecked":  isChecked,
+		"isSelected": isSelected,
 	}
 )
 
@@ -32,6 +35,20 @@ func beautify(text string) string {
 	text = schemaLinkPlaceholder.ReplaceAllString(text, "<a href='https://schema.org/$1'>$1</a>")
 	text = replacer.Replace(text)
 	return text
+}
+
+func isChecked(enabled, condition bool) string {
+	if enabled && condition {
+		return "checked"
+	}
+	return ""
+}
+
+func isSelected(enabled bool, optionVal, comparisonVal any) string {
+	if enabled && reflect.DeepEqual(optionVal, comparisonVal) {
+		return "selected"
+	}
+	return ""
 }
 
 var once sync.Once

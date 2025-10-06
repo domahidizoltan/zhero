@@ -1,20 +1,22 @@
 <div
   class="border-2 border-base-300 bg-base-200 rounded-box p-3 relative property-item text-sm mb-2"
-  data-property-name="{{property}}"
+  data-property-name="{{name}}" data-property-order="{{order}}"
 >
   <div class="absolute top-4 right-4 flex items-center space-x-4">
+    <input type="hidden" name="property-name" value="{{name}}"
     <label class="label cursor-pointer">
       <span class="label-text mr-2">Hide</span>
-      <input type="checkbox" class="toggle toggle-sm hide-toggle" name="{{property}}-hide" value="true" />
+      <input type="checkbox" class="toggle toggle-sm hide-toggle" {{isChecked isLoadedClass notUsed}} />
     </label>
     <label class="label cursor-pointer">
       <span class="label-text mr-2">Mandatory</span>
       <input
         type="checkbox"
         class="checkbox checkbox-sm"
-        id="mandatory-prop-{{property}}"
-        name="{{property}}-mandatory"
-        value="true"
+        id="mandatory-prop-{{name}}"
+        name="property-mandatory"
+        value="{{name}}"
+        {{isChecked isLoadedClass mandatory}}
       />
     </label>
     <label class="label cursor-pointer">
@@ -22,13 +24,14 @@
       <input
         type="checkbox"
         class="checkbox checkbox-sm"
-        id="searchable-prop-{{property}}"
-        name="{{property}}-searchable"
-        value="true"
+        id="searchable-prop-{{name}}"
+        name="property-searchable"
+        value="{{name}}"
+        {{isChecked isLoadedClass searchable}}
       />
     </label>
   </div>
-  <h3 class="text-lg font-semibold">{{property}}<a
+  <h3 class="text-lg font-semibold">{{name}}<a
       href="{{canonicalURL}}"
       target="_blank"
     ><sup
@@ -37,25 +40,25 @@
   <div class="text-sm text-base-content/70 mb-2 description">{{{beautify description}}}</div>
   <div class="grid grid-cols-2 gap-4">
     <div class="flex items-center gap-x-2">
-      <label class="label-text" for="prop-type-{{property}}">Type</label>
-      <select id="prop-type-{{property}}" name="{{property}}-type" class="select select-bordered w-full">
-        {{#each expectedTypes}}
-          <option>{{.}}</option>
+      <label class="label-text" for="prop-type-{{name}}">Type</label>
+      <select id="prop-type-{{name}}" name="property-type" class="select select-bordered w-full">
+        {{#each possibleTypes}}
+          <option {{isSelected isLoadedClass selectedType . }}>{{.}}</option>
         {{/each}}
       </select>
     </div>
     <div class="flex items-center gap-x-2">
       <label
         class="label-text"
-        for="prop-component-{{property}}"
+        for="prop-component-{{name}}"
       >HTML&nbsp;Component</label>
       <select
-        id="prop-component-{{property}}"
-        name="{{property}}-component"
+        id="prop-component-{{name}}"
+        name="property-component"
         class="select select-bordered w-full"
       >
         {{#each components}}
-          <option>{{.}}</option>
+          <option {{isSelected isLoadedClass selectedComponent . }}>{{.}}</option>
         {{/each}}
       </select>
     </div>

@@ -4,7 +4,7 @@
 <script src="/static/schemaorg/schemaorg.js"></script>
 
 <div class="bg-base-100 p-6 rounded-box shadow mt-6">
-  <form method="POST" action="/schema/{{class.name}}/save">
+  <form method="POST" action="/schema/{{class.name}}/save" id="edit-schema-form">
     <input type="hidden" name="property-order" id="property-order" />
     <div class="mb-6">
       <div class="flex justify-between items-center">
@@ -35,7 +35,7 @@
 
     <div class="space-y-2">
     {{#each class.properties}}
-      {{>editProperty}}
+      {{>editProperty isLoadedClass=class.isLoaded}}
     {{/each}}
    </div>
 
@@ -61,24 +61,22 @@
               <label class="label" for="identifier">
                 <span class="label-text">Identifier</span>
               </label>
+              <input type="hidden" disabled id="loaded-identifier" value="{{class.identifier}}"/>
               <select id="identifier" name="identifier" class="select select-bordered w-full">
                 <option disabled selected>Select an identifier</option>
-                <option>property1</option>
-                <option>property2</option>
               </select>
             </div>
             <div>
               <label class="label" for="secondary-identifier">
                 <span class="label-text">Secondary Identifier (Optional)</span>
               </label>
+              <input type="hidden" disabled id="loaded-secondary-identifier" value="{{class.secondaryIdentifier}}"/>
               <select
                 id="secondary-identifier"
                 name="secondary-identifier"
                 class="select select-bordered w-full"
               >
                 <option disabled selected>Select a secondary identifier</option>
-                <option>property1</option>
-                <option>property2</option>
               </select>
             </div>
           </div>
@@ -90,8 +88,12 @@
             <i class="fas fa-circle-xmark"></i>
             Cancel</button>
           <button type="submit" class="btn btn-success">
-            <i class="fas fa-circle-plus"></i>
-            Create</button>
+            {{#if class.isLoaded}}
+              <i class="fas fa-floppy-disk"></i>Update
+            {{else}}
+              <i class="fas fa-circle-plus"></i>Create
+            {{/if}}
+          </button>
         </div>
       </div>
     </div>

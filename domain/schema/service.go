@@ -11,11 +11,11 @@ import (
 )
 
 type (
-	repo interface {
-		Save(context.Context, Schema) error
+	schemaMetaRepo interface {
+		Upsert(context.Context, SchemaMeta) error
+		GetByClassName(context.Context, string) (*SchemaMeta, error)
 	}
 
-	// TODO refactor
 	schemaProvider interface {
 		GetSchemaClassByName(cls string) *schemaorg.SchemaClass
 		GetSubClassesHierarchyOf(cls rdf2go.Term, nestingLevelMarker string, currentLevel int) []string
@@ -23,22 +23,26 @@ type (
 )
 
 type Service struct {
-	repo           repo
+	schemaMetaRepo schemaMetaRepo
 	schemaProvider schemaProvider
 	classHierarchy [][]string
 }
 
-func NewService(repo repo, schemaProvider schemaProvider) Service {
+func NewService(repo schemaMetaRepo, schemaProvider schemaProvider) Service {
 	return Service{
-		repo:           repo,
+		schemaMetaRepo: repo,
 		schemaProvider: schemaProvider,
 	}
 }
 
-func (s Service) Save(ctx context.Context, schema Schema) error {
+func (s Service) SaveSchemaMeta(ctx context.Context, schema SchemaMeta) error {
 	return database.InTx(ctx, func(ctx context.Context) error {
-		return s.repo.Save(ctx, schema)
+		return s.schemaMetaRepo.Upsert(ctx, schema)
 	})
+}
+
+func (s Service) GetSchemaMetaByName(ctx context.Context, clsName string) (*SchemaMeta, error) {
+	return s.schemaMetaRepo.GetByClassName(ctx, clsName)
 }
 
 func (s Service) GetSchemaClassByName(clsName string) *schemaorg.SchemaClass {

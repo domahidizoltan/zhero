@@ -65,12 +65,16 @@ function initPropertyOrderWidget(evt) {
   );
 
   const updateUI = () => {
+    propertyOrderList.innerHTML = "";
     const showAll = showHiddenToggle.checked;
-    const selectedIdentifier = identifierSelect.value;
-    const selectedSecondaryIdentifier = secondaryIdentifierSelect.value;
+    const selectedIdentifier =
+      document.getElementById("loaded-identifier").value;
+    const selectedSecondaryIdentifier = document.getElementById(
+      "loaded-secondary-identifier",
+    ).value;
 
     // 1. Clear dynamic lists
-    propertyOrderList.innerHTML = "";
+    const propertyOrders = [];
     while (identifierSelect.options.length > 1) {
       identifierSelect.remove(1);
     }
@@ -83,6 +87,7 @@ function initPropertyOrderWidget(evt) {
     propertyItems.forEach((item) => {
       const hideToggle = item.querySelector(".hide-toggle");
       const propertyName = item.dataset.propertyName;
+      const propertyOrder = item.dataset.propertyOrder;
       if (!hideToggle || !propertyName) return;
 
       // Update visibility based on its own toggle and the main toggle
@@ -106,8 +111,9 @@ function initPropertyOrderWidget(evt) {
           "items-center",
         );
         listItem.dataset.propertyName = propertyName;
+        listItem.dataset.propertyOrder = propertyOrder;
         listItem.innerHTML = `<div class="handle w-full"><i class="fa-solid fa-sort w-5 h-5 mr-2"></i><span>${propertyName}</span></div>`;
-        propertyOrderList.appendChild(listItem);
+        propertyOrders.push(listItem);
 
         // Add to Identifier dropdowns
         const option = document.createElement("option");
@@ -121,6 +127,14 @@ function initPropertyOrderWidget(evt) {
     // 3.  Restore selections in dropdowns
     identifierSelect.value = selectedIdentifier;
     secondaryIdentifierSelect.value = selectedSecondaryIdentifier;
+
+    propertyOrders.sort((a, b) => {
+      return a.dataset.propertyOrder - b.dataset.propertyOrder;
+    });
+
+    propertyOrders.forEach((item) => {
+      propertyOrderList.appendChild(item);
+    });
   };
 
   // Attach  event listeners
@@ -136,20 +150,17 @@ function initPropertyOrderWidget(evt) {
   updateUI();
 
   // Initialize SortableJS
-  new Sortable(propertyOrderList, {
+  let sortable = new Sortable(propertyOrderList, {
     animation: 150,
     ghostClass: "sortable-ghost",
     handle: ".handle",
+    dataIdAttr: "data-property-name",
   });
 
-  const form = document.querySelector("form");
+  const form = document.querySelector("#edit-schema-form");
   if (form) {
     form.addEventListener("submit", (e) => {
-      const orderedProperties = Array.from(propertyOrderList.children).map(
-        (item) => item.dataset.propertyName,
-      );
-      document.getElementById("property-order").value =
-        orderedProperties.join(",");
+      document.getElementById("property-order").value = sortable.toArray();
     });
   }
 }

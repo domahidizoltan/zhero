@@ -45,6 +45,7 @@ func InTx(ctx context.Context, fn func(ctx context.Context) error) error {
 
 	ctx = context.WithValue(ctx, txKey{}, tx)
 	if err := fn(ctx); err != nil {
+		_ = tx.Rollback()
 		return err
 	}
 

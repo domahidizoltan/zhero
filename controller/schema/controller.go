@@ -4,15 +4,18 @@ package schema
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller"
 	"github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/schema"
+	"github.com/domahidizoltan/zhero/pkg/collection"
 	"github.com/domahidizoltan/zhero/pkg/handlebars"
 	"github.com/domahidizoltan/zhero/templates"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 var editTpl = templates.SchemaorgEdit
@@ -86,8 +89,16 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 		return "", true
 	}
 
+	orgSchema := sc.schemaSvc.GetSchemaClassByName(clsName)
+	savedSchema, err := sc.schemaSvc.GetSchemaMetaByName(c, clsName)
+	if err != nil {
+		controller.InternalServerError(c, "failed to get existing schema metadata", err)
+		return "", true
+	}
+
+	dto := schemaDtoFrom(*orgSchema, savedSchema)
 	ctx := map[string]any{
-		"class":       sc.schemaSvc.GetSchemaClassByName(clsName),
+		"class":       dto,
 		"breadcrumbs": sc.classBreadcrumbs(clsName),
 		"components":  []string{"TODO"},
 	}
@@ -100,15 +111,14 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 	errorMsg, successMsg := "", ""
 	if hasFormSubmitted {
 		schemaToSave := sc.schemaFromForm(c, clsName)
-		if err := sc.schemaSvc.Save(c.Request.Context(), schemaToSave); err != nil {
+		if err := sc.schemaSvc.SaveSchemaMeta(c.Request.Context(), schemaToSave); err != nil {
+			log.Error().Err(err).Msg("failed to save schema")
 			errorMsg = err.Error()
 		} else {
 			successMsg = fmt.Sprintf("Schema %s saved successfully", clsName)
 		}
 	}
 
-	// TODO display form errors
-	// TODO load schema for save or edit
 	operation := "Create"
 	output, err := template.Index(c, template.Content{
 		Title:    operation + " schema: " + clsName,
@@ -124,35 +134,41 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 	return output, false
 }
 
-func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) schema.Schema {
-	schemaToSave := schema.Schema{
-		Name:                clsName,
-		Identifier:          c.PostForm("identifier"),
-		SecondaryIdentifier: c.PostForm("secondary-identifier"),
+func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) schema.SchemaMeta {
+	var schemaToSave schema.SchemaMeta
+	if err := c.Bind(&schemaToSave); err != nil {
+		log.Error().Err(err).Msg("failed to bind form data")
 	}
+	schemaToSave.Name = clsName
 
-	orderedProperties := strings.Split(c.PostForm("property-order"), ",")
-	for i, propName := range orderedProperties {
-		if propName == "" {
-			continue
+	props := map[string]schema.Property{}
+	for i, name := range c.PostFormArray("property-name") {
+		props[name] = schema.Property{
+			Name:      name,
+			Type:      c.PostFormArray("property-type")[i],
+			Component: c.PostFormArray("property-component")[i],
 		}
+	}
+	alterMap(c, "property-mandatory", props, func(prop schema.Property) schema.Property { prop.Mandatory = true; return prop })
+	alterMap(c, "property-searchable", props, func(p schema.Property) schema.Property { p.Searchable = true; return p })
 
-		if c.PostForm(propName+"-hide") == "true" {
-			continue
+	propertyOrder := strings.Split(c.PostForm("property-order"), ",")
+	for i, p := range slices.Collect(collection.Unique(propertyOrder)) {
+		if prop, found := props[p]; found {
+			prop.Order = i
+			schemaToSave.Properties = append(schemaToSave.Properties, prop)
 		}
-
-		prop := schema.Property{
-			Name:       propName,
-			Mandatory:  c.PostForm(propName+"-mandatory") == "true",
-			Searchable: c.PostForm(propName+"-searchable") == "true",
-			Type:       c.PostForm(propName + "-type"),
-			Component:  c.PostForm(propName + "-component"),
-			Order:      i,
-		}
-		schemaToSave.Properties = append(schemaToSave.Properties, prop)
 	}
 
 	return schemaToSave
+}
+
+func alterMap[T any](c *gin.Context, key string, itemsByName map[string]T, setter func(p T) T) {
+	for _, name := range c.PostFormArray(key) {
+		if p, found := itemsByName[name]; found {
+			itemsByName[name] = setter(p)
+		}
+	}
 }
 
 func (sc *Controller) classBreadcrumbs(clsName string) []string {

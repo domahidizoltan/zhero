@@ -59,13 +59,13 @@ func TestSchemaorg(t *testing.T) {
 			Property:      "liveBlogUpdate",
 			CanonicalURL:  "https://schema.org/liveBlogUpdate",
 			Description:   "An update to the LiveBlog.",
-			ExpectedTypes: []string{"BlogPosting"},
+			PossibleTypes: []string{"BlogPosting"},
 		})
 		assert.Contains(t, res.Properties, ClassProperty{
 			Property:      "audio",
 			CanonicalURL:  "https://schema.org/audio",
 			Description:   "An embedded audio object.",
-			ExpectedTypes: []string{"AudioObject", "Clip", "MusicRecording"},
+			PossibleTypes: []string{"AudioObject", "Clip", "MusicRecording"},
 		})
 
 		var props []string

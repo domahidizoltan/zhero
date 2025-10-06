@@ -6,8 +6,8 @@ import (
 )
 
 //go:embed 0000_init_schemas.sql
-var schemametadataDdl string
+var schemametaDdl string
 
 var Scripts = []string{
-	schemametadataDdl,
+	schemametaDdl,
 }

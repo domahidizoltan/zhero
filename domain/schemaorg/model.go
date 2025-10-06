@@ -64,9 +64,9 @@ type (
 	}
 
 	ClassProperty struct {
-		Property      string
+		Name          string
 		CanonicalURL  string
-		ExpectedTypes []string
+		PossibleTypes []string
 		Description   string
 	}
 )

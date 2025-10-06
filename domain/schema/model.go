@@ -1,10 +1,10 @@
 // Package schema manages the data blueprint.
 package schema
 
-type Schema struct {
+type SchemaMeta struct {
 	Name                string
-	Identifier          string
-	SecondaryIdentifier string
+	Identifier          string `form:"identifier"` // binding:"required"`
+	SecondaryIdentifier string `form:"secondary-identifier"`
 	Properties          []Property
 }
 

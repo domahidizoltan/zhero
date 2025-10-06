@@ -81,7 +81,7 @@ func (s *Service) GetSchemaClass(cls rdf2go.Term) *SchemaClass {
 	}
 
 	sort.SliceStable(allProps, func(i, j int) bool {
-		return strings.Compare(allProps[i].Property, allProps[j].Property) <= 0
+		return strings.Compare(allProps[i].Name, allProps[j].Name) <= 0
 	})
 
 	return &SchemaClass{
@@ -125,10 +125,10 @@ func (s *Service) getPropertiesOf(values []string) map[string][]ClassProperty {
 				continue
 			}
 			properties[v] = append(properties[v], ClassProperty{
-				Property:      getTermName(p.Subject, schema),
+				Name:          getTermName(p.Subject, schema),
 				CanonicalURL:  p.Subject.RawValue(),
 				Description:   s.getDescription(p.Subject),
-				ExpectedTypes: s.getExpectedType(p.Subject),
+				PossibleTypes: s.getExpectedType(p.Subject),
 			})
 		}
 	}
