@@ -15,11 +15,12 @@ type (
 		Description         string
 		CanonicalURL        string
 		Properties          []schemaPropDto
-		Identifier          string `form:"identifier"` // binding:"required"`
-		SecondaryIdentifier string `form:"secondary-identifier"`
+		Identifier          string
+		SecondaryIdentifier string
 	}
 	schemaPropDto struct {
 		NotUsed       bool
+		Disabled      bool
 		Name          string
 		CanonicalURL  string
 		PossibleTypes []string
@@ -47,7 +48,12 @@ func schemaDtoFrom(orgCls schemaorg.SchemaClass, domain *schema.SchemaMeta) sche
 		if p, found := domainPropsByName[prop.Name]; found {
 			domainProp = &p
 		}
-		props = append(props, schemaPropDtoFrom(prop, domainProp))
+
+		propDto := schemaPropDtoFrom(prop, domainProp)
+		if domainProp != nil {
+			propDto.Disabled = prop.Name == domain.Identifier || prop.Name == domain.SecondaryIdentifier
+		}
+		props = append(props, propDto)
 	}
 
 	dto := schemaDto{

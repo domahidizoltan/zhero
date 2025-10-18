@@ -55,31 +55,49 @@
         <div
           class="rounded-box p-3 mb-4 border-2 border-secondary-content bg-secondary-content/70"
         >
+      <fieldset name="identifiers-fieldset" {{#if class.isLoaded}} disabled {{/if}}>
           <h2 class="text-xl font-bold mb-2">Meta Information</h2>
-          <div class="grid grid-cols-1 gap-4">
+            <p style="margin-bottom:10px;">
+              {{#if class.isLoaded}}
+                This section is not editable after create.
+              {{else}}
+                <i class="fa-solid fa-triangle-exclamation"></i> <b>This section could be configured only once, on create.</b>
+              {{/if}}
+            </p>
+          <div class="grid grid-cols-1">
             <div>
               <label class="label" for="identifier">
                 <span class="label-text">Identifier</span>
+                <div class="tooltip tooltip-right" data-tip="During save the Mandatory and Searchable option will be disabled for this property!">
+                  <i class="fa-solid fa-circle-info"></i>
+                </div>
               </label>
               <input type="hidden" disabled id="loaded-identifier" value="{{class.identifier}}"/>
-              <select id="identifier" name="identifier" class="select select-bordered w-full">
+              <select id="identifier" name="identifier" class="select select-bordered w-full validator" required>
                 <option disabled selected>Select an identifier</option>
               </select>
+              <div class="validator-hint">An identifier is required</div>
             </div>
             <div>
               <label class="label" for="secondary-identifier">
-                <span class="label-text">Secondary Identifier (Optional)</span>
+                <span class="label-text">Secondary Identifier</span>
+                <div class="tooltip tooltip-right" data-tip="During save the Mandatory and Searchable option will be enabled for this property!">
+                  <i class="fa-solid fa-circle-info"></i>
+                </div>
               </label>
               <input type="hidden" disabled id="loaded-secondary-identifier" value="{{class.secondaryIdentifier}}"/>
               <select
                 id="secondary-identifier"
                 name="secondary-identifier"
-                class="select select-bordered w-full"
+                class="select select-bordered w-full validator"
+                required
               >
                 <option disabled selected>Select a secondary identifier</option>
               </select>
+              <div class="validator-hint">A secondary identifier is required</div>
             </div>
           </div>
+        </fieldset>
         </div>
 
         <!-- Action Buttons -->
@@ -95,7 +113,6 @@
             {{/if}}
           </button>
         </div>
-      </div>
     </div>
   </form>
 </div>

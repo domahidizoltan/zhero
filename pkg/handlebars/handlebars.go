@@ -19,9 +19,9 @@ var (
 	schemaLinkReplacer    = strings.NewReplacer("(/docs/", "(https://schema.org/docs/")
 
 	helpers = map[string]any{
-		"beautify":   beautify,
-		"isChecked":  isChecked,
-		"isSelected": isSelected,
+		"beautify":      beautify,
+		"use":           use,
+		"compareAndUse": compareAndUse,
 	}
 )
 
@@ -37,16 +37,16 @@ func beautify(text string) string {
 	return text
 }
 
-func isChecked(enabled, condition bool) string {
+func use(use string, enabled, condition bool) string {
 	if enabled && condition {
-		return "checked"
+		return use
 	}
 	return ""
 }
 
-func isSelected(enabled bool, optionVal, comparisonVal any) string {
+func compareAndUse(use string, enabled bool, optionVal, comparisonVal any) string {
 	if enabled && reflect.DeepEqual(optionVal, comparisonVal) {
-		return "selected"
+		return use
 	}
 	return ""
 }

@@ -3,8 +3,8 @@ package schema
 
 type SchemaMeta struct {
 	Name                string
-	Identifier          string `form:"identifier"` // binding:"required"`
-	SecondaryIdentifier string `form:"secondary-identifier"`
+	Identifier          string `form:"identifier" binding:"required"`
+	SecondaryIdentifier string `form:"secondary-identifier" binding:"required,nefield=Identifier"`
 	Properties          []Property
 }
 

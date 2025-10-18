@@ -2,6 +2,7 @@
 package schema
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"slices"
@@ -15,6 +16,7 @@ import (
 	"github.com/domahidizoltan/zhero/pkg/handlebars"
 	"github.com/domahidizoltan/zhero/templates"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 )
 
@@ -96,6 +98,23 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 		return "", true
 	}
 
+	errorMsg, successMsg := "", ""
+	if hasFormSubmitted {
+		schemaToSave, validationErrs, err := sc.schemaFromForm(c, clsName)
+		if schemaToSave == nil {
+			if len(validationErrs) > 0 {
+				errorMsg = "Validation errors:\\n" + strings.Join(validationErrs, "\\n")
+			} else if err != nil {
+				errorMsg = err.Error()
+			}
+		} else if err := sc.schemaSvc.SaveSchemaMeta(c.Request.Context(), *schemaToSave); err != nil {
+			log.Error().Err(err).Msg("failed to save schema")
+			errorMsg = err.Error()
+		} else {
+			successMsg = fmt.Sprintf("Schema %s saved successfully", clsName)
+		}
+	}
+
 	dto := schemaDtoFrom(*orgSchema, savedSchema)
 	ctx := map[string]any{
 		"class":       dto,
@@ -106,17 +125,6 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return "", true
-	}
-
-	errorMsg, successMsg := "", ""
-	if hasFormSubmitted {
-		schemaToSave := sc.schemaFromForm(c, clsName)
-		if err := sc.schemaSvc.SaveSchemaMeta(c.Request.Context(), schemaToSave); err != nil {
-			log.Error().Err(err).Msg("failed to save schema")
-			errorMsg = err.Error()
-		} else {
-			successMsg = fmt.Sprintf("Schema %s saved successfully", clsName)
-		}
 	}
 
 	operation := "Create"
@@ -131,16 +139,29 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 		return "", true
 	}
 
-	return output, false
+	return output, len(errorMsg) > 0
 }
 
-func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) schema.SchemaMeta {
+var (
+	setPropMandatory  = func(p schema.Property, v bool) schema.Property { p.Mandatory = v; return p }
+	setPropSearchable = func(p schema.Property, v bool) schema.Property { p.Searchable = v; return p }
+)
+
+func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) (*schema.SchemaMeta, []string, error) {
+	// TODO refactor to bind to dto instead
 	var schemaToSave schema.SchemaMeta
 	if err := c.Bind(&schemaToSave); err != nil {
-		log.Error().Err(err).Msg("failed to bind form data")
+		var validationErrors validator.ValidationErrors
+		if errors.As(err, &validationErrors) {
+			errs := slices.Collect(collection.MapValues(validationErrors, func(e validator.FieldError) string {
+				return fmt.Sprintf("- %s is %s", e.Field(), e.Tag())
+			}))
+			return nil, errs, nil
+		}
+		return nil, nil, err
 	}
-	schemaToSave.Name = clsName
 
+	schemaToSave.Name = clsName
 	props := map[string]schema.Property{}
 	for i, name := range c.PostFormArray("property-name") {
 		props[name] = schema.Property{
@@ -149,8 +170,13 @@ func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) schema.Sche
 			Component: c.PostFormArray("property-component")[i],
 		}
 	}
-	alterMap(c, "property-mandatory", props, func(prop schema.Property) schema.Property { prop.Mandatory = true; return prop })
-	alterMap(c, "property-searchable", props, func(p schema.Property) schema.Property { p.Searchable = true; return p })
+	alterMap(c, "property-mandatory", props, func(p schema.Property) schema.Property { return setPropMandatory(p, true) })
+	alterMap(c, "property-searchable", props, func(p schema.Property) schema.Property { return setPropSearchable(p, true) })
+
+	props[schemaToSave.Identifier] = setPropMandatory(props[schemaToSave.Identifier], false)
+	props[schemaToSave.Identifier] = setPropSearchable(props[schemaToSave.Identifier], false)
+	props[schemaToSave.SecondaryIdentifier] = setPropMandatory(props[schemaToSave.SecondaryIdentifier], true)
+	props[schemaToSave.SecondaryIdentifier] = setPropSearchable(props[schemaToSave.SecondaryIdentifier], true)
 
 	propertyOrder := strings.Split(c.PostForm("property-order"), ",")
 	for i, p := range slices.Collect(collection.Unique(propertyOrder)) {
@@ -159,8 +185,8 @@ func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) schema.Sche
 			schemaToSave.Properties = append(schemaToSave.Properties, prop)
 		}
 	}
-
-	return schemaToSave
+	fmt.Printf("%+v", schemaToSave)
+	return &schemaToSave, nil, nil
 }
 
 func alterMap[T any](c *gin.Context, key string, itemsByName map[string]T, setter func(p T) T) {

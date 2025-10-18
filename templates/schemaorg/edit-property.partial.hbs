@@ -2,11 +2,12 @@
   class="border-2 border-base-200 bg-base-200/30 rounded-box p-3 relative property-item text-sm mb-2"
   data-property-name="{{name}}" data-property-order="{{order}}"
 >
-  <div class="absolute top-4 right-4 flex items-center space-x-4">
+<fieldset name="{{name}}-fieldset" {{use "disabled" isLoadedClass disabled}}>
+<div class="absolute top-4 right-4 flex items-center space-x-4">
     <input type="hidden" name="property-name" value="{{name}}"
     <label class="label cursor-pointer">
       <span class="label-text mr-2">Hide</span>
-      <input type="checkbox" class="toggle toggle-sm hide-toggle" {{isChecked isLoadedClass notUsed}} />
+      <input type="checkbox" class="toggle toggle-sm hide-toggle" {{use "checked" isLoadedClass notUsed}} />
     </label>
     <label class="label cursor-pointer">
       <span class="label-text mr-2">Mandatory</span>
@@ -16,7 +17,7 @@
         id="mandatory-prop-{{name}}"
         name="property-mandatory"
         value="{{name}}"
-        {{isChecked isLoadedClass mandatory}}
+        {{use "checked" isLoadedClass mandatory}}
       />
     </label>
     <label class="label cursor-pointer">
@@ -27,7 +28,7 @@
         id="searchable-prop-{{name}}"
         name="property-searchable"
         value="{{name}}"
-        {{isChecked isLoadedClass searchable}}
+        {{use "checked" isLoadedClass searchable}}
       />
     </label>
   </div>
@@ -43,7 +44,7 @@
       <label class="label-text" for="prop-type-{{name}}">Type</label>
       <select id="prop-type-{{name}}" name="property-type" class="select select-bordered w-full">
         {{#each possibleTypes}}
-          <option {{isSelected isLoadedClass selectedType . }}>{{.}}</option>
+          <option {{compareAndUse "selected" isLoadedClass selectedType . }}>{{.}}</option>
         {{/each}}
       </select>
     </div>
@@ -58,9 +59,10 @@
         class="select select-bordered w-full"
       >
         {{#each components}}
-          <option {{isSelected isLoadedClass selectedComponent . }}>{{.}}</option>
+          <option {{compareAndUse "selected" isLoadedClass selectedComponent . }}>{{.}}</option>
         {{/each}}
       </select>
     </div>
   </div>
+</fieldset>
 </div>

@@ -159,8 +159,20 @@ function initPropertyOrderWidget(evt) {
 
   const form = document.querySelector("#edit-schema-form");
   if (form) {
+    form.noValidate = true;
     form.addEventListener("submit", (e) => {
-      document.getElementById("property-order").value = sortable.toArray();
+      e.preventDefault();
+      if (form.checkValidity()) {
+        document.getElementById("property-order").value = sortable.toArray();
+        document.getElementsByName("identifiers-fieldset")[0].disabled = false;
+        const idName = document.getElementById("loaded-identifier").value;
+        document.getElementsByName(idName + "-fieldset")[0].disabled = false;
+        const secIdName = document.getElementById(
+          "loaded-secondary-identifier",
+        ).value;
+        document.getElementsByName(secIdName + "-fieldset")[0].disabled = false;
+        form.submit();
+      }
     });
   }
 }
