@@ -1,0 +1,56 @@
+<style>
+  .menu {
+    & {
+      padding: 0;
+    }
+    a {
+      padding: 0.15rem;
+    }
+  }
+</style>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-4">
+  <div class="bg-base-100 p-3 rounded-box shadow">
+    <h3 class="text-m font-bold">Schemas</h3>
+    {{#if schemas}}
+      <ul class="menu menu-sm bg-base-100 w-full">
+        {{#each schemas}}
+          <li><a
+              hx-get="/page/list/{{this}}"
+              hx-target="#page-list-content"
+              hx-swap="innerHTML"
+            >{{this}}</a></li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <div class="mt-4 text-sm text-base-content/70">
+        No schema
+      </div>
+    {{/if}}
+
+    <br />
+    <a
+      class="btn btn-outline btn-sm w-full"
+      hx-get="/schema/search"
+      hx-target="#page-list-content"
+      hx-swap="innerHTML"
+    >
+      <i class="fas fa-circle-plus"></i>
+      Create schema
+    </a>
+  </div>
+  <div class="col-span-4" id="page-list-content">
+    {{#if schemas}}
+      <span
+        hx-get="/page/list/{{schemas.[0]}}"
+        hx-trigger="load"
+        hx-swap="outerHTML"
+      ></span>
+    {{else}}
+      <span
+        hx-get="/schema/search"
+        hx-trigger="load"
+        hx-swap="outerHTML"
+      ></span>
+    {{/if}}
+  </div>
+</div>

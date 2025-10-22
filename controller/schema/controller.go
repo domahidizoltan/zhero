@@ -14,16 +14,16 @@ import (
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/collection"
 	"github.com/domahidizoltan/zhero/pkg/handlebars"
-	"github.com/domahidizoltan/zhero/templates"
+	tpl "github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 )
 
-var editTpl = templates.SchemaorgEdit
+var editTpl = tpl.SchemaorgEdit
 
 func init() {
-	editTpl.RegisterPartialTemplate("editProperty", templates.SchemaorgEditPropertyPartial)
+	editTpl.RegisterPartialTemplate("editProperty", tpl.SchemaorgEditPropertyPartial)
 	handlebars.InitHelpers()
 }
 
@@ -38,16 +38,7 @@ func NewController(schemaSvc schema.Service) Controller {
 }
 
 func (sc *Controller) Search(c *gin.Context) {
-	body, err := templates.SchemaorgSearch.Exec(nil)
-	if err != nil {
-		controller.TemplateRenderError(c, err)
-		return
-	}
-
-	output, err := template.Index(c, template.Content{
-		Title: "Welcome to Zhero",
-		Body:  raymond.SafeString(body),
-	})
+	output, err := tpl.SchemaorgSearch.Exec(nil)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return

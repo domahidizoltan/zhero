@@ -4,7 +4,7 @@ package template
 import (
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/pkg/session"
-	"github.com/domahidizoltan/zhero/templates"
+	"github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -20,7 +20,7 @@ type Content struct {
 
 func Index(c *gin.Context, content Content) (string, error) {
 	handleFlash(c, &content)
-	output, err := templates.Index.Exec(content)
+	output, err := template.Index.Exec(content)
 	if err != nil {
 		log.Error().Err(err).Msg("error rendering template")
 		return "", err

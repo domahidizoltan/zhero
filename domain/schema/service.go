@@ -13,6 +13,7 @@ import (
 type (
 	schemaMetaRepo interface {
 		Upsert(context.Context, SchemaMeta) error
+		GetAllNames(context.Context) ([]string, error)
 		GetByClassName(context.Context, string) (*SchemaMeta, error)
 	}
 
@@ -39,6 +40,10 @@ func (s Service) SaveSchemaMeta(ctx context.Context, schema SchemaMeta) error {
 	return database.InTx(ctx, func(ctx context.Context) error {
 		return s.schemaMetaRepo.Upsert(ctx, schema)
 	})
+}
+
+func (s Service) GetSchemaMetaNames(ctx context.Context) ([]string, error) {
+	return s.schemaMetaRepo.GetAllNames(ctx)
 }
 
 func (s Service) GetSchemaMetaByName(ctx context.Context, clsName string) (*SchemaMeta, error) {

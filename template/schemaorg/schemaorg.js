@@ -1,7 +1,7 @@
 function loadSchemaClasses(evt) {
-  htmx.ajax("GET", "/class-hierarchy", "#classHierarchy");
+  htmx.ajax("GET", "/schema/class-hierarchy", "#class-hierarchy");
   document
-    .getElementById("classHierarchy")
+    .getElementById("class-hierarchy")
     .addEventListener("htmx:afterSwap", function (evt) {
       let classHierarchy = JSON.parse(evt.target.textContent);
       fillSchemaClasses(classHierarchy);

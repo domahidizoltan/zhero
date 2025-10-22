@@ -22,6 +22,7 @@ const (
 			secondary_identifier = excluded.secondary_identifier;
 	`
 	selectSchemaMetaByName = `SELECT name, identifier, secondary_identifier FROM schema_meta WHERE name = ?;`
+	selectSchemaMetaNames  = `SELECT name FROM schema_meta ORDER BY name asc;`
 
 	deleteSchemaMetaProps             = `DELETE FROM schema_meta_properties WHERE schema_name = ?;`
 	insertSchemaMetaPropsPrefix       = `INSERT INTO schema_meta_properties (schema_name, name, mandatory, searchable, [type], component, [order]) VALUES `
@@ -97,4 +98,26 @@ func (r *Repository) GetByClassName(ctx context.Context, name string) (*domain.S
 	}
 
 	return &schema, nil
+}
+
+func (r *Repository) GetAllNames(ctx context.Context) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, selectSchemaMetaNames)
+	if err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0)
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		names = append(names, name)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return names, nil
 }
