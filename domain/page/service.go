@@ -1,0 +1,47 @@
+package page
+
+import (
+	"context"
+
+	"github.com/domahidizoltan/zhero/pkg/database"
+)
+
+type (
+	pageRepo interface {
+		Insert(context.Context, Page) (string, error)
+		Update(context.Context, string, Page) error
+		GetPageBySchemaNameAndIdentifier(context.Context, string, string) (*Page, error)
+	}
+)
+
+type Service struct {
+	pageRepo pageRepo
+}
+
+func NewService(repo pageRepo) Service {
+	return Service{
+		pageRepo: repo,
+	}
+}
+
+func (s Service) Create(ctx context.Context, page Page) (string, error) {
+	createdID := ""
+	if err := database.InTx(ctx, func(ctx context.Context) error {
+		var err error
+		createdID, err = s.pageRepo.Insert(ctx, page)
+		return err
+	}); err != nil {
+		return "", err
+	}
+	return createdID, nil
+}
+
+func (s Service) Update(ctx context.Context, identifier string, page Page) error {
+	return database.InTx(ctx, func(ctx context.Context) error {
+		return s.pageRepo.Update(ctx, identifier, page)
+	})
+}
+
+func (s Service) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName, identifier string) (*Page, error) {
+	return s.pageRepo.GetPageBySchemaNameAndIdentifier(ctx, schemaName, identifier)
+}

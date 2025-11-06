@@ -14,8 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/domain/schemaorg"
+	page_repo "github.com/domahidizoltan/zhero/repository/page"
 	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
 )
 
@@ -65,10 +67,13 @@ func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
 		log.Fatal().Err(err).Msg("failed to create Schema.org service")
 	}
 
-	mRepo := meta_repo.NewRepo(db)
-	metaSvc := schema.NewService(mRepo, schemaorgSvc)
+	metaRepo := meta_repo.NewRepo(db)
+	metaSvc := schema.NewService(metaRepo, schemaorgSvc)
+	pageRepo := page_repo.NewRepo(db)
+	pageSvc := page.NewService(pageRepo)
 
 	return router.Services{
 		Schema: metaSvc,
+		Page:   pageSvc,
 	}
 }

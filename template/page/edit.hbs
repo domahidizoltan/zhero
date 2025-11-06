@@ -1,0 +1,94 @@
+<div class="bg-base-100 p-6 rounded-box shadow">
+  <form method="POST" action="/page/save/{{class}}" id="edit-page-form">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold">Edit {{class}}</h1>
+      <input type="hidden" name="identifier" value="{{identifier}}" />
+    </div>
+
+    <div class="space-y-4">
+      {{#each page.fields}}
+        <div class="form-control">
+          <label class="label" for="{{name}}">
+            <span
+              class="label-text
+                {{compareAndUse
+                  'text-primary font-bold'
+                  true
+                  page.identifier
+                  name
+                }}
+                {{compareAndUse
+                  'text-secondary font-bold'
+                  true
+                  page.secondaryIdentifier
+                  name
+                }}
+                "
+            >{{name}}
+              {{#if isMandatory}}
+                <span class="text-error">*</span>
+              {{/if}}
+              {{#if isSearchable}}
+                <i class="fa-solid fa-magnifying-glass searchable-icon"></i>
+              {{/if}}
+            </span>
+          </label>
+          <input
+            type="text"
+            id="field-{{name}}"
+            name="field-{{name}}"
+            class="input input-bordered w-full
+              {{use 'validator' true isMandatory}}
+              {{compareAndUse 'bg-primary/10' true page.identifier name}}
+              {{compareAndUse
+                'bg-secondary/10'
+                true
+                page.secondaryIdentifier
+                name
+              }}
+              "
+            value="{{value}}"
+            {{compareAndUse "disabled" true page.identifier name}}
+            {{use "required" true isMandatory}}
+          />
+          {{#if isMandatory}}
+            <div class="validator-hint">{{name}} is required.</div>
+          {{/if}}
+        </div>
+      {{/each}}
+    </div>
+    <!--
+        <textarea
+          id="content"
+          name="content"
+          class="textarea textarea-bordered w-full h-32"
+          required
+        >This is the main content of the page.</textarea>
+        <input
+          type="file"
+          id="featured-image"
+          name="featured-image"
+          class="file-input file-input-bordered w-full"
+        />
+-->
+
+    <div class="flex justify-end space-x-2 mt-6">
+      <button type="button" class="btn btn-info">
+        <i class="fas fa-eye"></i>
+        Preview
+      </button>
+      <button
+        type="button"
+        class="btn btn-error"
+        onclick="window.location.href = '/page/list'"
+      >
+        <i class="fas fa-circle-xmark"></i>
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-floppy-disk"></i>
+        Update
+      </button>
+    </div>
+  </form>
+</div>

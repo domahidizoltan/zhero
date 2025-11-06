@@ -49,7 +49,7 @@ function navigateToEditSchemaPage() {
   if (!schemaClass) {
     popup("No schema selected!");
   } else {
-    window.location.href = `/schema/${schemaClass}/edit`;
+    window.location.href = `/schema/edit/${schemaClass}`;
   }
 }
 
@@ -166,11 +166,16 @@ function initPropertyOrderWidget(evt) {
         document.getElementById("property-order").value = sortable.toArray();
         document.getElementsByName("identifiers-fieldset")[0].disabled = false;
         const idName = document.getElementById("loaded-identifier").value;
-        document.getElementsByName(idName + "-fieldset")[0].disabled = false;
+        if (idName != "") {
+          document.getElementsByName(idName + "-fieldset")[0].disabled = false;
+        }
         const secIdName = document.getElementById(
           "loaded-secondary-identifier",
         ).value;
-        document.getElementsByName(secIdName + "-fieldset")[0].disabled = false;
+        if (secIdName != "") {
+          document.getElementsByName(secIdName + "-fieldset")[0].disabled =
+            false;
+        }
         form.submit();
       }
     });

@@ -16,6 +16,7 @@ var (
 
 	PageMain                     = handlebars.MustParse(pagesTpl + "main.hbs")
 	PageList                     = handlebars.MustParse(pagesTpl + "list.hbs")
+	PageEdit                     = handlebars.MustParse(pagesTpl + "edit.hbs")
 	SchemaorgSearch              = handlebars.MustParse(schemaorgTpl + "search.hbs")
 	SchemaorgEdit                = handlebars.MustParse(schemaorgTpl + "edit.hbs")
 	SchemaorgEditPropertyPartial = handlebars.MustParse(schemaorgTpl + "edit-property.partial.hbs")
