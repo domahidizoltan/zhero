@@ -20,15 +20,15 @@
 
 ### Backend (`controller/page/controller.go`)
 - [x] **T00008: Save Logic:** Refine the `Save` method to ensure it robustly handles both creation and updates.
-- [ ] **T00009: Redirects:** Correct the redirect on successful save to point to the list page for the current schema (e.g., `/page/list/{{class}}`).
-- [ ] **T00010: Validation:** Implement comprehensive server-side validation for submitted page data and return clear error messages to the user.
+- [x] **T00009: Redirects:** Correct the redirect on successful save to point to the list page for the current schema (e.g., `/page/list?=schema={{class}}`).
+- [x] **T00010: Validation:** Implement comprehensive server-side validation for submitted page data and return clear error messages to the user. (client side validation is enough for the moment)
 
 ### Frontend (`template/page/edit.hbs`)
 - [ ] **T00011: Dynamic Components:** Extend the template to render different HTML form components (e.g., `textarea`, `select`, `checkbox`) based on the `Component` type defined in the schema for each field.
-- [ ] **T00012: Button Logic:**
-    - [ ] Dynamically change the submit button text to "Create" for new pages and "Update" for existing ones.
-    - [ ] Fix the "Cancel" button's `onclick` handler to redirect to `/page/list/{{class}}`.
-- [ ] **T00013: Client-side Validation:** In `template/page/page.js`, add JavaScript to handle basic client-side validation for mandatory fields to provide instant feedback.
+- [x] **T00012: Button Logic:**
+    - [x] Dynamically change the submit button text to "Create" for new pages and "Update" for existing ones.
+    - [x] Fix the "Cancel" button's `onclick` handler to redirect to `/page/list?schema={{class}}`.
+- [x] **T00013: Client-side Validation:** In `template/page/page.js`, add JavaScript to handle basic client-side validation for mandatory fields to provide instant feedback.
 
 ## F03: Additional Actions & Refinements
 

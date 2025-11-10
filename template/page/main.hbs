@@ -39,9 +39,9 @@
     </a>
   </div>
   <div class="col-span-4" id="page-list-content">
-    {{#if schemas}}
+    {{#if selectedSchema}}
       <span
-        hx-get="/page/list/{{schemas.[0]}}"
+        hx-get="/page/list/{{selectedSchema}}"
         hx-trigger="load"
         hx-swap="outerHTML"
       ></span>

@@ -34,8 +34,17 @@ func (pc *Controller) Main(c *gin.Context) {
 		return
 	}
 
+	var selectedSchema string
+	if len(schemas) > 0 {
+		selectedSchema = schemas[0]
+	}
+	if s, ok := c.GetQuery("schema"); ok {
+		selectedSchema = s
+	}
+
 	ctx := map[string]any{
-		"schemas": schemas,
+		"schemas":        schemas,
+		"selectedSchema": selectedSchema,
 	}
 	body, err := tpl.PageMain.Exec(ctx)
 	if err != nil {
@@ -93,8 +102,8 @@ func (pc *Controller) Save(c *gin.Context) {
 		c.Data(http.StatusBadRequest, gin.MIMEHTML, []byte(output))
 		return
 	}
-	// class := c.Param("class")
-	c.Redirect(http.StatusSeeOther, "/page/list")
+	class := c.Param("class")
+	c.Redirect(http.StatusSeeOther, "/page/list?schema="+class)
 }
 
 func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool) {
@@ -131,19 +140,7 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 		} else {
 			successMsg = fmt.Sprintf("\"%s\" page saved successfully with ID %s", class, identifier)
 		}
-		// schemaToSave, validationErrs, err := pc.fromForm(c)
-		// if schemaToSave == nil {
-		// 	if len(validationErrs) > 0 {
-		// 		errorMsg = "Validation errors:\\n" + strings.Join(validationErrs, "\\n")
-		// 	} else if err != nil {
-		// 		errorMsg = err.Error()
-		// 	}
-		// } else if err := sc.schemaSvc.SaveSchemaMeta(c.Request.Context(), *schemaToSave); err != nil {
-		// 	log.Error().Err(err).Msg("failed to save schema")
-		// 	errorMsg = err.Error()
-		// } else {
-		// 	successMsg = fmt.Sprintf("Schema %s saved successfully", clsName)
-		// }
+
 	}
 
 	pageModel, err := pc.pageSvc.GetPageBySchemaNameAndIdentifier(c.Request.Context(), class, identifier)

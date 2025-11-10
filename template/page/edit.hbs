@@ -1,7 +1,7 @@
 <div class="bg-base-100 p-6 rounded-box shadow">
   <form method="POST" action="/page/save/{{class}}" id="edit-page-form">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold">Edit {{class}}</h1>
+      <h1 class="text-3xl font-bold">Edit {{class}} page</h1>
       <input type="hidden" name="identifier" value="{{identifier}}" />
     </div>
 
@@ -80,14 +80,17 @@
       <button
         type="button"
         class="btn btn-error"
-        onclick="window.location.href = '/page/list'"
+        onclick="window.location.href = '/page/list?schema={{class}}'"
       >
         <i class="fas fa-circle-xmark"></i>
         Cancel
       </button>
       <button type="submit" class="btn btn-success">
-        <i class="fas fa-floppy-disk"></i>
-        Update
+        {{#if identifier}}
+          <i class="fas fa-floppy-disk"></i>Update
+        {{else}}
+          <i class="fas fa-circle-plus"></i>Create
+        {{/if}}
       </button>
     </div>
   </form>
