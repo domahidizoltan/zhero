@@ -66,6 +66,7 @@ func (dto *pageDto) enhanceFromForm(c *gin.Context) {
 	for i, f := range dto.Fields {
 		dto.Fields[i].Value = c.PostForm("field-" + f.Name)
 	}
+	dto.IsEnabled = c.PostForm("is-enabled") == "on"
 }
 
 func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
@@ -73,6 +74,7 @@ func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
 		return
 	}
 
+	dto.IsEnabled = p.IsEnabled
 	modelFieldsByName := maps.Collect(collection.MapBy(p.Fields, func(f page_domain.Field) (string, page_domain.Field) {
 		return f.Name, f
 	}))

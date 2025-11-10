@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS page (
     identifier TEXT NOT NULL,
     secondary_identifier TEXT NOT NULL,
     fields TEXT,
-    search_columns TEXT
+    search_columns TEXT,
+    enabled INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS page_schema_id_idx ON page(schema_name, identifier);
 

@@ -1,8 +1,21 @@
 <div class="bg-base-100 p-6 rounded-box shadow">
   <form method="POST" action="/page/save/{{class}}" id="edit-page-form">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold">Edit {{class}} page</h1>
-      <input type="hidden" name="identifier" value="{{identifier}}" />
+    <div class="mb-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold">Edit {{class}} page</h1>
+        <input type="hidden" name="identifier" value="{{identifier}}" />
+      </div>
+      <div class="form-control">
+        <label class="label cursor-pointer gap-2">
+          <span class="label-text">Enabled</span>
+          <input
+            type="checkbox"
+            name="is-enabled"
+            class="toggle toggle-success"
+            {{#if page.isEnabled}}checked{{/if}}
+          />
+        </label>
+      </div>
     </div>
 
     <div class="space-y-4">

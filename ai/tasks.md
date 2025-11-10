@@ -33,7 +33,7 @@
 ## F03: Additional Actions & Refinements
 
 - [ ] **T00014: Enable/Disable Functionality:**
-    - [ ] Implement the backend logic (routes, controller methods, service, repository) to toggle a page's `IsEnabled` status.
+    - [x] Implement the backend logic (routes, controller methods, service, repository) to toggle a page's `IsEnabled` status.
     - [ ] Update the UI in `template/page/list.hbs` to show the current status and provide the correct toggle action icon/link.
 - [ ] **T00015: Delete Functionality:**
     - [ ] Implement the full backend stack for deleting a page.

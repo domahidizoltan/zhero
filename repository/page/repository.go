@@ -17,15 +17,15 @@ import (
 
 const (
 	maxSearchFields  = 5
-	insertPage       = `INSERT INTO page (schema_name, identifier, secondary_identifier, fields, search_columns) VALUES (?, ?, ?, ?, ?);`
+	insertPage       = `INSERT INTO page (schema_name, identifier, secondary_identifier, fields, search_columns, enabled) VALUES (?, ?, ?, ?, ?, ?);`
 	insertPageSearch = `INSERT INTO page_search (schema_name, identifier, col0, col1, col2, col3, col4) VALUES (?, ?, ?, ?, ?, ?, ?);`
 	updatePage       = `UPDATE page 
-		SET secondary_identifier = ?, fields = ?, search_columns = ?
+		SET secondary_identifier = ?, fields = ?, search_columns = ?, enabled = ?
 		WHERE schema_name = ? AND identifier = ?;`
 	updatePageSearch = `UPDATE page_search 
 		SET col0 = ?, col1 = ?, col2 = ?, col3 = ?, col4 = ?
 		WHERE schema_name = ? AND identifier = ?;`
-	selectPage       = `SELECT secondary_identifier, fields FROM page WHERE schema_name = ? AND identifier = ?;`
+	selectPage       = `SELECT secondary_identifier, fields, enabled FROM page WHERE schema_name = ? AND identifier = ?;`
 	selectPageSearch = `SELECT col0,col1,col2,col3,col4 FROM page_search WHERE schema_name = ? AND identifier = ?;`
 	// searchBySchema     = `SELECT col0,col1,col2,col3,col4 FROM page_search WHERE schema_name = ? MATCH ? ORDER BY rank;`
 	// deletePage       = `DELETE FROM page WHERE schema_name = ? AND identifier = ?;`
@@ -53,7 +53,7 @@ func (r *Repository) Insert(ctx context.Context, page domain.Page) (string, erro
 	}
 
 	if _, err := tx.ExecContext(ctx, insertPage,
-		page.SchemaName, t.id, t.secID, t.fieldsJSON, t.searchColNamesJSON); err != nil {
+		page.SchemaName, t.id, t.secID, t.fieldsJSON, t.searchColNamesJSON, page.IsEnabled); err != nil {
 		return "", err
 	}
 
@@ -77,7 +77,7 @@ func (r *Repository) Update(ctx context.Context, identifier string, page domain.
 	}
 
 	if _, err := tx.ExecContext(ctx, updatePage,
-		t.secID, t.fieldsJSON, t.searchColNamesJSON, page.SchemaName, t.id); err != nil {
+		t.secID, t.fieldsJSON, t.searchColNamesJSON, page.IsEnabled, page.SchemaName, t.id); err != nil {
 		return err
 	}
 
@@ -155,7 +155,7 @@ func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schem
 		Identifier: identifier,
 	}
 	var fieldsJSON string
-	if err := row.Scan(&page.SecondaryIdentifier, &fieldsJSON); err != nil {
+	if err := row.Scan(&page.SecondaryIdentifier, &fieldsJSON, &page.IsEnabled); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
