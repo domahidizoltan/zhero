@@ -4,6 +4,8 @@ package page
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller"
@@ -66,9 +68,39 @@ func (pc *Controller) Main(c *gin.Context) {
 
 func (pc *Controller) List(c *gin.Context) {
 	clsName := c.Param("class")
-	ctx := map[string]any{
-		"class": clsName,
+
+	pageNo, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || pageNo < 1 {
+		pageNo = 1
 	}
+
+	search := c.Query("search")
+	opts := page.ListOptions{
+		SecondaryIdentifierLike: search,
+		Page:                    uint(pageNo),
+	}
+
+	if sortBy, sortOrder, found := strings.Cut(c.DefaultQuery("sort", "identifier:asc"), ":"); found {
+		opts.SortBy = sortBy
+		opts.SortDir = page.SortDir(sortOrder)
+	}
+
+	pages, paging, err := pc.pageSvc.List(c, clsName, opts)
+	if err != nil {
+		controller.InternalServerError(c, "failed to list pages", err)
+		return
+	}
+
+	sort := fmt.Sprintf("%s:%s", opts.SortBy, opts.SortDir)
+	ctx := map[string]any{
+		"class":    clsName,
+		"paging":   pagingDtoFrom(paging, fmt.Sprintf("/page/list/%s?search=%s&sort=%s", clsName, search, sort)),
+		"pages":    pages,
+		"search":   search,
+		"sort":     sort,
+		"listOpts": opts,
+	}
+
 	output, err := tpl.PageList.Exec(ctx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)

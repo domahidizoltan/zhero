@@ -6,19 +6,24 @@
 <div class="bg-base-100 p-6 rounded-box shadow">
   <div class="flex justify-between items-center mb-4">
     <h1 class="text-2xl font-bold">{{class}}</h1>
-    <div class="flex items-center gap-4">
-      <div class="form-control">
-        <input
-          type="text"
-          placeholder="Search by Identifier or Secondary Identifier"
-          class="input input-bordered w-auto"
-        />
+    <form action="/page/list/{{class}}" method="GET">
+      <div class="flex items-center gap-4">
+        <div class="form-control">
+          <input
+            type="text"
+            name="search"
+            value="{{search}}"
+            placeholder="Search secondary identifier"
+            class="input input-bordered w-auto"
+          />
+        </div>
+        <input type="hidden" name="sort" value="{{sort}}" />
+        <button class="btn" type="submit">
+          <i class="fas fa-search"></i>
+          Search
+        </button>
       </div>
-      <button class="btn">
-        <i class="fas fa-search"></i>
-        Search
-      </button>
-    </div>
+    </form>
   </div>
 
   <div class="overflow-x-auto">
@@ -26,101 +31,108 @@
       <thead>
         <tr>
           <th>
-            <a
-              href="?sort=identifier"
-              class="flex items-center gap-2 cursor-pointer"
-            >
-              Identifier
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"
-                /></svg>
-            </a>
+            {{{htmxSortButton 
+              (concat (concat '/page/list/' class) (concat '?search=' search)) 
+              'page-list-content' 
+              'flex items-center gap-2 cursor-pointer' 
+              'Identifier' 
+              'identifier' 
+              sort 
+            }}}
           </th>
           <th class="w-3/4">
-            <a
-              href="?sort=secondary_identifier"
-              class="flex items-center gap-2 cursor-pointer"
-            >
-              Secondary Identifier
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"
-                /></svg>
-            </a>
+            {{{htmxSortButton 
+              (concat (concat '/page/list/' class) (concat '?search=' search)) 
+              'page-list-content' 
+              'flex items-center gap-2 cursor-pointer' 
+              'Secondary Identifier' 
+              'secondary_identifier' 
+              sort 
+            }}}
           </th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Page-1-ID</td>
-          <td><a href="/preview/Page-1-ID" class="link">The first page</a></td>
-          <td>
-            <div class="flex items-center gap-4">
-              <a href="/page/edit/Page-1-ID" title="Edit"><i
-                  class="fas fa-edit text-info"
-                ></i></a>
-              <a href="/page/disable/Page-1-ID" title="Disable"><i
-                  class="fas fa-toggle-off text-warning"
-                ></i></a>
-              <a href="/page/delete/Page-1-ID" title="Delete"><i
-                  class="fas fa-trash text-error"
-                ></i></a>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>Page-2-ID</td>
-          <td><a href="/preview/Page-2-ID" class="link">The second page</a></td>
-          <td>
-            <div class="flex items-center gap-4">
-              <a href="/page/edit/Page-2-ID" title="Edit"><i
-                  class="fas fa-edit text-info"
-                ></i></a>
-              <a href="/page/enable/Page-2-ID" title="Enable"><i
-                  class="fas fa-toggle-on text-success"
-                ></i></a>
-              <a href="/page/delete/Page-2-ID" title="Delete"><i
-                  class="fas fa-trash text-error"
-                ></i></a>
-            </div>
-          </td>
-        </tr>
+        {{#unless pages}}
+          <!-- align text to center -->
+          <tr><td colspan=3 class="text-center">Nothing to list</td></tr>
+        {{/unless}}
+        {{#each pages}}
+          <tr>
+            <td>{{this.Identifier}}</td>
+            <td><a
+                href="/preview/{{this.Identifier}}"
+                class="link"
+              >{{this.SecondaryIdentifier}}</a></td>
+            <td>
+              <div class="flex items-center gap-4">
+                <a
+                  href="/page/edit/{{../class}}/{{this.Identifier}}"
+                  title="Edit"
+                ><i class="fas fa-edit text-info"></i></a>
+                {{#if this.IsEnabled}}
+                  <a
+                    href="/page/disable/{{../class}}/{{this.Identifier}}"
+                    title="Disable"
+                  ><i class="fas fa-toggle-on text-success"></i></a>
+                {{else}}
+                  <a
+                    href="/page/enable/{{../class}}/{{this.Identifier}}"
+                    title="Enable"
+                  ><i class="fas fa-toggle-off text-warning"></i></a>
+                {{/if}}
+                <a
+                  href="/page/delete/{{../class}}/{{this.Identifier}}"
+                  title="Delete"
+                ><i class="fas fa-trash text-error"></i></a>
+              </div>
+            </td>
+          </tr>
+        {{/each}}
       </tbody>
     </table>
   </div>
 
-  <div class="mt-6 flex justify-between items-center">
-    <div class="join">
-      <button class="join-item btn btn-sm">«</button>
-      <button class="join-item btn btn-sm btn-active">1</button>
-      <button class="join-item btn btn-sm">2</button>
-      <button class="join-item btn btn-sm">3</button>
-      <button class="join-item btn btn-sm">4</button>
-      <button class="join-item btn btn-sm">5</button>
-      <button class="join-item btn btn-sm btn-disabled">...</button>
-      <button class="join-item btn btn-sm">»</button>
+    <div class="mt-6 flex justify-between items-center">
+      <div class="join">
+
+        {{#with paging}}
+          {{#if first}}
+           <a hx-get="{{baseURL}}&page={{first}}" 
+            hx-target="#page-list-content" 
+            hx-swap="innerHTML" 
+            class="join-item btn btn-sm">«</a>
+          {{/if}}
+
+          {{#each prev}}
+           <a hx-get="{{baseURL}}&page={{this}}" 
+            hx-target="#page-list-content" 
+            hx-swap="innerHTML" 
+            class="join-item btn btn-sm">{{this}}</a>
+          {{/each}}
+
+          <a class="join-item btn btn-sm btn-active">{{current}}</a>
+        
+          {{#each next}}
+           <a hx-get="{{baseURL}}&page={{this}}" 
+            hx-target="#page-list-content" 
+            hx-swap="innerHTML" 
+            class="join-item btn btn-sm">{{this}}</a>
+          {{/each}}
+
+          {{#if last}}
+           <a hx-get="{{baseURL}}&page={{last}}" 
+            hx-target="#page-list-content" 
+            hx-swap="innerHTML" 
+            class="join-item btn btn-sm">»</a>
+          {{/if}}
+      {{/with}}
+
+      </div>
+      <a href="/page/create/{{class}}" class="btn btn-success">
+        <i class="fas fa-circle-plus"></i>
+        Create new page
+      </a>
     </div>
-    <a href="/page/create/{{class}}" class="btn btn-success">
-      <i class="fas fa-circle-plus"></i>
-      Create new page
-    </a>
-  </div>
 </div>

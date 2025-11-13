@@ -2,6 +2,7 @@
 package handlebars
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -19,14 +20,20 @@ var (
 	schemaLinkReplacer    = strings.NewReplacer("(/docs/", "(https://schema.org/docs/")
 
 	helpers = map[string]any{
-		"beautify":      beautify,
-		"use":           use,
-		"compareAndUse": compareAndUse,
+		"concat":         concat,
+		"beautify":       beautify,
+		"use":            use,
+		"compareAndUse":  compareAndUse,
+		"htmxSortButton": htmxSortButton,
 	}
 )
 
 func InitHelpers() {
 	raymond.RegisterHelpers(helpers)
+}
+
+func concat(c1, c2 string) string {
+	return c1 + c2
 }
 
 func beautify(text string) string {
@@ -49,6 +56,30 @@ func compareAndUse(use string, enabled bool, optionVal, comparisonVal any) strin
 		return use
 	}
 	return ""
+}
+
+func htmxSortButton(getURL, targetID, class, label, sortField, actualQuery string) string {
+	actualField, actualDir, _ := strings.Cut(actualQuery, ":")
+	dir := ""
+
+	if sortField == actualField {
+		switch actualDir {
+		case "asc":
+			dir = "-up"
+			sortField += ":desc"
+		case "desc":
+			dir = "-down"
+			sortField += ":asc"
+		}
+	}
+	if !strings.Contains(sortField, ":") {
+		sortField += ":asc"
+	}
+
+	sort := fmt.Sprintf("<i class=\"fa-solid fa-sort%s\"></i>", dir)
+	output := fmt.Sprintf("<a hx-get=\"%s&sort=%s\" hx-target=\"#%s\" hx-swap=\"innerHTML\" class=\"%s\">%s%s</a>",
+		getURL, sortField, targetID, class, label, sort)
+	return output
 }
 
 var once sync.Once

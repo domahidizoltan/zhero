@@ -11,6 +11,7 @@ type (
 		Insert(context.Context, Page) (string, error)
 		Update(context.Context, string, Page) error
 		GetPageBySchemaNameAndIdentifier(context.Context, string, string) (*Page, error)
+		List(context.Context, string, ListOptions) ([]Page, PagingMeta, error)
 	}
 )
 
@@ -44,4 +45,8 @@ func (s Service) Update(ctx context.Context, identifier string, page Page) error
 
 func (s Service) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName, identifier string) (*Page, error) {
 	return s.pageRepo.GetPageBySchemaNameAndIdentifier(ctx, schemaName, identifier)
+}
+
+func (s Service) List(ctx context.Context, schemaName string, opts ListOptions) ([]Page, PagingMeta, error) {
+	return s.pageRepo.List(ctx, schemaName, opts)
 }

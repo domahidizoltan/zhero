@@ -2,6 +2,7 @@ package page
 
 import (
 	"maps"
+	"strconv"
 	"time"
 
 	page_domain "github.com/domahidizoltan/zhero/domain/page"
@@ -25,12 +26,21 @@ type (
 
 	fieldDto struct {
 		Name         string
-		Order        int
+		Order        uint
 		IsMandatory  bool
 		IsSearchable bool
 		Type         string
 		Component    string
 		Value        any
+	}
+
+	pagingDto struct {
+		BaseURL string
+		First   string
+		Prev    []uint
+		Current uint
+		Next    []uint
+		Last    string
 	}
 )
 
@@ -107,4 +117,41 @@ func (dto *pageDto) toModel() page_domain.Page {
 		SecondaryIdentifier: dto.SecondaryIdentifier,
 		IsEnabled:           dto.IsEnabled,
 	}
+}
+
+const jump = 3
+
+func pagingDtoFrom(p page_domain.PagingMeta, baseURL string) *pagingDto {
+	if p.TotalPages < 1 {
+		return nil
+	}
+
+	pg := &pagingDto{
+		BaseURL: baseURL,
+		Current: p.CurrentPage,
+	}
+
+	if p.CurrentPage > jump+1 {
+		pg.First = strconv.Itoa(1)
+	}
+	for i := range jump {
+		if this := int(p.CurrentPage) - (jump - i); this > 0 {
+			pg.Prev = append(pg.Prev, uint(this))
+		} else {
+			break
+		}
+	}
+
+	if limit := int(p.TotalPages) - jump; limit >= 0 && p.CurrentPage < uint(limit) {
+		pg.Last = strconv.Itoa(int(p.TotalPages))
+	}
+	for i := range jump {
+		if this := p.CurrentPage + uint(i) + 1; this <= p.TotalPages {
+			pg.Next = append(pg.Next, this)
+		} else {
+			break
+		}
+	}
+
+	return pg
 }

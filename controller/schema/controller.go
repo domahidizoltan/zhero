@@ -172,7 +172,7 @@ func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) (*schema.Sc
 	propertyOrder := strings.Split(c.PostForm("property-order"), ",")
 	for i, p := range slices.Collect(collection.Unique(propertyOrder)) {
 		if prop, found := props[p]; found {
-			prop.Order = i
+			prop.Order = uint(i)
 			schemaToSave.Properties = append(schemaToSave.Properties, prop)
 		}
 	}

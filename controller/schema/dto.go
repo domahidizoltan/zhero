@@ -29,7 +29,7 @@ type (
 		Searchable    bool
 		SelectedType  string
 		Component     string
-		Order         int
+		Order         uint
 	}
 )
 

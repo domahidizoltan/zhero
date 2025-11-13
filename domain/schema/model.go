@@ -14,5 +14,5 @@ type Property struct {
 	Searchable bool
 	Type       string
 	Component  string
-	Order      int
+	Order      uint
 }

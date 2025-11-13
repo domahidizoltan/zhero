@@ -7,12 +7,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
+	"strings"
+	"time"
 
 	_ "modernc.org/sqlite"
 
 	domain "github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/pkg/database"
-	"github.com/google/uuid"
+	"github.com/oklog/ulid"
 )
 
 const (
@@ -27,9 +30,9 @@ const (
 		WHERE schema_name = ? AND identifier = ?;`
 	selectPage       = `SELECT secondary_identifier, fields, enabled FROM page WHERE schema_name = ? AND identifier = ?;`
 	selectPageSearch = `SELECT col0,col1,col2,col3,col4 FROM page_search WHERE schema_name = ? AND identifier = ?;`
-	// searchBySchema     = `SELECT col0,col1,col2,col3,col4 FROM page_search WHERE schema_name = ? MATCH ? ORDER BY rank;`
-	// deletePage       = `DELETE FROM page WHERE schema_name = ? AND identifier = ?;`
-	// deletePageSearch = `DELETE FROM page_search WHERE schema_name = ? AND identifier = ?;`
+
+	listPages  = `SELECT identifier, secondary_identifier, enabled FROM page WHERE schema_name = ?`
+	countPages = `SELECT COUNT(*) FROM page WHERE schema_name = ?`
 )
 
 type Repository struct {
@@ -47,7 +50,13 @@ func (r *Repository) Insert(ctx context.Context, page domain.Page) (string, erro
 		return "", database.ErrTransactionNotFound
 	}
 
-	t, err := r.getTransformedFields(page, uuid.NewString())
+	entropy := rand.New(rand.NewSource(time.Now().UnixNano()))
+	ms := ulid.Timestamp(time.Now())
+	newID, err := ulid.New(ms, entropy)
+	if err != nil {
+		return "", err
+	}
+	t, err := r.getTransformedFields(page, newID.String())
 	if err != nil {
 		return "", err
 	}
@@ -185,4 +194,71 @@ func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schem
 	}
 
 	return &page, nil
+}
+
+const defaultPageSize uint = 20
+
+func (r *Repository) List(ctx context.Context, schemaName string, opts domain.ListOptions) ([]domain.Page, domain.PagingMeta, error) {
+	pageSize := defaultPageSize
+	if opts.Page < 1 {
+		opts.Page = 1
+	}
+	if opts.PageSize > 0 {
+		pageSize = opts.PageSize
+	}
+	if len(opts.SortBy) == 0 {
+		opts.SortBy = "identifier"
+	}
+	meta := domain.PagingMeta{
+		PageSize:    uint(pageSize),
+		CurrentPage: opts.Page,
+	}
+	pages := []domain.Page{}
+
+	countQuery := countPages
+	countArgs := []any{schemaName}
+	query := listPages
+	queryArgs := []any{schemaName}
+
+	if len(opts.SecondaryIdentifierLike) > 0 {
+		countQuery += " AND secondary_identifier LIKE %lower(?)%"
+		countArgs = append(countArgs, strings.ToLower(opts.SecondaryIdentifierLike))
+		query += " AND secondary_identifier LIKE %lower(?)%"
+		queryArgs = append(queryArgs, strings.ToLower(opts.SecondaryIdentifierLike))
+	}
+
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total)
+	if err != nil {
+		return pages, meta, fmt.Errorf("failed to count pages: %w", err)
+	}
+	if total == 0 {
+		return pages, meta, nil
+	}
+
+	meta.TotalItems = uint(total)
+	meta.TotalPages = uint(meta.TotalItems / meta.PageSize)
+
+	query += " ORDER BY " + opts.SortBy + " " + string(opts.SortDir) + " LIMIT ? OFFSET ?"
+	queryArgs = append(queryArgs, pageSize, (opts.Page-1)*pageSize)
+
+	rows, err := r.db.QueryContext(ctx, query, queryArgs...)
+	if err != nil {
+		return pages, meta, fmt.Errorf("failed to query listed pages: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p domain.Page
+		if err := rows.Scan(&p.Identifier, &p.SecondaryIdentifier, &p.IsEnabled); err != nil {
+			return pages, meta, fmt.Errorf("failed to scan listed page row: %w", err)
+		}
+		pages = append(pages, p)
+	}
+
+	if err = rows.Err(); err != nil {
+		return pages, meta, fmt.Errorf("error during rows iteration: %w", err)
+	}
+
+	return pages, meta, nil
 }
