@@ -56,13 +56,13 @@ func TestSchemaorg(t *testing.T) {
 		assert.Greater(t, len(res.Properties), 100)
 
 		assert.Contains(t, res.Properties, ClassProperty{
-			Property:      "liveBlogUpdate",
+			Name:          "liveBlogUpdate",
 			CanonicalURL:  "https://schema.org/liveBlogUpdate",
 			Description:   "An update to the LiveBlog.",
 			PossibleTypes: []string{"BlogPosting"},
 		})
 		assert.Contains(t, res.Properties, ClassProperty{
-			Property:      "audio",
+			Name:          "audio",
 			CanonicalURL:  "https://schema.org/audio",
 			Description:   "An embedded audio object.",
 			PossibleTypes: []string{"AudioObject", "Clip", "MusicRecording"},
@@ -70,7 +70,7 @@ func TestSchemaorg(t *testing.T) {
 
 		var props []string
 		for _, p := range res.Properties {
-			props = append(props, p.Property)
+			props = append(props, p.Name)
 		}
 		assert.NotContains(t, props, "usageInfo")
 		assert.NotContains(t, props, "backStory")

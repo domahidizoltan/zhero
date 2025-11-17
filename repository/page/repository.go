@@ -46,7 +46,6 @@ func NewRepo(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// TODO ignore secondaryIdentifier from searchCols because it's searchable as defined
 func (r *Repository) Insert(ctx context.Context, page domain.Page) (string, error) {
 	tx := database.GetTx(ctx)
 	if tx == nil {
@@ -59,7 +58,7 @@ func (r *Repository) Insert(ctx context.Context, page domain.Page) (string, erro
 	if err != nil {
 		return "", err
 	}
-	t, err := r.getTransformedFields(page, newID.String())
+	t, err := r.getTransformedFields(page, newID.String(), page.SecondaryIdentifier)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +82,7 @@ func (r *Repository) Update(ctx context.Context, identifier string, page domain.
 		return database.ErrTransactionNotFound
 	}
 
-	t, err := r.getTransformedFields(page, identifier)
+	t, err := r.getTransformedFields(page, identifier, page.SecondaryIdentifier)
 	if err != nil {
 		return err
 	}
@@ -106,7 +105,7 @@ type transformedFields struct {
 	searchVals                                []string
 }
 
-func (r *Repository) getTransformedFields(page domain.Page, id string) (transformedFields, error) {
+func (r *Repository) getTransformedFields(page domain.Page, id, secondaryIdentifierFieldName string) (transformedFields, error) {
 	t := transformedFields{
 		id: id,
 	}
@@ -121,8 +120,8 @@ func (r *Repository) getTransformedFields(page domain.Page, id string) (transfor
 		t.secID = fmt.Sprintf("%s", page.Fields[secIdx].Value)
 	}
 
-	fields, searchColNames, searchVals := extractSearchFields(page.Fields)
-	fieldsJSON, err := json.Marshal(fields)
+	fieldsForJSON, searchColNames, searchVals := extractSearchFields(page.Fields, secondaryIdentifierFieldName)
+	fieldsJSON, err := json.Marshal(fieldsForJSON)
 	if err != nil {
 		return t, err
 	}
@@ -137,18 +136,30 @@ func (r *Repository) getTransformedFields(page domain.Page, id string) (transfor
 	return t, nil
 }
 
-func extractSearchFields(fields []domain.Field) ([]domain.Field, []string, []string) {
+func extractSearchFields(fields []domain.Field, secondaryIdentifierFieldName string) ([]domain.Field, []string, []string) {
 	searchColNames := make([]string, 0, maxSearchFields)
 	searchVals := make([]string, 0, maxSearchFields)
-	returnFields := make([]domain.Field, 0, len(fields))
+	var fieldsForJSON []domain.Field
 
 	for _, f := range fields {
-		if len(f.SearchColumn) > 0 {
-			searchColNames = append(searchColNames, f.SearchColumn)
-			searchVals = append(searchVals, fmt.Sprintf("%v", f.Value))
+		if f.Name == secondaryIdentifierFieldName {
+			f.SearchColumn = "secondary_identifier"
 			f.Value = ""
+			fieldsForJSON = append(fieldsForJSON, f)
+			continue
 		}
-		returnFields = append(returnFields, f)
+
+		if len(f.SearchColumn) > 0 {
+			if len(searchColNames) < maxSearchFields {
+				searchColNames = append(searchColNames, f.SearchColumn)
+				searchVals = append(searchVals, fmt.Sprintf("%v", f.Value))
+				f.Value = ""
+			} else {
+				break
+			}
+		}
+
+		fieldsForJSON = append(fieldsForJSON, f)
 	}
 
 	for range maxSearchFields - len(searchColNames) {
@@ -156,10 +167,10 @@ func extractSearchFields(fields []domain.Field) ([]domain.Field, []string, []str
 		searchVals = append(searchVals, "")
 	}
 
-	return returnFields, searchColNames, searchVals
+	return fieldsForJSON, searchColNames, searchVals
 }
 
-func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName string, identifier string) (*domain.Page, error) {
+func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName, identifier string) (*domain.Page, error) {
 	row := r.db.QueryRowContext(ctx, selectPage, schemaName, identifier)
 
 	page := domain.Page{
@@ -190,6 +201,10 @@ func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schem
 
 	cIdx := 0
 	for i, f := range page.Fields {
+		if f.SearchColumn == "secondary_identifier" {
+			page.Fields[i].Value = page.SecondaryIdentifier
+			continue
+		}
 		if len(f.SearchColumn) > 0 {
 			page.Fields[i].Value = c[cIdx]
 			cIdx++

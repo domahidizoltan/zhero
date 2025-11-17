@@ -26,17 +26,17 @@
     </form>
   </div>
 
-  <dialog id="list_action_modal" class="modal">
+  <dialog id="list-action-modal" class="modal">
     <div class="modal-box">
       <h3 class="text-lg font-bold">Confirm action</h3>
-      <p class="py-4" id="list_action_desc"></p>
+      <p class="py-4" id="list-action-desc"></p>
       <div class="modal-action">
         <form hx-post="/page/edit/{{class}}?{{urlQuery}}" hx-target="#page-list-content">
-          <input id="list_action_name" name="item-action" type="hidden"/>
-          <input id="list_action_item_id" name="item-identifier" type="hidden"/>
+          <input id="list-action-name" name="item-action" type="hidden"/>
+          <input id="list-action-item-id" name="item-identifier" type="hidden"/>
           <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i>Confirm</button>
         </form>
-        <button class="btn btn-error" onclick="list_action_modal.close()"><i class="fa-solid fa-x"></i>Cancel</button>
+        <button class="btn btn-error" onclick="document.getElementById('list-action-modal').close()"><i class="fa-solid fa-x"></i>Cancel</button>
       </div>
     </div>
   </dialog>
