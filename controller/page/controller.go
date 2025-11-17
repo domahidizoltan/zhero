@@ -2,8 +2,10 @@
 package page
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -68,7 +70,6 @@ func (pc *Controller) Main(c *gin.Context) {
 
 func (pc *Controller) List(c *gin.Context) {
 	clsName := c.Param("class")
-
 	pageNo, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || pageNo < 1 {
 		pageNo = 1
@@ -80,7 +81,15 @@ func (pc *Controller) List(c *gin.Context) {
 		Page:                    uint(pageNo),
 	}
 
-	if sortBy, sortOrder, found := strings.Cut(c.DefaultQuery("sort", "identifier:asc"), ":"); found {
+	sortQuery := c.DefaultQuery("sort", "identifier:asc")
+	unescape, err := url.QueryUnescape(sortQuery)
+	if err != nil {
+		controller.BadRequest(c, "failed to parse search query", err)
+		return
+	}
+	sortQuery = unescape
+
+	if sortBy, sortOrder, found := strings.Cut(sortQuery, ":"); found {
 		opts.SortBy = sortBy
 		opts.SortDir = page.SortDir(sortOrder)
 	}
@@ -92,12 +101,14 @@ func (pc *Controller) List(c *gin.Context) {
 	}
 
 	sort := fmt.Sprintf("%s:%s", opts.SortBy, opts.SortDir)
+	urlQuery := fmt.Sprintf("search=%s&sort=%s", search, sort)
 	ctx := map[string]any{
 		"class":    clsName,
-		"paging":   pagingDtoFrom(paging, fmt.Sprintf("/page/list/%s?search=%s&sort=%s", clsName, search, sort)),
+		"paging":   pagingDtoFrom(paging, fmt.Sprintf("/page/list/%s?%s", clsName, urlQuery)),
+		"urlQuery": fmt.Sprintf("%s&page=%d", urlQuery, pageNo),
 		"pages":    pages,
 		"search":   search,
-		"sort":     sort,
+		"sort":     sortQuery,
 		"listOpts": opts,
 	}
 
@@ -126,6 +137,48 @@ func (pc *Controller) Edit(c *gin.Context) {
 		return
 	}
 	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
+}
+
+func (pc *Controller) EditAction(c *gin.Context) {
+	identifier := c.PostForm("item-identifier")
+	action := c.PostForm("item-action")
+	class := c.Param("class")
+
+	sendPopupError := func(status int, msg string, err error) {
+		log.Error().Err(err).Str("status", http.StatusText(status)).Msg(msg)
+		jsonPayload, _ := json.Marshal(map[string]string{"showError": msg})
+		c.Header("HX-Trigger", string(jsonPayload))
+		c.Status(status)
+	}
+
+	if identifier == "" || action == "" {
+		sendPopupError(http.StatusBadRequest, "identifier and action are mandatory", nil)
+		return
+	}
+
+	var err error
+	switch action {
+	case "enable":
+		err = pc.pageSvc.Enable(c, class, identifier, true)
+	case "disable":
+		err = pc.pageSvc.Enable(c, class, identifier, false)
+	case "delete":
+		err = pc.pageSvc.Delete(c, class, identifier)
+	default:
+		sendPopupError(http.StatusBadRequest, fmt.Sprintf("invalid action: %s", action), nil)
+		return
+	}
+
+	if err != nil {
+		sendPopupError(http.StatusInternalServerError, fmt.Sprintf("failed to perform action '%s'", action), err)
+		return
+	}
+
+	search := c.Query("search")
+	sort := c.Query("sort")
+	page := c.Query("page")
+
+	c.Redirect(http.StatusSeeOther, fmt.Sprintf("/page/list/%s?search=%s&sort=%s&page=%s", class, search, sort, page))
 }
 
 func (pc *Controller) Save(c *gin.Context) {

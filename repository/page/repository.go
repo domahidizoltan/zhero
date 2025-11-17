@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -33,6 +32,10 @@ const (
 
 	listPages  = `SELECT identifier, secondary_identifier, enabled FROM page WHERE schema_name = ?`
 	countPages = `SELECT COUNT(*) FROM page WHERE schema_name = ?`
+
+	enablePage       = `UPDATE page SET enabled = ? WHERE schema_name = ? AND identifier = ?;`
+	deletePage       = `DELETE FROM page WHERE schema_name = ? AND identifier = ?;`
+	deletePageSearch = `DELETE FROM page_search WHERE schema_name = ? AND identifier = ?;`
 )
 
 type Repository struct {
@@ -221,12 +224,11 @@ func (r *Repository) List(ctx context.Context, schemaName string, opts domain.Li
 	queryArgs := []any{schemaName}
 
 	if len(opts.SecondaryIdentifierLike) > 0 {
-		countQuery += " AND secondary_identifier LIKE %lower(?)%"
-		countArgs = append(countArgs, strings.ToLower(opts.SecondaryIdentifierLike))
-		query += " AND secondary_identifier LIKE %lower(?)%"
-		queryArgs = append(queryArgs, strings.ToLower(opts.SecondaryIdentifierLike))
+		countQuery += " AND secondary_identifier LIKE ?" // case insensitive in SQlite
+		countArgs = append(countArgs, "%"+opts.SecondaryIdentifierLike+"%")
+		query += " AND secondary_identifier LIKE ?"
+		queryArgs = append(queryArgs, "%"+opts.SecondaryIdentifierLike+"%")
 	}
-
 	var total int
 	err := r.db.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total)
 	if err != nil {
@@ -261,4 +263,28 @@ func (r *Repository) List(ctx context.Context, schemaName string, opts domain.Li
 	}
 
 	return pages, meta, nil
+}
+
+func (r *Repository) Enable(ctx context.Context, schemaName, identifier string, enable bool) error {
+	tx := database.GetTx(ctx)
+	if tx == nil {
+		return database.ErrTransactionNotFound
+	}
+
+	_, err := tx.ExecContext(ctx, enablePage, enable, schemaName, identifier)
+	return err
+}
+
+func (r *Repository) Delete(ctx context.Context, schemaName, identifier string) error {
+	tx := database.GetTx(ctx)
+	if tx == nil {
+		return database.ErrTransactionNotFound
+	}
+
+	if _, err := tx.ExecContext(ctx, deletePageSearch, schemaName, identifier); err != nil {
+		return err
+	}
+
+	_, err := tx.ExecContext(ctx, deletePage, schemaName, identifier)
+	return err
 }

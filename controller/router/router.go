@@ -33,6 +33,7 @@ func SetRoutes(router *gin.Engine, svc Services) {
 	router.GET("/page/list", pageCtrl.Main)
 	router.GET("/page/list/:class", pageCtrl.List)
 	router.GET("/page/create/:class", pageCtrl.Create)
+	router.POST("/page/edit/:class", pageCtrl.EditAction)
 	router.GET("/page/edit/:class/:identifier", pageCtrl.Edit)
 	router.POST("/page/save/:class", pageCtrl.Save)
 }

@@ -137,8 +137,6 @@ func pagingDtoFrom(p page_domain.PagingMeta, baseURL string) *pagingDto {
 	for i := range jump {
 		if this := int(p.CurrentPage) - (jump - i); this > 0 {
 			pg.Prev = append(pg.Prev, uint(this))
-		} else {
-			break
 		}
 	}
 
@@ -148,8 +146,6 @@ func pagingDtoFrom(p page_domain.PagingMeta, baseURL string) *pagingDto {
 	for i := range jump {
 		if this := p.CurrentPage + uint(i) + 1; this <= p.TotalPages {
 			pg.Next = append(pg.Next, this)
-		} else {
-			break
 		}
 	}
 

@@ -6,7 +6,7 @@
 <div class="bg-base-100 p-6 rounded-box shadow">
   <div class="flex justify-between items-center mb-4">
     <h1 class="text-2xl font-bold">{{class}}</h1>
-    <form action="/page/list/{{class}}" method="GET">
+    <form hx-get="/page/list/{{class}}" hx-target="#page-list-content">
       <div class="flex items-center gap-4">
         <div class="form-control">
           <input
@@ -25,6 +25,21 @@
       </div>
     </form>
   </div>
+
+  <dialog id="list_action_modal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">Confirm action</h3>
+      <p class="py-4" id="list_action_desc"></p>
+      <div class="modal-action">
+        <form hx-post="/page/edit/{{class}}?{{urlQuery}}" hx-target="#page-list-content">
+          <input id="list_action_name" name="item-action" type="hidden"/>
+          <input id="list_action_item_id" name="item-identifier" type="hidden"/>
+          <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i>Confirm</button>
+        </form>
+        <button class="btn btn-error" onclick="list_action_modal.close()"><i class="fa-solid fa-x"></i>Cancel</button>
+      </div>
+    </div>
+  </dialog>
 
   <div class="overflow-x-auto">
     <table class="table table-sm w-full table-hover table-zebra">
@@ -73,18 +88,18 @@
                 ><i class="fas fa-edit text-info"></i></a>
                 {{#if this.IsEnabled}}
                   <a
-                    href="/page/disable/{{../class}}/{{this.Identifier}}"
-                    title="Disable"
+                    onclick="confirmListAction('{{this.Identifier}}', 'disable')"
+                    title="Disable" class="cursor-pointer"
                   ><i class="fas fa-toggle-on text-success"></i></a>
                 {{else}}
                   <a
-                    href="/page/enable/{{../class}}/{{this.Identifier}}"
-                    title="Enable"
+                    onclick="confirmListAction('{{this.Identifier}}', 'enable')"
+                    title="Enable" class="cursor-pointer"
                   ><i class="fas fa-toggle-off text-warning"></i></a>
                 {{/if}}
                 <a
-                  href="/page/delete/{{../class}}/{{this.Identifier}}"
-                  title="Delete"
+                  onclick="confirmListAction('{{this.Identifier}}', 'delete')"
+                  title="Delete" class="cursor-pointer"
                 ><i class="fas fa-trash text-error"></i></a>
               </div>
             </td>

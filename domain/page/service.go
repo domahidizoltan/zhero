@@ -12,6 +12,8 @@ type (
 		Update(context.Context, string, Page) error
 		GetPageBySchemaNameAndIdentifier(context.Context, string, string) (*Page, error)
 		List(context.Context, string, ListOptions) ([]Page, PagingMeta, error)
+		Enable(context.Context, string, string, bool) error
+		Delete(context.Context, string, string) error
 	}
 )
 
@@ -49,4 +51,16 @@ func (s Service) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaNam
 
 func (s Service) List(ctx context.Context, schemaName string, opts ListOptions) ([]Page, PagingMeta, error) {
 	return s.pageRepo.List(ctx, schemaName, opts)
+}
+
+func (s Service) Enable(ctx context.Context, schemaName, identifier string, enable bool) error {
+	return database.InTx(ctx, func(ctx context.Context) error {
+		return s.pageRepo.Enable(ctx, schemaName, identifier, enable)
+	})
+}
+
+func (s Service) Delete(ctx context.Context, schemaName, identifier string) error {
+	return database.InTx(ctx, func(ctx context.Context) error {
+		return s.pageRepo.Delete(ctx, schemaName, identifier)
+	})
 }
