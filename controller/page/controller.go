@@ -104,7 +104,7 @@ func (pc *Controller) List(c *gin.Context) {
 	urlQuery := fmt.Sprintf("search=%s&sort=%s", search, sort)
 	ctx := map[string]any{
 		"class":    clsName,
-		"paging":   pagingDtoFrom(paging, fmt.Sprintf("/page/list/%s?%s", clsName, urlQuery)),
+		"paging":   pagingDtoFrom(paging, fmt.Sprintf("/admin/page/list/%s?%s", clsName, urlQuery)),
 		"urlQuery": fmt.Sprintf("%s&page=%d", urlQuery, pageNo),
 		"pages":    pages,
 		"search":   search,
@@ -178,7 +178,7 @@ func (pc *Controller) EditAction(c *gin.Context) {
 	sort := c.Query("sort")
 	page := c.Query("page")
 
-	c.Redirect(http.StatusSeeOther, fmt.Sprintf("/page/list/%s?search=%s&sort=%s&page=%s", class, search, sort, page))
+	c.Redirect(http.StatusSeeOther, fmt.Sprintf("/admin/page/list/%s?search=%s&sort=%s&page=%s", class, search, sort, page))
 }
 
 func (pc *Controller) Save(c *gin.Context) {
@@ -188,7 +188,7 @@ func (pc *Controller) Save(c *gin.Context) {
 		return
 	}
 	class := c.Param("class")
-	c.Redirect(http.StatusSeeOther, "/page/list?schema="+class)
+	c.Redirect(http.StatusSeeOther, "/admin/page/list?schema="+class)
 }
 
 func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool) {

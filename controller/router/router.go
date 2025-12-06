@@ -20,20 +20,23 @@ func SetRoutes(router *gin.Engine, svc Services) {
 	router.Static("/static", "./template")
 
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/page/list")
+		c.Redirect(http.StatusTemporaryRedirect, "/admin/page/list")
 	})
 
-	schemaorgCtrl := schemaorg_ctrl.NewController(svc.Schema)
-	router.GET("/schema/search", schemaorgCtrl.Search)
-	router.GET("/schema/edit/:class", schemaorgCtrl.Edit)
-	router.POST("/schema/save/:class", schemaorgCtrl.Save)
-	router.GET("/schema/class-hierarchy", schemaorgCtrl.GetClassHierarchy)
+	admin := router.Group("/admin")
+	{
+		schemaorgCtrl := schemaorg_ctrl.NewController(svc.Schema)
+		admin.GET("/schema/search", schemaorgCtrl.Search)
+		admin.GET("/schema/edit/:class", schemaorgCtrl.Edit)
+		admin.POST("/schema/save/:class", schemaorgCtrl.Save)
+		admin.GET("/schema/class-hierarchy", schemaorgCtrl.GetClassHierarchy)
 
-	pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page)
-	router.GET("/page/list", pageCtrl.Main)
-	router.GET("/page/list/:class", pageCtrl.List)
-	router.GET("/page/create/:class", pageCtrl.Create)
-	router.POST("/page/edit/:class", pageCtrl.EditAction)
-	router.GET("/page/edit/:class/:identifier", pageCtrl.Edit)
-	router.POST("/page/save/:class", pageCtrl.Save)
+		pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page)
+		admin.GET("/page/list", pageCtrl.Main)
+		admin.GET("/page/list/:class", pageCtrl.List)
+		admin.GET("/page/create/:class", pageCtrl.Create)
+		admin.POST("/page/edit/:class", pageCtrl.EditAction)
+		admin.GET("/page/edit/:class/:identifier", pageCtrl.Edit)
+		admin.POST("/page/save/:class", pageCtrl.Save)
+	}
 }

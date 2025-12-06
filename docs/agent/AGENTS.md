@@ -29,3 +29,19 @@
 - Review the changes and notify the user about potential security issues, technical debts and improvement possibilities.
 - NEVER commit anything to Git; ask user to review and commit changes.
 
+## TASKS.md template
+- Add this status legend to the top of the file: ~ in progress, x completed, ! failed or blocked
+- Use the statuses in the task title checkboxes.
+- Update the task statuses after completing each task.
+- Use this template below for the tasks:
+```
+# Task List
+
+## F012: Feature title
+
+- [ ] T001: **Task Title**
+  - Details: Here come the implementation details.
+  - Dependencies: T000, T001
+  - Comment: Post-implementation comments about failures or impediments.
+
+```

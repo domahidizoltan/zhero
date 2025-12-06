@@ -1,5 +1,5 @@
 <div class="bg-base-100 p-6 rounded-box shadow">
-  <form method="POST" action="/page/save/{{class}}" id="edit-page-form">
+  <form method="POST" action="/admin/page/save/{{class}}" id="edit-page-form">
     <div class="mb-6 flex justify-between items-center">
       <div>
         <h1 class="text-3xl font-bold">Edit {{class}} page</h1>
@@ -93,7 +93,7 @@
       <button
         type="button"
         class="btn btn-error"
-        onclick="window.location.href = '/page/list?schema={{class}}'"
+        onclick="window.location.href = '/admin/page/list?schema={{class}}'"
       >
         <i class="fas fa-circle-xmark"></i>
         Cancel

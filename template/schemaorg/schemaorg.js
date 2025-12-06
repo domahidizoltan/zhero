@@ -1,5 +1,5 @@
 function loadSchemaClasses(evt) {
-  htmx.ajax("GET", "/schema/class-hierarchy", "#class-hierarchy");
+  htmx.ajax("GET", "/admin/schema/class-hierarchy", "#class-hierarchy");
   document
     .getElementById("class-hierarchy")
     .addEventListener("htmx:afterSwap", function (evt) {
@@ -49,7 +49,7 @@ function navigateToEditSchemaPage() {
   if (!schemaClass) {
     popup("No schema selected!");
   } else {
-    window.location.href = `/schema/edit/${schemaClass}`;
+    window.location.href = `/admin/schema/edit/${schemaClass}`;
   }
 }
 

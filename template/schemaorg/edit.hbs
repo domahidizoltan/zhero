@@ -4,7 +4,7 @@
 <script src="/static/schemaorg/schemaorg.js"></script>
 
 <div class="bg-base-100 p-6 rounded-box shadow">
-  <form method="POST" action="/schema/save/{{class.name}}" id="edit-schema-form">
+  <form method="POST" action="/admin/schema/save/{{class.name}}" id="edit-schema-form">
     <input type="hidden" name="property-order" id="property-order" />
     <div class="mb-6">
       <div class="flex justify-between items-center">
@@ -106,7 +106,7 @@
             <i class="fas fa-eye"></i>
             Preview
           </button>
-          <button type="button" class="btn btn-error" onclick="window.location.href = '/'">
+          <button type="button" class="btn btn-error" onclick="window.location.href = '/admin/'">
             <i class="fas fa-circle-xmark"></i>
             Cancel</button>
           <button type="submit" class="btn btn-success">

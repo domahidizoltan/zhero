@@ -6,7 +6,7 @@
 <div class="bg-base-100 p-6 rounded-box shadow">
   <div class="flex justify-between items-center mb-4">
     <h1 class="text-2xl font-bold">{{class}}</h1>
-    <form hx-get="/page/list/{{class}}" hx-target="#page-list-content">
+    <form hx-get="/admin/page/list/{{class}}" hx-target="#page-list-content">
       <div class="flex items-center gap-4">
         <div class="form-control">
           <input
@@ -31,7 +31,7 @@
       <h3 class="text-lg font-bold">Confirm action</h3>
       <p class="py-4" id="list-action-desc"></p>
       <div class="modal-action">
-        <form hx-post="/page/edit/{{class}}?{{urlQuery}}" hx-target="#page-list-content">
+        <form hx-post="/admin/page/edit/{{class}}?{{urlQuery}}" hx-target="#page-list-content">
           <input id="list-action-name" name="item-action" type="hidden"/>
           <input id="list-action-item-id" name="item-identifier" type="hidden"/>
           <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i>Confirm</button>
@@ -47,7 +47,7 @@
         <tr>
           <th>
             {{{htmxSortButton 
-              (concat (concat '/page/list/' class) (concat '?search=' search)) 
+              (concat (concat '/admin/page/list/' class) (concat '?search=' search)) 
               'page-list-content' 
               'flex items-center gap-2 cursor-pointer' 
               'Identifier' 
@@ -57,7 +57,7 @@
           </th>
           <th class="w-3/4">
             {{{htmxSortButton 
-              (concat (concat '/page/list/' class) (concat '?search=' search)) 
+              (concat (concat '/admin/page/list/' class) (concat '?search=' search)) 
               'page-list-content' 
               'flex items-center gap-2 cursor-pointer' 
               'Secondary Identifier' 
@@ -83,7 +83,7 @@
             <td>
               <div class="flex items-center gap-4">
                 <a
-                  href="/page/edit/{{../class}}/{{this.Identifier}}"
+                  href="/admin/page/edit/{{../class}}/{{this.Identifier}}"
                   title="Edit"
                 ><i class="fas fa-edit text-info"></i></a>
                 {{#if this.IsEnabled}}
@@ -145,7 +145,7 @@
       {{/with}}
 
       </div>
-      <a href="/page/create/{{class}}" class="btn btn-success">
+      <a href="/admin/page/create/{{class}}" class="btn btn-success">
         <i class="fas fa-circle-plus"></i>
         Create new page
       </a>

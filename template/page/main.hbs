@@ -15,7 +15,7 @@
       <ul class="menu menu-sm bg-base-100 w-full">
         {{#each schemas}}
           <li><a
-              hx-get="/page/list/{{this}}"
+              hx-get="/admin/page/list/{{this}}"
               hx-target="#page-list-content"
               hx-swap="innerHTML"
             >{{this}}</a></li>
@@ -30,7 +30,7 @@
     <div class="divider"></div>
     <a
       class="btn btn-outline btn-sm w-full"
-      hx-get="/schema/search"
+      hx-get="/admin/schema/search"
       hx-target="#page-list-content"
       hx-swap="innerHTML"
     >
@@ -41,13 +41,13 @@
   <div class="col-span-4" id="page-list-content">
     {{#if selectedSchema}}
       <span
-        hx-get="/page/list/{{selectedSchema}}"
+        hx-get="/admin/page/list/{{selectedSchema}}"
         hx-trigger="load"
         hx-swap="outerHTML"
       ></span>
     {{else}}
       <span
-        hx-get="/schema/search"
+        hx-get="/admin/schema/search"
         hx-trigger="load"
         hx-swap="outerHTML"
       ></span>
