@@ -1,5 +1,10 @@
 <div class="bg-base-100 p-6 rounded-box shadow">
-  <form method="POST" action="/admin/page/save/{{class}}" id="edit-page-form">
+  <form
+    method="POST"
+    action="/admin/page/save/{{class}}"
+    id="edit-page-form"
+    name="edit-page-form"
+  >
     <div class="mb-6 flex justify-between items-center">
       <div>
         <h1 class="text-3xl font-bold">Edit {{class}} page</h1>
@@ -86,7 +91,11 @@
 -->
 
     <div class="flex justify-end space-x-2 mt-6">
-      <button type="button" class="btn btn-info">
+      <button
+        type="button"
+        class="btn btn-info"
+        onclick="submitPreview('{{class}}')"
+      >
         <i class="fas fa-eye"></i>
         Preview
       </button>

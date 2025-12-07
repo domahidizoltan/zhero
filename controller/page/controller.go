@@ -205,12 +205,12 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 		return "", true
 	}
 
-	dto = pageDtoFrom(meta)
+	dto = PageDtoFrom(meta)
 
 	errorMsg, successMsg := "", ""
 	if hasFormSubmitted {
-		dto.enhanceFromForm(c)
-		page := dto.toModel()
+		dto.EnhanceFromForm(c)
+		page := dto.ToModel()
 
 		var err error
 		if len(identifier) == 0 {

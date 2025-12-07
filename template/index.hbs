@@ -25,6 +25,8 @@
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@2.0.6"></script>
     {{! <link rel="stylesheet" href="static/index.css" /> }}
+    <script src="/static/schemaorg/schemaorg.js"></script>
+    <script src="/static/page/page.js"></script>
     <script src="/static/index.js" defer></script>
 
     <link
@@ -34,16 +36,15 @@
     <script
       src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"
     ></script>
-
-    <!-- TODO load by content -->
-    <script src="/static/schemaorg/schemaorg.js"></script>
-    <script src="/static/page/page.js"></script>
   </head>
   <body class="bg-base-200">
     <div class="navbar bg-base-100 shadow-md mb-6">
       <div class="container mx-auto max-w-5xl flex">
         <div class="flex-1">
-          <a href="/admin/page/list" class="btn btn-ghost text-xl normal-case">{{title}}</a>
+          <a
+            href="/admin/page/list"
+            class="btn btn-ghost text-xl normal-case"
+          >{{title}}</a>
         </div>
         <div class="flex-none">
           <label class="toggle text-base-content">

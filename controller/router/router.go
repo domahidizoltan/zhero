@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	page_ctrl "github.com/domahidizoltan/zhero/controller/page"
+	preview_ctrl "github.com/domahidizoltan/zhero/controller/preview" // New import
 	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/schema"
 	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
@@ -12,11 +13,18 @@ import (
 )
 
 type Services struct {
-	Schema schema.Service
-	Page   page.Service
+	Schema  schema.Service
+	Page    page.Service
+	Preview preview_ctrl.Controller
 }
 
-func SetRoutes(router *gin.Engine, svc Services) {
+func SetPublicRoutes(router *gin.Engine, svc Services) {
+	router.Static("/static", "./template")
+
+	router.POST("/preview", svc.Preview.Page)
+}
+
+func SetAdminRoutes(router *gin.Engine, svc Services) {
 	router.Static("/static", "./template")
 
 	router.GET("/", func(c *gin.Context) {

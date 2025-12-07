@@ -10,9 +10,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func DownloadToPath(path, url string, owerwrite bool) error {
-	if _, err := os.Stat(path); err == nil && !owerwrite {
-		log.Debug().Str("file", path).Msg("file already downladed")
+func DownloadToPath(path, url string, overwrite bool) error {
+	if _, err := os.Stat(path); err == nil && !overwrite {
+		log.Debug().Str("file", path).Msg("file already downloaded")
 		return nil
 	}
 

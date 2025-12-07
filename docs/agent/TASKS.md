@@ -26,57 +26,68 @@
 
 ## F002: Additional Actions & Refinements
 
-  - [ ] T005: **Create a new controller in a new package (`controller/preview`) for handling public page previews.**
-    - Details: Here come the implementation details.
+  - [x] T005: **Create a new controller in a new package (`controller/preview`) for handling public page previews.**
+    - Details: Created `controller/preview/controller.go` and `controller/preview/dto.go`.
     - Dependencies:
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment:
 
-  - [ ] T006: **Implement a new public-facing route, `/preview`, that accepts POST requests containing page data.**
-    - Details: Here come the implementation details.
+  - [x] T006: **Implement a new public-facing route, `/preview`, that accepts POST requests containing page data.**
+    - Details: Added `router.POST("/preview", svc.Preview.PreviewPage)` in `controller/router/router.go`.
     - Dependencies: T005
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment:
 
-  - [ ] T007: **Create a new service and repository for transforming page data into JSON-LD format.**
-    - Details: Here come the implementation details.
+  - [x] T007: **Create a new service and repository for transforming page data into JSON-LD format.**
+    - Details: Created `domain/jsonld/jsonld.go` and `domain/jsonld/service.go`. Corrected import paths from `page-craft` to `zhero`. Updated `jsonld/service.go` to correctly read page properties from `page.Fields`.
     - Dependencies:
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment: (edit: created a dummy json-ld generator)
 
-  - [ ] T008: **Update the "Preview" button of the page create/edit form in the admin UI.**
-    - Details: Here come the implementation details.
+  - [x] T008: **Update the "Preview" button of the page create/edit form in the admin UI.**
+    - Details: Added `onclick="previewPage('edit-page-form')"` to the Preview button in `template/page/edit.hbs` and added `name="edit-page-form"` to the form.
     - Dependencies: T006, T007, T009
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment:
 
-  - [ ] T009: **Implement client-side JavaScript to serialize the page form data and POST it to the `/preview` endpoint, displaying the result in a new browser tab.**
-    - Details: Here come the implementation details.
+  - [x] T009: **Implement client-side JavaScript to serialize the page form data and POST it to the `/preview` endpoint, displaying the result in a new browser tab.**
+    - Details: Added `serializeFormToJSON` and `previewPage` functions to `template/page/page.js` and included it in `template/index.hbs`.
     - Dependencies: T006
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment: (edited: replaced serialized with a simple submit)
 
-  - [ ] T010: **Create a new package (`pkg/renderer`) that transforms the JSON-LD data into a user-friendly HTML representation.**
-    - Details: Here come the implementation details.
+  - [x] T010: **Create a new package (`pkg/renderer`) that transforms the JSON-LD data into a user-friendly HTML representation.**
+    - Details: Created `pkg/renderer/renderer.go` with `RenderJsonLdToHTML`.
     - Dependencies:
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment:
 
-  - [ ] T011: **The preview controller will use the new renderer package to process the posted data and return the final HTML.**
-    - Details: Here come the implementation details.
+  - [x] T011: **The preview controller will use the new renderer package to process the posted data and return the final HTML.**
+    - Details: Implemented in `controller/preview/controller.go` by calling `jsonldSvc.GenerateJsonLd` and `renderer.RenderJsonLdToHTML`. Corrected import paths from `page-craft` to `zhero`. Updated `preview/controller.go` to correctly map DTO fields to the `page_domain.Page` struct's `Fields` slice.
     - Dependencies: T006, T010
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment: (edited: removed and postponed)
 
 ## F003: Deployment
 
+### Server Refactoring
+  - [x] T012: **Separate admin and public endpoints onto distinct HTTP servers.**
+    - Details: Updated `config/config.go` and `config.yaml` for public server configuration. Modified `controller/router/router.go` to accept and route for two Gin engines. Updated `main.go` to initialize and manage two `http.Server` instances.
+    - Dependencies: F002 (Preview endpoint).
+    - Comment: This task addresses the `ERR_CONNECTION_REFUSED` by ensuring separate server instances are properly configured and started.
+
+  - [x] T013: **Ensure `rdf_schema.jsonld` is downloaded and available at startup.**
+    - Details: Created `pkg/file/file.go` with a `DownloadToPath` function and corrected a typo in its `overwrite` parameter. Integrated a check and download logic into `main.go`'s `getRouterServices` to fetch the RDF schema if it doesn't exist, fixing the argument mismatch in the function call. Also removed a duplicated log line.
+    - Dependencies:
+    - Comment: This resolves potential crashes if the `schemaorg` service cannot find its required data file and fixes compilation errors related to `file.DownloadToPath`.
+
 ### Raspberry PI Zero Packaging
-  - [ ] T012: **Create a Makefile target named `build-rpi-zero` for cross-compiling the application.**
+  - [ ] T014: **Create a Makefile target named `build-rpi-zero` for cross-compiling the application.**
     - Details: Here come the implementation details.
     - Dependencies:
     - Comment: Post-implementation comments about failures or impediments.
 
-  - [ ] T013: **Configure the `build-rpi-zero` target to use the correct `GOOS=linux` and `GOARCH=arm` environment variables for Raspberry PI Zero.**
+  - [ ] T015: **Configure the `build-rpi-zero` target to use the correct `GOOS=linux` and `GOARCH=arm` environment variables for Raspberry PI Zero.**
     - Details: Here come the implementation details.
-    - Dependencies: T012
+    - Dependencies: T014
     - Comment: Post-implementation comments about failures or impediments.
 
-  - [ ] T014: **Add comments or documentation within the Makefile explaining how to build and run the application on the target device.**
+  - [ ] T016: **Add comments or documentation within the Makefile explaining how to build and run the application on the target device.**
     - Details: Here come the implementation details.
-    - Dependencies: T012, T013
+    - Dependencies: T014, T015
     - Comment: Post-implementation comments about failures or impediments.
 
 ### Android Packaging

@@ -8,9 +8,10 @@ import (
 
 type (
 	Config struct {
-		Log   LogConfig   `mapstructure:"log"`
-		DB    DBConfig    `mapstructure:"database"`
-		Admin AdminConfig `mapstructure:"admin"`
+		Log    LogConfig    `mapstructure:"log"`
+		DB     DBConfig     `mapstructure:"database"`
+		Admin  AdminConfig  `mapstructure:"admin"`
+		Public PublicConfig `mapstructure:"public"`
 	}
 
 	LogConfig struct {
@@ -27,11 +28,15 @@ type (
 	}
 
 	AdminConfig struct {
-		Server AdminServerConfig `mapstructure:"server"`
-		RDF    RdfConfig         `mapstructure:"rdf"`
+		Server ServerConfig `mapstructure:"server"`
+		RDF    RdfConfig    `mapstructure:"rdf"`
 	}
 
-	AdminServerConfig struct {
+	PublicConfig struct {
+		Server ServerConfig `mapstructure:"server"`
+	}
+
+	ServerConfig struct {
 		Port int `mapstructure:"port"`
 	}
 

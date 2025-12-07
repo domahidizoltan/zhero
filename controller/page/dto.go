@@ -44,7 +44,7 @@ type (
 	}
 )
 
-func pageDtoFrom(meta *schema.SchemaMeta) pageDto {
+func PageDtoFrom(meta *schema.SchemaMeta) pageDto {
 	if meta == nil {
 		return pageDto{}
 	}
@@ -72,7 +72,7 @@ func pageDtoFrom(meta *schema.SchemaMeta) pageDto {
 	return dto
 }
 
-func (dto *pageDto) enhanceFromForm(c *gin.Context) {
+func (dto *pageDto) EnhanceFromForm(c *gin.Context) {
 	for i, f := range dto.Fields {
 		dto.Fields[i].Value = c.PostForm("field-" + f.Name)
 	}
@@ -96,7 +96,7 @@ func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
 	}
 }
 
-func (dto *pageDto) toModel() page_domain.Page {
+func (dto *pageDto) ToModel() page_domain.Page {
 	fields := make([]page_domain.Field, 0, len(dto.Fields))
 	for _, f := range dto.Fields {
 		field := page_domain.Field{

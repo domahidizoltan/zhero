@@ -2,10 +2,17 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/domahidizoltan/zhero/config"
+	"github.com/domahidizoltan/zhero/controller/preview"
 	"github.com/domahidizoltan/zhero/controller/router"
 	"github.com/domahidizoltan/zhero/data/db/sqlite"
 	"github.com/domahidizoltan/zhero/pkg/database"
@@ -27,12 +34,8 @@ func main() {
 	cfg, err := config.LoadConfig()
 	logging.ConfigureLogging(cfg)
 
-	r := gin.New()
-	r.Use(
-		gin.Recovery(),
-		logging.ZerologMiddleware(log.Logger),
-		session.SessionMiddleware(),
-	)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load config")
@@ -52,13 +55,54 @@ func main() {
 	}
 
 	services := getRouterServices(database.GetDB(), *cfg)
-	router.SetRoutes(r, services)
+	adminSrv := createAndStartServer("Admin", cfg.Admin.Server.Port, func(e *gin.Engine) {
+		router.SetAdminRoutes(e, services)
+	})
+	publicSrv := createAndStartServer("Public", cfg.Public.Server.Port, func(e *gin.Engine) {
+		router.SetPublicRoutes(e, services)
+	})
 
-	serverAddr := fmt.Sprintf(":%d", cfg.Admin.Server.Port)
-	log.Info().Int("port", cfg.Admin.Server.Port).Msg("server started on port")
-	if err := r.Run(serverAddr); err != nil {
-		log.Fatal().Err(err).Msg("failed to start server")
+	<-quit
+	log.Info().Msg("Shutting down servers...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := publicSrv.Shutdown(shutdownCtx); err != nil {
+		log.Fatal().Err(err).Msg("Public server forced to shutdown")
 	}
+
+	if err := adminSrv.Shutdown(shutdownCtx); err != nil {
+		log.Fatal().Err(err).Msg("Admin server forced to shutdown")
+	}
+
+	log.Info().Msg("Servers exited")
+}
+
+func createAndStartServer(serverName string, port int, setRoutes func(*gin.Engine)) *http.Server {
+	ginRouter := gin.New()
+	ginRouter.Use(
+		gin.Recovery(),
+		logging.ZerologMiddleware(log.Logger),
+		session.SessionMiddleware(),
+	)
+
+	setRoutes(ginRouter)
+
+	srvAddr := fmt.Sprintf(":%d", port)
+	srv := &http.Server{
+		Addr:    srvAddr,
+		Handler: ginRouter,
+	}
+
+	go func() {
+		log.Info().Int("port", port).Msg(serverName + " server started")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal().Err(err).Msg(serverName + " server listen: %s")
+		}
+	}()
+
+	return srv
 }
 
 func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
@@ -72,8 +116,11 @@ func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
 	pageRepo := page_repo.NewRepo(db)
 	pageSvc := page.NewService(pageRepo)
 
+	previewCtrl := preview.NewController(metaSvc)
+
 	return router.Services{
-		Schema: metaSvc,
-		Page:   pageSvc,
+		Schema:  metaSvc,
+		Page:    pageSvc,
+		Preview: previewCtrl,
 	}
 }

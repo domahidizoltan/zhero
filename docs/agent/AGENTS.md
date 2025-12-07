@@ -33,15 +33,15 @@
 - Add this status legend to the top of the file: ~ in progress, x completed, ! failed or blocked
 - Use the statuses in the task title checkboxes.
 - Update the task statuses after completing each task.
-- Use this template below for the tasks:
+- Use this template below for the tasks (parts between {} are instructions for the field, don't copy them):
 ```
 # Task List
 
 ## F012: Feature title
 
 - [ ] T001: **Task Title**
-  - Details: Here come the implementation details.
+  - Details: {Here come the implementation details.}
   - Dependencies: T000, T001
-  - Comment: Post-implementation comments about failures or impediments.
+  - Comment: {Post-implementation comments about failures or impediments.}
 
 ```
