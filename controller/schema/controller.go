@@ -176,7 +176,6 @@ func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) (*schema.Sc
 			schemaToSave.Properties = append(schemaToSave.Properties, prop)
 		}
 	}
-	fmt.Printf("%+v", schemaToSave)
 	return &schemaToSave, nil, nil
 }
 

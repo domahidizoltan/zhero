@@ -9,7 +9,6 @@ import (
 )
 
 func FromPage(page page.Page) ([]byte, error) {
-	fmt.Printf("page %+v", page)
 	jsonLD := make(map[string]any)
 	jsonLD["@context"] = "https://schema.org/"
 	jsonLD["@type"] = page.SchemaName

@@ -7,7 +7,12 @@ function confirmListAction(identifier, action) {
 }
 
 document.addEventListener("htmx:afterRequest", (e) => {
-  document.getElementById("list-action-modal").close();
+  const listActionModal = document.getElementById("list-action-modal");
+  if (!listActionModal) {
+    return;
+  }
+
+  listActionModal.close();
   const triggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
   if (!triggerHeader) {
     return;
@@ -25,10 +30,12 @@ document.addEventListener("htmx:afterRequest", (e) => {
 
 function submitPreview(cls) {
   const form = document.getElementById("edit-page-form");
-  restoreAction = form.action;
-  restoreTarget = form.target;
+  const restoreAction = form.action;
+  const restoreTarget = form.target;
+  const host =
+    window.location.protocol + "//" + window.location.hostname + ":" + 8080;
   try {
-    form.action = "http://localhost:8080/preview?class=" + cls;
+    form.action = host + "/preview?class=" + cls;
     form.target = "_blank";
     form.submit();
   } finally {

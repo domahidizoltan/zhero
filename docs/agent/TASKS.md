@@ -75,20 +75,20 @@
     - Comment: This resolves potential crashes if the `schemaorg` service cannot find its required data file and fixes compilation errors related to `file.DownloadToPath`.
 
 ### Raspberry PI Zero Packaging
-  - [ ] T014: **Create a Makefile target named `build-rpi-zero` for cross-compiling the application.**
-    - Details: Here come the implementation details.
+  - [x] T014: **Create a Makefile target named `build-rpi-zero` for cross-compiling the application.**
+    - Details: Created `Makefile` with `build-rpi-zero` target.
     - Dependencies:
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment:
 
-  - [ ] T015: **Configure the `build-rpi-zero` target to use the correct `GOOS=linux` and `GOARCH=arm` environment variables for Raspberry PI Zero.**
-    - Details: Here come the implementation details.
+  - [x] T015: **Configure the `build-rpi-zero` target to use the correct `GOOS=linux` and `GOARCH=arm` environment variables for Raspberry PI Zero.**
+    - Details: Configured `GOOS=linux`, `GOARCH=arm`, and `GOARM=6` in the `build-rpi-zero` target.
     - Dependencies: T014
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment:
 
-  - [ ] T016: **Add comments or documentation within the Makefile explaining how to build and run the application on the target device.**
-    - Details: Here come the implementation details.
+  - [x] T016: **Add comments or documentation within the Makefile explaining how to build and run the application on the target device.**
+    - Details: Added detailed comments to the `Makefile` for building and deployment instructions.
     - Dependencies: T014, T015
-    - Comment: Post-implementation comments about failures or impediments.
+    - Comment:
 
 ### Android Packaging
   - [ ] T015: **Research and select the best method for packaging a Go web server application as an Android library (e.g., Gomobile).**
