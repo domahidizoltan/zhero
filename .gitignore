@@ -8,4 +8,6 @@ zhero.db
 .env*
 .air.toml
 
-zhero-rpi-zero
+build/
+zhero-android-app/app/libs/
+zhero-android-app/app/build/
