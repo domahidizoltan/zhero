@@ -82,14 +82,24 @@ func htmxSortButton(getURL, targetID, class, label, sortField, actualQuery strin
 	return output
 }
 
-var once sync.Once
+var (
+	once         sync.Once
+	apOnce       sync.Once
+	absolutePath string
+)
+
+func SetAbsolutePath(path string) {
+	apOnce.Do(func() {
+		absolutePath = path
+	})
+}
 
 func MustParse(filePath string) *raymond.Template {
 	once.Do(func() {
 		logging.ConfigureLogging(nil)
 	})
 
-	tpl, err := raymond.ParseFile(filePath)
+	tpl, err := raymond.ParseFile(absolutePath + filePath)
 	if err != nil {
 		log.Error().
 			Err(err).

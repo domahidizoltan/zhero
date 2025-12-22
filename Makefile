@@ -38,23 +38,26 @@ gomobile-init:
 .PHONY: build-android-lib
 build-android-lib:
 	# CGO_ENABLED=1 is required for gomobile.
-	gomobile bind -target=android -androidapi 21 -o zheroapp.aar ./server
+	CGO_ENABLED=1 gomobile bind -tags "android fts5" -target=android -androidapi 21 -o zheroapp.aar ./server
 	mv zheroapp.aar zhero-android-app/app/libs/zheroapp.aar
 	mv zheroapp-sources.jar zhero-android-app/app/libs/zheroapp-sources.jar
 
+
+# TODO copy config + rdf_schema + zhero.db + template/ files to Android
+
 # --- Android Application Building and Deployment ---
-ANDROID_APP_DIR = zhero-android-app
-ADB ?= adb # Ensure adb is in your PATH, or set this variable to its full path (e.g., /path/to/android/sdk/platform-tools/adb)
-
-# Build the Android APK
-.PHONY: build-android-apk
-build-android-apk: build-android-lib
-	@echo "Building Android APK..."
-	@cd $(ANDROID_APP_DIR) && ./gradlew assembleDebug
-
-# Push the Android APK to a connected device
-.PHONY: push-android-apk
-push-android-apk: build-android-apk
-	@echo "Installing Android APK on device..."
-	@$(ADB) install -r $(ANDROID_APP_DIR)/app/build/outputs/apk/debug/app-debug.apk
+# ANDROID_APP_DIR = zhero-android-app
+# ADB ?= adb # Ensure adb is in your PATH, or set this variable to its full path (e.g., /path/to/android/sdk/platform-tools/adb)
+#
+# # Build the Android APK
+# .PHONY: build-android-apk
+# build-android-apk: build-android-lib
+# 	@echo "Building Android APK..."
+# 	@cd $(ANDROID_APP_DIR) && ./gradlew assembleDebug
+#
+# # Push the Android APK to a connected device
+# .PHONY: push-android-apk
+# push-android-apk: build-android-apk
+# 	@echo "Installing Android APK on device..."
+# 	@$(ADB) install -r $(ANDROID_APP_DIR)/app/build/outputs/apk/debug/app-debug.apk
 

@@ -10,8 +10,6 @@ import (
 	"math/rand"
 	"time"
 
-	_ "modernc.org/sqlite"
-
 	domain "github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/pkg/database"
 	"github.com/oklog/ulid"

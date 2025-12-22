@@ -16,62 +16,53 @@ import (
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/domain/schemaorg"
 	"github.com/domahidizoltan/zhero/pkg/database"
+	"github.com/domahidizoltan/zhero/pkg/handlebars"
 	"github.com/domahidizoltan/zhero/pkg/logging"
 	"github.com/domahidizoltan/zhero/pkg/session"
 	page_repo "github.com/domahidizoltan/zhero/repository/page"
 	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
+	"github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
+
 	"github.com/rs/zerolog/log"
 )
 
 type Server struct {
 	adminSrv, publicSrv *http.Server
+	db                  *sql.DB
+	absolutePath        string
 }
 
 func New() *Server {
 	return &Server{}
 }
 
-// func (s *Server) Test() {
-// 	f, err := os.Create("/sdcard/testfile.txt")
-// 	if err != nil {
-// 		fmt.Println("createerr")
-// 		fmt.Println(err.Error())
-// 	}
-// 	if _, err := f.Write([]byte("testfilecontent")); err != nil {
-// 		fmt.Println("err")
-// 		fmt.Println(err.Error())
-// 	}
-//
-// 	dir, _ := os.Getwd()
-// 	fmt.Println("oooo")
-// 	fmt.Println(dir)
-// }
+func (s *Server) SetAbsolutePath(absolutePath string) {
+	s.absolutePath = absolutePath
+}
 
 func (s *Server) Start() {
 	gin.SetMode(gin.ReleaseMode)
 
-	cfg, err := config.LoadConfig()
-	logging.ConfigureLogging(cfg)
-
+	cfg, err := config.LoadConfig(s.absolutePath)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load config")
 	}
-	if err := database.InitSqliteDB(cfg.DB.SQLite.File); err != nil {
+
+	handlebars.SetAbsolutePath(cfg.Env.AbsolutePath)
+	template.InitTemplates()
+	logging.ConfigureLogging(cfg)
+
+	dbFile := s.absolutePath + cfg.DB.SQLite.File
+	if err := database.InitSqliteDB(dbFile); err != nil {
 		log.Fatal().Err(err).Msg("failed to connect to database")
 	}
+	s.db = database.GetDB()
 
-	defer func() {
-		if err := database.GetDB().Close(); err != nil {
-			log.Error().Err(err).Msg("failed to close database connection")
-		}
-	}()
-
-	if err := database.Migrate(database.GetDB(), sqlite.Scripts); err != nil {
+	if err := database.Migrate(s.db, sqlite.Scripts); err != nil {
 		log.Fatal().Err(err).Msg("failed to run database migrations")
 	}
-
-	services := getRouterServices(database.GetDB(), *cfg)
+	services := getRouterServices(s.db, *cfg)
 	s.adminSrv = createAndStartServer("Admin", cfg.Admin.Server.Port, func(e *gin.Engine) {
 		router.SetAdminRoutes(e, services)
 	})
@@ -81,20 +72,32 @@ func (s *Server) Start() {
 }
 
 func (s *Server) Stop() {
-	log.Info().Msg("Shutting down servers...")
-
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := s.publicSrv.Shutdown(shutdownCtx); err != nil {
-		log.Fatal().Err(err).Msg("Public server forced to shutdown")
+	if s.publicSrv != nil {
+		if err := s.publicSrv.Shutdown(shutdownCtx); err != nil {
+			log.Error().Err(err).Msg("Public server forced to shutdown")
+		}
+	} else {
+		log.Warn().Msg("Public server instance is nil, skipping shutdown")
 	}
 
-	if err := s.adminSrv.Shutdown(shutdownCtx); err != nil {
-		log.Fatal().Err(err).Msg("Admin server forced to shutdown")
+	if s.adminSrv != nil {
+		if err := s.adminSrv.Shutdown(shutdownCtx); err != nil {
+			log.Error().Err(err).Msg("Admin server forced to shutdown")
+		}
+	} else {
+		log.Warn().Msg("Admin server instance is nil, skipping shutdown")
 	}
 
-	log.Info().Msg("Servers exited")
+	if s.db != nil {
+		if err := s.db.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close database connection")
+		}
+	} else {
+		log.Warn().Msg("Database instance is nil, skipping close")
+	}
 }
 
 func createAndStartServer(serverName string, port int, setRoutes func(*gin.Engine)) *http.Server {
@@ -124,7 +127,7 @@ func createAndStartServer(serverName string, port int, setRoutes func(*gin.Engin
 }
 
 func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
-	schemaorgSvc, err := schemaorg.NewService(cfg.Admin.RDF)
+	schemaorgSvc, err := schemaorg.NewService(cfg.Env.AbsolutePath, cfg.Admin.RDF)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create Schema.org service")
 	}

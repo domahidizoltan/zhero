@@ -19,7 +19,7 @@ type Service struct {
 
 var once sync.Once
 
-func NewService(cfg config.RdfConfig) (*Service, error) {
+func NewService(absolutePath string, cfg config.RdfConfig) (*Service, error) {
 	var (
 		g             *rdfPkg.Graph
 		err           error
@@ -27,7 +27,7 @@ func NewService(cfg config.RdfConfig) (*Service, error) {
 	)
 
 	once.Do(func() {
-		g, err = rdfPkg.Init(cfg.File, cfg.Source, false)
+		g, err = rdfPkg.Init(absolutePath+cfg.File, cfg.Source, false)
 		if err != nil {
 			return
 		}

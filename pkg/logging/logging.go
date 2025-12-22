@@ -12,18 +12,34 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type Platform string
+
+const (
+	PlatformAndroid Platform = "android"
+)
+
 func ConfigureLogging(cfg *config.Config) {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	if cfg == nil {
+		cfg = &config.Config{
+			Log: config.LogConfig{
+				Color: true,
+			},
+		}
+	}
+	if cfg.Env.Platform == string(PlatformAndroid) {
+		cfg.Log.Color = false
+	}
+
+	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339, NoColor: !cfg.Log.Color}
 	logger := zerolog.New(output)
 	lvl := zerolog.InfoLevel
 
 	if cfg != nil {
 		switch strings.ToLower(cfg.Log.Format) {
 		case "json":
-			logger = zerolog.New(os.Stdout)
+			logger = zerolog.New(os.Stderr)
 		}
-
 		switch strings.ToLower(cfg.Log.Level) {
 		case "debug":
 			lvl = zerolog.DebugLevel
@@ -31,12 +47,12 @@ func ConfigureLogging(cfg *config.Config) {
 			lvl = zerolog.ErrorLevel
 		case "fatal":
 			lvl = zerolog.FatalLevel
-		case "info":
-			lvl = zerolog.InfoLevel
 		case "panic":
 			lvl = zerolog.PanicLevel
 		case "warn":
 			lvl = zerolog.WarnLevel
+		default:
+			lvl = zerolog.InfoLevel
 		}
 	}
 

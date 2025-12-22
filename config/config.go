@@ -8,15 +8,22 @@ import (
 
 type (
 	Config struct {
+		Env    EnvConfig    `mapstructure:"env"`
 		Log    LogConfig    `mapstructure:"log"`
 		DB     DBConfig     `mapstructure:"database"`
 		Admin  AdminConfig  `mapstructure:"admin"`
 		Public PublicConfig `mapstructure:"public"`
 	}
 
+	EnvConfig struct {
+		Platform     string `mapstructure:"platform"`
+		AbsolutePath string
+	}
+
 	LogConfig struct {
 		Format string `mapstructure:"format"`
 		Level  string `mapstructure:"level"`
+		Color  bool   `mapstructure:"color"`
 	}
 
 	DBConfig struct {
@@ -46,8 +53,8 @@ type (
 	}
 )
 
-func LoadConfig() (*Config, error) {
-	viper.SetConfigFile("config.yaml")
+func LoadConfig(absolutePath string) (*Config, error) {
+	viper.SetConfigFile(absolutePath + "config.yaml")
 	viper.SetConfigType("yaml")
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -59,5 +66,6 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	cfg.Env.AbsolutePath = absolutePath
 	return &cfg, nil
 }

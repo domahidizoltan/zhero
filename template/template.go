@@ -2,6 +2,7 @@
 package template
 
 import (
+	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/pkg/handlebars"
 )
 
@@ -11,13 +12,18 @@ const (
 	pagesTpl     = tpl + "page/"
 )
 
-var (
+var Index, PageMain, PageList, PageEdit, SchemaorgSearch, SchemaorgEdit, SchemaorgEditPropertyPartial *raymond.Template
+
+func InitTemplates() {
 	Index = handlebars.MustParse(tpl + "index.hbs")
 
-	PageMain                     = handlebars.MustParse(pagesTpl + "main.hbs")
-	PageList                     = handlebars.MustParse(pagesTpl + "list.hbs")
-	PageEdit                     = handlebars.MustParse(pagesTpl + "edit.hbs")
-	SchemaorgSearch              = handlebars.MustParse(schemaorgTpl + "search.hbs")
-	SchemaorgEdit                = handlebars.MustParse(schemaorgTpl + "edit.hbs")
+	PageMain = handlebars.MustParse(pagesTpl + "main.hbs")
+	PageList = handlebars.MustParse(pagesTpl + "list.hbs")
+	PageEdit = handlebars.MustParse(pagesTpl + "edit.hbs")
+	SchemaorgSearch = handlebars.MustParse(schemaorgTpl + "search.hbs")
+	SchemaorgEdit = handlebars.MustParse(schemaorgTpl + "edit.hbs")
 	SchemaorgEditPropertyPartial = handlebars.MustParse(schemaorgTpl + "edit-property.partial.hbs")
-)
+
+	SchemaorgEdit.RegisterPartialTemplate("editProperty", SchemaorgEditPropertyPartial)
+	handlebars.InitHelpers()
+}

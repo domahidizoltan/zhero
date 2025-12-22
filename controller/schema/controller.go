@@ -13,19 +13,11 @@ import (
 	"github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/collection"
-	"github.com/domahidizoltan/zhero/pkg/handlebars"
 	tpl "github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 )
-
-var editTpl = tpl.SchemaorgEdit
-
-func init() {
-	editTpl.RegisterPartialTemplate("editProperty", tpl.SchemaorgEditPropertyPartial)
-	handlebars.InitHelpers()
-}
 
 type Controller struct {
 	schemaSvc schema.Service
@@ -112,7 +104,7 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 		"breadcrumbs": sc.classBreadcrumbs(clsName),
 		"components":  []string{"TODO"},
 	}
-	body, err := editTpl.Exec(ctx)
+	body, err := tpl.SchemaorgEdit.Exec(ctx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return "", true

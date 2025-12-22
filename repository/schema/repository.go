@@ -1,4 +1,4 @@
-// Package schemam is the repository to manage data blueprint.
+// Package schema is the repository to manage data blueprint.
 package schema
 
 import (
@@ -6,8 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
-
-	_ "modernc.org/sqlite"
 
 	domain "github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/database"

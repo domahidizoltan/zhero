@@ -5,8 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-
-	_ "modernc.org/sqlite"
 )
 
 type txKey = struct{}
@@ -17,7 +15,7 @@ var (
 )
 
 func InitSqliteDB(dbFile string) error {
-	d, err := sql.Open("sqlite", dbFile)
+	d, err := sql.Open(sqliteDriver, dbFile)
 	if err != nil {
 		return err
 	}
