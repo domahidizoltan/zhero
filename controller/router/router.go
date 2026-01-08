@@ -3,6 +3,7 @@ package router
 
 import (
 	"net/http"
+	"strings"
 
 	dynamicpage_ctrl "github.com/domahidizoltan/zhero/controller/dynamicpage"
 	page_ctrl "github.com/domahidizoltan/zhero/controller/page"
@@ -11,6 +12,7 @@ import (
 	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/schema"
 	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
+	"github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,8 +22,34 @@ type Services struct {
 	DynamicPageRenderer pagerenderer.DynamicPageRenderer
 }
 
-func SetPublicRoutes(router *gin.Engine, svc Services) {
+var mimeTypes = map[string]string{
+	"js":  "text/javascript",
+	"css": "text/css",
+}
+
+func addCommonHandlers(router *gin.Engine) {
 	router.Static("/static", "./template")
+
+	router.GET("/asset/*path", func(ctx *gin.Context) {
+		assetPath := ctx.Param("path")
+		mimeType := "text/plain"
+
+		if content, found := template.Assets[assetPath]; found {
+			if extIdx := strings.LastIndex(assetPath, "."); extIdx > -1 {
+				ext := strings.ToLower(assetPath[extIdx+1:])
+				if mt, found := mimeTypes[ext]; found {
+					mimeType = mt
+				}
+			}
+			ctx.Data(http.StatusOK, mimeType, []byte(content))
+			return
+		}
+		ctx.Data(http.StatusNotFound, mimeType, nil)
+	})
+}
+
+func SetPublicRoutes(router *gin.Engine, svc Services) {
+	addCommonHandlers(router)
 
 	dynamicPageCtrl := dynamicpage_ctrl.NewController(svc.DynamicPageRenderer)
 	previewCtrl := preview_ctrl.NewController(svc.Schema, svc.DynamicPageRenderer)
@@ -31,7 +59,7 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 }
 
 func SetAdminRoutes(router *gin.Engine, svc Services) {
-	router.Static("/static", "./template")
+	addCommonHandlers(router)
 
 	router.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, "/admin/page/list")

@@ -21,7 +21,6 @@ import (
 	"github.com/domahidizoltan/zhero/pkg/session"
 	page_repo "github.com/domahidizoltan/zhero/repository/page"
 	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
-	"github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
 
 	"github.com/rs/zerolog/log"
@@ -49,8 +48,7 @@ func (s *Server) Start() {
 		log.Fatal().Err(err).Msg("failed to load config")
 	}
 
-	handlebars.SetAbsolutePath(cfg.Env.AbsolutePath)
-	template.InitTemplates()
+	handlebars.InitHelpers()
 	logging.ConfigureLogging(cfg)
 
 	dbFile := s.absolutePath + cfg.DB.SQLite.File

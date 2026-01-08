@@ -6,11 +6,9 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/aymerick/raymond"
-	"github.com/domahidizoltan/zhero/pkg/logging"
-	"github.com/rs/zerolog/log"
+	"github.com/domahidizoltan/zhero/template"
 	"github.com/russross/blackfriday"
 )
 
@@ -29,6 +27,7 @@ var (
 )
 
 func InitHelpers() {
+	template.RegisterPartials()
 	raymond.RegisterHelpers(helpers)
 }
 
@@ -80,31 +79,4 @@ func htmxSortButton(getURL, targetID, class, label, sortField, actualQuery strin
 	output := fmt.Sprintf("<a hx-get=\"%s&sort=%s\" hx-target=\"#%s\" hx-swap=\"innerHTML\" class=\"%s\">%s%s</a>",
 		getURL, sortField, targetID, class, label, sort)
 	return output
-}
-
-var (
-	once         sync.Once
-	apOnce       sync.Once
-	absolutePath string
-)
-
-func SetAbsolutePath(path string) {
-	apOnce.Do(func() {
-		absolutePath = path
-	})
-}
-
-func MustParse(filePath string) *raymond.Template {
-	once.Do(func() {
-		logging.ConfigureLogging(nil)
-	})
-
-	tpl, err := raymond.ParseFile(absolutePath + filePath)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Str("file", filePath).
-			Msg("failed to parse template")
-	}
-	return tpl
 }

@@ -19,7 +19,7 @@ add-rpi-key:
 
 copy-rpi:
 	ssh -p $(PORT) $(SERVER) "mkdir -p /tmp/zhero"
-	scp -P $(PORT) -r build/zheroapp-rpi-zero config.yaml template $(SERVER):/tmp/zhero
+	scp -P $(PORT) -r build/zheroapp-rpi-zero config.yaml 
 
 # --- Android Packaging (GoMobile) ---
 
