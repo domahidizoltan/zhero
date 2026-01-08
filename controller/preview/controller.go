@@ -12,14 +12,17 @@ import (
 )
 
 type Controller struct {
-	schemaSvc schema_domain.Service
+	schemaSvc      schema_domain.Service
+	dynamicPageRdr controller.UserFacingPageRenderer
 }
 
 func NewController(
 	schemaSvc schema_domain.Service,
+	dynamicPageRdr controller.UserFacingPageRenderer,
 ) Controller {
 	return Controller{
-		schemaSvc: schemaSvc,
+		schemaSvc:      schemaSvc,
+		dynamicPageRdr: dynamicPageRdr,
 	}
 }
 
@@ -40,5 +43,11 @@ func (ctrl *Controller) Page(c *gin.Context) {
 		controller.InternalServerError(c, "failed to generate JSON-LD", err)
 		return
 	}
-	c.Data(http.StatusOK, "application/ld+json", json)
+	// c.Data(http.StatusOK, "application/ld+json", json)
+
+	content, err := ctrl.dynamicPageRdr.Render(string(json))
+	if err != nil {
+		controller.InternalServerError(c, "failed to generate page", err)
+	}
+	c.Data(http.StatusOK, "text/html", []byte(content))
 }

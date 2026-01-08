@@ -111,7 +111,7 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 	}
 
 	operation := "Create"
-	output, err := template.Index(c, template.Content{
+	output, err := template.AdminIndex(c, template.Content{
 		Title:    operation + " schema: " + clsName,
 		Body:     raymond.SafeString(body),
 		ErrorMsg: errorMsg,

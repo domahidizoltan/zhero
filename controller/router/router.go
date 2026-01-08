@@ -4,8 +4,10 @@ package router
 import (
 	"net/http"
 
+	dynamicpage_ctrl "github.com/domahidizoltan/zhero/controller/dynamicpage"
 	page_ctrl "github.com/domahidizoltan/zhero/controller/page"
-	preview_ctrl "github.com/domahidizoltan/zhero/controller/preview" // New import
+	"github.com/domahidizoltan/zhero/controller/pagerenderer"
+	preview_ctrl "github.com/domahidizoltan/zhero/controller/preview"
 	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/schema"
 	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
@@ -13,15 +15,19 @@ import (
 )
 
 type Services struct {
-	Schema  schema.Service
-	Page    page.Service
-	Preview preview_ctrl.Controller
+	Schema              schema.Service
+	Page                page.Service
+	DynamicPageRenderer pagerenderer.DynamicPageRenderer
 }
 
 func SetPublicRoutes(router *gin.Engine, svc Services) {
 	router.Static("/static", "./template")
 
-	router.POST("/preview", svc.Preview.Page)
+	dynamicPageCtrl := dynamicpage_ctrl.NewController(svc.DynamicPageRenderer)
+	previewCtrl := preview_ctrl.NewController(svc.Schema, svc.DynamicPageRenderer)
+
+	router.GET("/", dynamicPageCtrl.Index)
+	router.POST("/preview", previewCtrl.Page)
 }
 
 func SetAdminRoutes(router *gin.Engine, svc Services) {

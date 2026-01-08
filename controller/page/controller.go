@@ -56,7 +56,7 @@ func (pc *Controller) Main(c *gin.Context) {
 		return
 	}
 
-	output, err := template.Index(c, template.Content{
+	output, err := template.AdminIndex(c, template.Content{
 		Title: "Welcome to Zhero",
 		Body:  raymond.SafeString(body),
 	})
@@ -245,7 +245,7 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 		return "", true
 	}
 
-	output, err := template.Index(c, template.Content{
+	output, err := template.AdminIndex(c, template.Content{
 		Title:    "Welcome to Zhero",
 		Body:     raymond.SafeString(body),
 		ErrorMsg: errorMsg,

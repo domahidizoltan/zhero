@@ -1,15 +1,12 @@
-<html data-theme="fantasy">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{title}}</title>
-    <!-- Font Awesome -->
+    <title>Page Template</title>
+    <link rel="stylesheet" href="static/index.css" />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
     <link
       href="https://cdn.jsdelivr.net/npm/daisyui@5"
@@ -24,82 +21,80 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@2.0.6"></script>
-    {{! <link rel="stylesheet" href="static/index.css" /> }}
-    <script src="/static/schemaorg/schemaorg.js"></script>
-    <script src="/static/page/page.js"></script>
-    <script src="/static/index.js" defer></script>
-
-    <link
-      href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
-      rel="stylesheet"
-    />
-    <script
-      src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"
-    ></script>
   </head>
-  <body class="bg-base-200">
-    <div class="navbar bg-base-100 shadow-md mb-6">
-      <div class="container mx-auto max-w-5xl flex">
-        <div class="flex-1">
-          <a
-            href="/admin/page/list"
-            class="btn btn-ghost text-xl normal-case"
-          >{{title}}</a>
-        </div>
-        <div class="flex-none">
-          <label class="toggle text-base-content">
-            <input type="checkbox" value="night" class="theme-controller" />
-            <i class="fa-regular fa-sun"></i>
-            <i class="fa-regular fa-moon"></i>
-          </label>
-        </div>
+  <body>
+    <header>
+      <div class="container">
+        <div class="page-title">My Awesome Page</div>
+        <nav>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Contact</a></li>
+            <li>
+              <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="search-popup" id="searchPopup">
+      <div class="search-popup-content">
+        <span class="close-search" id="closeSearch">&times;</span>
+        <h2>Search Articles</h2>
+        <input type="text" id="searchInput" placeholder="Enter keywords..." />
+        <button id="searchButton">Search</button>
       </div>
     </div>
 
-    <dialog id="popup-modal" class="modal">
-      <div class="modal-box">
-        <form method="dialog">
-          <button
-            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-          >✕</button>
-        </form>
-        <p class="py-4" id="popup-text"></p>
-      </div>
-    </dialog>
-
-    <main class="container mx-auto max-w-5xl">
-      {{#if errorMsg}}
-        <div role="alert" class="alert alert-error">
-          <i class="fa-solid fa-circle-exclamation"></i>
-          <span>{{{beautify errorMsg}}}</span>
-        </div>
-      {{/if}}
-
-      {{#if flashMsg}}
-        <div role="alert" class="alert alert-success alert-outline">
-          <i class="fa-solid fa-check"></i><span>{{flashMsg}}</span>
-        </div>
-      {{/if}}
-
+    <main class="container page-body">
       {{body}}
     </main>
-  </body>
-  <style>
-    .alert-success {
-      transition:
-        max-height 0.2s ease-out,
-        opacity 0.2s ease-out,
-        padding 0.2s ease-out,
-        border-width 0.2s ease-out;
-      overflow: hidden;
-    }
 
-    .hide {
-      opacity: 0;
-      max-height: 0;
-      padding-top: 0;
-      padding-bottom: 0;
-      border-width: 0;
-    }
-  </style>
+    <footer>
+      <div class="container footer-content">
+        <div class="minor-links">
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">About Us</a></li>
+          </ul>
+        </div>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook"><i
+              class="fab fa-facebook-f"
+            ></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" aria-label="Instagram"><i
+              class="fab fa-instagram"
+            ></i></a>
+          <a href="#" aria-label="LinkedIn"><i
+              class="fab fa-linkedin-in"
+            ></i></a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const searchIcon = document.querySelector(".search-icon"); const
+      searchPopup = document.getElementById("searchPopup"); const closeSearch =
+      document.getElementById("closeSearch"); const searchInput =
+      document.getElementById("searchInput"); const searchButton =
+      document.getElementById("searchButton");
+      searchIcon.addEventListener("click", (e) => { e.preventDefault();
+      searchPopup.classList.add("active"); searchInput.focus(); });
+      closeSearch.addEventListener("click", () => {
+      searchPopup.classList.remove("active"); });
+      searchButton.addEventListener("click", () => { const query =
+      searchInput.value; if (query) { alert(`Searching for: ${query}`); //
+      Replace with actual search logic } }); // Close popup if clicking outside
+      the content searchPopup.addEventListener("click", (e) => { if (e.target
+      === searchPopup) { searchPopup.classList.remove("active"); } }); // Close
+      popup on Escape key document.addEventListener("keydown", (e) => { if
+      (e.key === "Escape" && searchPopup.classList.contains("active")) {
+      searchPopup.classList.remove("active"); } });
+    </script>
+  </body>
 </html>

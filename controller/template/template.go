@@ -18,9 +18,9 @@ type Content struct {
 	FlashMsg string
 }
 
-func Index(c *gin.Context, content Content) (string, error) {
+func AdminIndex(c *gin.Context, content Content) (string, error) {
 	handleFlash(c, &content)
-	output, err := template.Index.Exec(content)
+	output, err := template.AdminIndex.Exec(content)
 	if err != nil {
 		log.Error().Err(err).Msg("error rendering template")
 		return "", err

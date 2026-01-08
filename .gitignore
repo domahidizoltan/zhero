@@ -11,3 +11,7 @@ zhero.db
 build/
 zhero-android-app/app/libs/
 zhero-android-app/app/build/
+
+.serena/
+openspec/
+AGENTS.md

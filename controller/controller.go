@@ -8,6 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type UserFacingPageRenderer interface {
+	Render(content string) (string, error)
+}
+
 func TemplateRenderError(c *gin.Context, err error) {
 	InternalServerError(c, "failed to render template", err)
 }

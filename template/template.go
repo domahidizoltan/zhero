@@ -12,10 +12,11 @@ const (
 	pagesTpl     = tpl + "page/"
 )
 
-var Index, PageMain, PageList, PageEdit, SchemaorgSearch, SchemaorgEdit, SchemaorgEditPropertyPartial *raymond.Template
+var Index, AdminIndex, PageMain, PageList, PageEdit, SchemaorgSearch, SchemaorgEdit, SchemaorgEditPropertyPartial *raymond.Template
 
 func InitTemplates() {
 	Index = handlebars.MustParse(tpl + "index.hbs")
+	AdminIndex = handlebars.MustParse(tpl + "admin_index.hbs")
 
 	PageMain = handlebars.MustParse(pagesTpl + "main.hbs")
 	PageList = handlebars.MustParse(pagesTpl + "list.hbs")

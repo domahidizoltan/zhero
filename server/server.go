@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/domahidizoltan/zhero/config"
-	"github.com/domahidizoltan/zhero/controller/preview"
+	"github.com/domahidizoltan/zhero/controller/pagerenderer"
 	"github.com/domahidizoltan/zhero/controller/router"
 	"github.com/domahidizoltan/zhero/data/db/sqlite"
 	"github.com/domahidizoltan/zhero/domain/page"
@@ -137,11 +137,9 @@ func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
 	pageRepo := page_repo.NewRepo(db)
 	pageSvc := page.NewService(pageRepo)
 
-	previewCtrl := preview.NewController(metaSvc)
-
 	return router.Services{
-		Schema:  metaSvc,
-		Page:    pageSvc,
-		Preview: previewCtrl,
+		Schema:              metaSvc,
+		Page:                pageSvc,
+		DynamicPageRenderer: pagerenderer.NewDynamicPageRenderer(),
 	}
 }
