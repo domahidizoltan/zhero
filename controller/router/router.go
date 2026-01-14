@@ -41,7 +41,7 @@ func addCommonHandlers(router *gin.Engine) {
 					mimeType = mt
 				}
 			}
-			ctx.Data(http.StatusOK, mimeType, []byte(content))
+			ctx.Data(http.StatusOK, mimeType, content)
 			return
 		}
 		ctx.Data(http.StatusNotFound, mimeType, nil)

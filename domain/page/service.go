@@ -8,8 +8,8 @@ import (
 
 type (
 	pageRepo interface {
-		Insert(context.Context, Page) (string, error)
-		Update(context.Context, string, Page) error
+		Insert(context.Context, Page, string) (string, error)
+		Update(context.Context, string, Page, string) error
 		GetPageBySchemaNameAndIdentifier(context.Context, string, string) (*Page, error)
 		List(context.Context, string, ListOptions) ([]Page, PagingMeta, error)
 		Enable(context.Context, string, string, bool) error
@@ -27,11 +27,11 @@ func NewService(repo pageRepo) Service {
 	}
 }
 
-func (s Service) Create(ctx context.Context, page Page) (string, error) {
+func (s Service) Create(ctx context.Context, page Page, idField string) (string, error) {
 	createdID := ""
 	if err := database.InTx(ctx, func(ctx context.Context) error {
 		var err error
-		createdID, err = s.pageRepo.Insert(ctx, page)
+		createdID, err = s.pageRepo.Insert(ctx, page, idField)
 		return err
 	}); err != nil {
 		return "", err
@@ -39,9 +39,9 @@ func (s Service) Create(ctx context.Context, page Page) (string, error) {
 	return createdID, nil
 }
 
-func (s Service) Update(ctx context.Context, identifier string, page Page) error {
+func (s Service) Update(ctx context.Context, identifier string, page Page, idField string) error {
 	return database.InTx(ctx, func(ctx context.Context) error {
-		return s.pageRepo.Update(ctx, identifier, page)
+		return s.pageRepo.Update(ctx, identifier, page, idField)
 	})
 }
 

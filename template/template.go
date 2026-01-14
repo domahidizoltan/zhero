@@ -2,68 +2,44 @@
 package template
 
 import (
-	_ "embed"
+	"embed"
 
 	"github.com/aymerick/raymond"
 )
 
 var (
-	//go:embed index.css
-	indexCSS string
-	//go:embed index.hbs
-	indexTpl string
-	Index    = parse(indexTpl)
+	//go:embed *.css *.js *.hbs
+	//go:embed page/* schemaorg/*
+	templates embed.FS
 
-	//go:embed admin_index.js
-	adminIndexJs string
-	//go:embed admin_index.hbs
-	adminIndexTpl string
-	AdminIndex    = parse(adminIndexTpl)
+	Index                        = mustParse("index.hbs")
+	AdminIndex                   = mustParse("admin_index.hbs")
+	PageMain                     = mustParse("page/main.hbs")
+	PageList                     = mustParse("page/list.hbs")
+	PageEdit                     = mustParse("page/edit.hbs")
+	SchemaorgSearch              = mustParse("schemaorg/search.hbs")
+	SchemaorgEdit                = mustParse("schemaorg/edit.hbs")
+	SchemaorgEditPropertyPartial = mustParse("schemaorg/edit-property.partial.hbs")
 
-	//go:embed page/page.js
-	pagePageJs string
-
-	//go:embed page/main.hbs
-	pageMainTpl string
-	PageMain    = parse(pageMainTpl)
-
-	//go:embed page/list.hbs
-	pageListTpl string
-	PageList    = parse(pageListTpl)
-
-	//go:embed page/edit.hbs
-	pageEditTpl string
-	PageEdit    = parse(pageEditTpl)
-
-	//go:embed schemaorg/schemaorg.js
-	schemaorgSchemaorgJs string
-
-	//go:embed schemaorg/search.hbs
-	schemaorgSearchTpl string
-	SchemaorgSearch    = parse(schemaorgSearchTpl)
-
-	//go:embed schemaorg/edit.hbs
-	schemaorgEditTpl string
-	SchemaorgEdit    = parse(schemaorgEditTpl)
-
-	//go:embed schemaorg/edit-property.partial.hbs
-	schemaorgEditPropertyPartialTpl string
-	SchemaorgEditPropertyPartial    = parse(schemaorgEditPropertyPartialTpl)
-
-	Assets = map[string]string{
-		"/index.css":              indexCSS,
-		"/admin_index.js":         adminIndexJs,
-		"/page/page.js":           pagePageJs,
-		"/schemaorg/schemaorg.js": schemaorgSchemaorgJs,
+	Assets = map[string][]byte{
+		"/index.css":              mustLoad("index.css"),
+		"/admin_index.js":         mustLoad("admin_index.js"),
+		"/page/page.js":           mustLoad("page/page.js"),
+		"/schemaorg/schemaorg.js": mustLoad("schemaorg/schemaorg.js"),
 	}
 )
 
-func parse(templateStr string) *raymond.Template {
-	tpl, err := raymond.Parse(templateStr)
+func mustLoad(filename string) []byte {
+	data, err := templates.ReadFile(filename)
 	if err != nil {
-		panic("failed to parse template: " + err.Error())
+		panic("failed to read template file: " + err.Error())
 	}
-	return tpl
+	return data
+}
+
+func mustParse(filename string) *raymond.Template {
+	data := mustLoad(filename)
+	return raymond.MustParse(string(data))
 }
 
 func RegisterPartials() {

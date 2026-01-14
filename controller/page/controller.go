@@ -214,9 +214,9 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 
 		var err error
 		if len(identifier) == 0 {
-			identifier, err = pc.pageSvc.Create(c, page)
+			identifier, err = pc.pageSvc.Create(c, page, dto.Identifier)
 		} else {
-			err = pc.pageSvc.Update(c, identifier, page)
+			err = pc.pageSvc.Update(c, identifier, page, dto.Identifier)
 		}
 
 		if err != nil {

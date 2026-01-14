@@ -1,27 +1,21 @@
 // Package page manages the schema pages.
 package page
 
-import "slices"
-
 var (
 	SortDirAsc  SortDir = "asc"
 	SortDirDesc SortDir = "desc"
 )
+
+const MaxSearchVals = 5
 
 type (
 	Page struct {
 		SchemaName          string
 		Identifier          string
 		SecondaryIdentifier string
-		Fields              []Field
+		Data                map[string]any
 		IsEnabled           bool
-	}
-
-	Field struct {
-		Name         string
-		Value        any
-		Order        uint
-		SearchColumn string
+		SearchVals          [MaxSearchVals]any
 	}
 
 	PagingMeta struct {
@@ -41,9 +35,3 @@ type (
 		PageSize                uint
 	}
 )
-
-func GetFieldIdxByName(fields []Field, name string) int {
-	return slices.IndexFunc(fields, func(f Field) bool {
-		return f.Name == name
-	})
-}

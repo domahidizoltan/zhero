@@ -1,13 +1,11 @@
 package page
 
 import (
-	"maps"
 	"strconv"
 	"time"
 
 	page_domain "github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
-	"github.com/domahidizoltan/zhero/pkg/collection"
 	"github.com/gin-gonic/gin"
 )
 
@@ -65,7 +63,6 @@ func PageDtoFrom(meta *schema.SchemaMeta) pageDto {
 			IsSearchable: p.Searchable,
 			Type:         p.Type,
 			Component:    p.Component,
-			// Value:        ,
 		})
 	}
 
@@ -85,37 +82,33 @@ func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
 	}
 
 	dto.IsEnabled = p.IsEnabled
-	modelFieldsByName := maps.Collect(collection.MapBy(p.Fields, func(f page_domain.Field) (string, page_domain.Field) {
-		return f.Name, f
-	}))
-
 	for i, f := range dto.Fields {
-		if f, ok := modelFieldsByName[f.Name]; ok {
-			dto.Fields[i].Value = f.Value
+		if val, ok := p.Data[f.Name]; ok {
+			dto.Fields[i].Value = val
 		}
 	}
 }
 
 func (dto *pageDto) ToModel() page_domain.Page {
-	fields := make([]page_domain.Field, 0, len(dto.Fields))
+	searchVals := [page_domain.MaxSearchVals]any{}
+	data := make(map[string]any, len(dto.Fields))
+	scIdx := 0
 	for _, f := range dto.Fields {
-		field := page_domain.Field{
-			Name:  f.Name,
-			Order: f.Order,
-			Value: f.Value,
+		val := f.Value
+		if f.IsSearchable && f.Name != dto.SecondaryIdentifier && scIdx < 5 {
+			searchVals[scIdx] = f.Value
+			scIdx++
 		}
-		if f.IsSearchable {
-			field.SearchColumn = f.Name
-		}
-		fields = append(fields, field)
+		data[f.Name] = val
 	}
 
 	return page_domain.Page{
 		SchemaName:          dto.SchemaName,
-		Fields:              fields,
-		Identifier:          dto.Identifier,
-		SecondaryIdentifier: dto.SecondaryIdentifier,
+		Identifier:          data[dto.Identifier].(string),
+		SecondaryIdentifier: data[dto.SecondaryIdentifier].(string),
+		Data:                data,
 		IsEnabled:           dto.IsEnabled,
+		SearchVals:          searchVals,
 	}
 }
 

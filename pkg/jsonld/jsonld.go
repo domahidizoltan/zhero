@@ -13,12 +13,13 @@ func FromPage(page page.Page) ([]byte, error) {
 	jsonLD["@context"] = "https://schema.org/"
 	jsonLD["@type"] = page.SchemaName
 
-	for _, field := range page.Fields {
-		if field.Name == page.Identifier {
-			jsonLD["@id"] = field.Value
+	// Use the Data map directly
+	for key, value := range page.Data {
+		if key == page.Identifier {
+			jsonLD["@id"] = value
 			continue
 		}
-		jsonLD[field.Name] = field.Value
+		jsonLD[key] = value
 	}
 
 	data, err := json.MarshalIndent(jsonLD, "", "  ")

@@ -28,14 +28,15 @@ document.addEventListener("htmx:afterRequest", (e) => {
   }
 });
 
+const previewHost =
+  window.location.protocol + "//" + window.location.hostname + ":" + 8080;
+
 function submitPreview(cls) {
   const form = document.getElementById("edit-page-form");
   const restoreAction = form.action;
   const restoreTarget = form.target;
-  const host =
-    window.location.protocol + "//" + window.location.hostname + ":" + 8080;
   try {
-    form.action = host + "/preview?class=" + cls;
+    form.action = previewHost + "/preview?class=" + cls;
     form.target = "_blank";
     form.submit();
   } finally {
