@@ -4,12 +4,13 @@ package controller
 import (
 	"net/http"
 
+	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
 
 type UserFacingPageRenderer interface {
-	Render(content string) (string, error)
+	Render(meta schema.SchemaMeta, data map[string]any) (string, error)
 }
 
 func TemplateRenderError(c *gin.Context, err error) {

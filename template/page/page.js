@@ -36,7 +36,7 @@ function submitPreview(cls) {
   const restoreAction = form.action;
   const restoreTarget = form.target;
   try {
-    form.action = previewHost + "/preview?class=" + cls;
+    form.action = `${previewHost}/preview/${cls}`;
     form.target = "_blank";
     form.submit();
   } finally {

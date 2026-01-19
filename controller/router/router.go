@@ -52,10 +52,11 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 	addCommonHandlers(router)
 
 	dynamicPageCtrl := dynamicpage_ctrl.NewController(svc.DynamicPageRenderer)
-	previewCtrl := preview_ctrl.NewController(svc.Schema, svc.DynamicPageRenderer)
+	previewCtrl := preview_ctrl.NewController(svc.Schema, svc.Page, svc.DynamicPageRenderer)
 
 	router.GET("/", dynamicPageCtrl.Index)
-	router.POST("/preview", previewCtrl.Page)
+	router.POST("/preview/:class", previewCtrl.InFlightPage)
+	router.GET("/preview/:class/:identifier", previewCtrl.LoadPage)
 }
 
 func SetAdminRoutes(router *gin.Engine, svc Services) {

@@ -24,10 +24,11 @@ func (ctrl *Controller) Index(c *gin.Context) {
 		c.Data(http.StatusInternalServerError, "text/html", []byte(err.Error()))
 		return
 	}
-	content, err := ctrl.dynamicPageRdr.Render(string(body))
-	if err != nil {
-		c.Data(http.StatusInternalServerError, "text/html", []byte(err.Error()))
-		return
-	}
-	c.Data(http.StatusOK, "text/html", []byte(content))
+	_ = body
+	// content, err := ctrl.dynamicPageRdr.Render(string(body))
+	// if err != nil {
+	// 	c.Data(http.StatusInternalServerError, "text/html", []byte(err.Error()))
+	// 	return
+	// }
+	// c.Data(http.StatusOK, "text/html", []byte(content))
 }

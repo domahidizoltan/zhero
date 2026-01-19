@@ -106,6 +106,9 @@ func (r *Repository) Update(ctx context.Context, identifier string, page domain.
 
 func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName, identifier string) (*domain.Page, error) {
 	row := r.db.QueryRowContext(ctx, selectPage, schemaName, identifier)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
 
 	page := domain.Page{
 		SchemaName: schemaName,
