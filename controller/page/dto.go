@@ -32,7 +32,7 @@ type (
 		Value        any
 	}
 
-	pagingDto struct {
+	PagingDto struct {
 		BaseURL string
 		First   string
 		Prev    []uint
@@ -114,12 +114,12 @@ func (dto *pageDto) ToModel() page_domain.Page {
 
 const jump = 3
 
-func pagingDtoFrom(p page_domain.PagingMeta, baseURL string) *pagingDto {
+func PagingDtoFrom(p page_domain.PagingMeta, baseURL string) *PagingDto {
 	if p.TotalPages < 1 {
 		return nil
 	}
 
-	pg := &pagingDto{
+	pg := &PagingDto{
 		BaseURL: baseURL,
 		Current: p.CurrentPage,
 	}

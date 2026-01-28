@@ -144,14 +144,14 @@ header nav ul li .search-icon {
   padding: 30px 0;
 }
 
-.articles-list {
+.list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 30px;
   margin-bottom: 30px;
 }
 
-.article-item {
+.list-item {
   background-color: var(--white);
   border-radius: 8px;
   overflow: hidden;
@@ -161,70 +161,59 @@ header nav ul li .search-icon {
     box-shadow 0.3s ease;
 }
 
-.article-item:hover {
+.list-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.article-item .img {
+.list-item .img {
   width: 100%;
   height: 180px;
   object-fit: cover;
   display: block;
 }
 
-.article-item .content {
+.list-item .content {
   padding: 15px;
 }
 
-.article-item h3 {
+.list-item h3 {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.3em;
   color: var(--primary-color);
 }
 
-.article-item p {
+.list-item p {
   font-size: 0.95em;
   color: var(--dark-gray);
 }
 
 .pagination {
   text-align: center;
-  margin-bottom: 40px;
 }
 
-.pagination ul {
-  list-style: none;
-  padding: 0;
+.pagination a {
   display: inline-block;
   background-color: var(--white);
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.pagination li {
-  display: inline-block;
-}
-
-.pagination li a {
-  display: block;
-  padding: 10px 15px;
+  padding: 5px 15px;
+  margin: 0px 3px;
   text-decoration: none;
   color: var(--text-color);
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
-  border-radius: 5px;
 }
 
-.pagination li a:hover,
-.pagination li.active a {
+.pagination a:hover,
+.pagination a.btn-active {
   background-color: var(--primary-color);
   color: var(--white);
 }
 
-.contact-form {
+contact-form {
   background-color: var(--white);
   padding: 30px;
   border-radius: 8px;

@@ -32,6 +32,9 @@
             <li><a href="#">About</a></li>
             <li><a href="#">Services</a></li>
             <li><a href="#">Contact</a></li>
+            {{#eachMenuItem}}
+              <li><a href="/{{@menu}}">{{@menu}}</a></li>
+            {{/eachMenuItem}}
             <li>
               <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
             </li>

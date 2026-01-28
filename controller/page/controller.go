@@ -94,7 +94,7 @@ func (pc *Controller) List(c *gin.Context) {
 		opts.SortDir = page.SortDir(sortOrder)
 	}
 
-	pages, paging, err := pc.pageSvc.List(c, clsName, opts)
+	pages, paging, err := pc.pageSvc.List(c, clsName, opts, false)
 	if err != nil {
 		controller.InternalServerError(c, "failed to list pages", err)
 		return
@@ -104,7 +104,7 @@ func (pc *Controller) List(c *gin.Context) {
 	urlQuery := fmt.Sprintf("search=%s&sort=%s", search, sort)
 	ctx := map[string]any{
 		"class":    clsName,
-		"paging":   pagingDtoFrom(paging, fmt.Sprintf("/admin/page/list/%s?%s", clsName, urlQuery)),
+		"paging":   PagingDtoFrom(paging, fmt.Sprintf("/admin/page/list/%s?%s", clsName, urlQuery)),
 		"urlQuery": fmt.Sprintf("%s&page=%d", urlQuery, pageNo),
 		"pages":    pages,
 		"search":   search,
@@ -228,7 +228,7 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 
 	}
 
-	pageModel, err := pc.pageSvc.GetPageBySchemaNameAndIdentifier(c.Request.Context(), class, identifier)
+	pageModel, err := pc.pageSvc.GetPageBySchemaNameAndIdentifier(c.Request.Context(), class, identifier, false)
 	if err != nil {
 		controller.InternalServerError(c, "failed to load page date", err)
 	}

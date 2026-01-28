@@ -13,6 +13,7 @@ var (
 	templates embed.FS
 
 	Index                        = mustParse("index.hbs")
+	PageNotFound                 = mustParse("page_not_found.hbs")
 	AdminIndex                   = mustParse("admin_index.hbs")
 	PageMain                     = mustParse("page/main.hbs")
 	PageList                     = mustParse("page/list.hbs")

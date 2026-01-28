@@ -2,7 +2,10 @@
 package template
 
 import (
+	"net/http"
+
 	"github.com/aymerick/raymond"
+	"github.com/domahidizoltan/zhero/controller"
 	"github.com/domahidizoltan/zhero/pkg/session"
 	"github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
@@ -26,6 +29,24 @@ func AdminIndex(c *gin.Context, content Content) (string, error) {
 		return "", err
 	}
 	return output, nil
+}
+
+func WithLayout(c *gin.Context, body string) {
+	content, err := template.Index.Exec(map[string]any{"body": raymond.SafeString(body)})
+	if err != nil {
+		controller.TemplateRenderError(c, err)
+		return
+	}
+	c.Data(http.StatusOK, "text/html", []byte(content))
+}
+
+func PageNotFoundLayout(c *gin.Context) {
+	content, err := template.PageNotFound.Exec(nil)
+	if err != nil {
+		controller.TemplateRenderError(c, err)
+		return
+	}
+	WithLayout(c, content)
 }
 
 func handleFlash(c *gin.Context, content *Content) {

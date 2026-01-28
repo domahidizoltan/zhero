@@ -10,10 +10,11 @@ type (
 	pageRepo interface {
 		Insert(context.Context, Page, string) (string, error)
 		Update(context.Context, string, Page, string) error
-		GetPageBySchemaNameAndIdentifier(context.Context, string, string) (*Page, error)
-		List(context.Context, string, ListOptions) ([]Page, PagingMeta, error)
+		GetPageBySchemaNameAndIdentifier(context.Context, string, string, bool) (*Page, error)
+		List(context.Context, string, ListOptions, bool) ([]Page, PagingMeta, error)
 		Enable(context.Context, string, string, bool) error
 		Delete(context.Context, string, string) error
+		GetEnabledSchemaNames(context.Context) ([]string, error)
 	}
 )
 
@@ -45,12 +46,12 @@ func (s Service) Update(ctx context.Context, identifier string, page Page, idFie
 	})
 }
 
-func (s Service) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName, identifier string) (*Page, error) {
-	return s.pageRepo.GetPageBySchemaNameAndIdentifier(ctx, schemaName, identifier)
+func (s Service) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName, identifier string, onlyEnabled bool) (*Page, error) {
+	return s.pageRepo.GetPageBySchemaNameAndIdentifier(ctx, schemaName, identifier, onlyEnabled)
 }
 
-func (s Service) List(ctx context.Context, schemaName string, opts ListOptions) ([]Page, PagingMeta, error) {
-	return s.pageRepo.List(ctx, schemaName, opts)
+func (s Service) List(ctx context.Context, schemaName string, opts ListOptions, onlyEnabled bool) ([]Page, PagingMeta, error) {
+	return s.pageRepo.List(ctx, schemaName, opts, onlyEnabled)
 }
 
 func (s Service) Enable(ctx context.Context, schemaName, identifier string, enable bool) error {
@@ -63,4 +64,8 @@ func (s Service) Delete(ctx context.Context, schemaName, identifier string) erro
 	return database.InTx(ctx, func(ctx context.Context) error {
 		return s.pageRepo.Delete(ctx, schemaName, identifier)
 	})
+}
+
+func (s Service) GetEnabledSchemaNames(ctx context.Context) ([]string, error) {
+	return s.pageRepo.GetEnabledSchemaNames(ctx)
 }

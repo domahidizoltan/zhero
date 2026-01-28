@@ -25,9 +25,9 @@ const (
 	deleteSchemaMetaProps             = `DELETE FROM schema_meta_properties WHERE schema_name = ?;`
 	insertSchemaMetaPropsPrefix       = `INSERT INTO schema_meta_properties (schema_name, name, mandatory, searchable, [type], component, [order]) VALUES `
 	selectSchemaMetaPropsBySchemaName = `
-		SELECT name, mandatory, searchable, [type], component, [order] 
-		FROM schema_meta_properties 
-		WHERE schema_name = ? 
+		SELECT name, mandatory, searchable, [type], component, [order]
+		FROM schema_meta_properties
+		WHERE schema_name = ?
 		ORDER BY [order] ASC;
 	`
 )
