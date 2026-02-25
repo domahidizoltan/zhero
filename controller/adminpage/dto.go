@@ -1,4 +1,4 @@
-package page
+package adminpage
 
 import (
 	"time"

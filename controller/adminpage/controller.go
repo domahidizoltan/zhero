@@ -1,5 +1,5 @@
-// Package page contains the controllers for the pages
-package page
+// Package adminpage contains the controllers for the pages
+package adminpage
 
 import (
 	"encoding/json"
@@ -48,7 +48,7 @@ func (pc *Controller) Main(c *gin.Context) {
 		"schemas":        schemas,
 		"selectedSchema": selectedSchema,
 	}
-	body, err := tpl.PageMain.Exec(ctx)
+	body, err := tpl.AdminPageMain.Exec(ctx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return
@@ -94,7 +94,7 @@ func (pc *Controller) List(c *gin.Context) {
 		"listOpts": opts,
 	}
 
-	output, err := tpl.PageList.Exec(ctx)
+	output, err := tpl.AdminPageList.Exec(ctx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return
@@ -221,7 +221,7 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 		"identifier": identifier,
 		"page":       dto,
 	}
-	body, err := tpl.PageEdit.Exec(ctx)
+	body, err := tpl.AdminPageEdit.Exec(ctx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return "", true

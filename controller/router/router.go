@@ -8,11 +8,11 @@ import (
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller"
+	page_ctrl "github.com/domahidizoltan/zhero/controller/adminpage"
+	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/adminschema"
 	dynamicpage_ctrl "github.com/domahidizoltan/zhero/controller/dynamicpage"
-	page_ctrl "github.com/domahidizoltan/zhero/controller/page"
 	"github.com/domahidizoltan/zhero/controller/pagerenderer"
 	preview_ctrl "github.com/domahidizoltan/zhero/controller/preview"
-	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/schema"
 	template_ctrl "github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
@@ -32,14 +32,21 @@ var mimeTypes = map[string]string{
 	"css": "text/css",
 }
 
-func addCommonHandlers(router *gin.Engine) {
-	router.Static("/static", "./template")
+func addCommonHandlers(router *gin.Engine, isAdmin bool) {
+	staticRoot := "./template"
+	assets := template.Assets
+	if isAdmin {
+		staticRoot += "/admin"
+		assets = template.AdminAssets
+	}
+
+	router.Static("/static", staticRoot)
 
 	router.GET("/asset/*path", func(ctx *gin.Context) {
 		assetPath := ctx.Param("path")
 		mimeType := "text/plain"
 
-		if content, found := template.Assets[assetPath]; found {
+		if content, found := assets[assetPath]; found {
 			if extIdx := strings.LastIndex(assetPath, "."); extIdx > -1 {
 				ext := strings.ToLower(assetPath[extIdx+1:])
 				if mt, found := mimeTypes[ext]; found {
@@ -54,7 +61,7 @@ func addCommonHandlers(router *gin.Engine) {
 }
 
 func SetPublicRoutes(router *gin.Engine, svc Services) {
-	addCommonHandlers(router)
+	addCommonHandlers(router, false)
 	registerPublicPageHelpers(svc)
 
 	dynamicPageCtrl := dynamicpage_ctrl.NewController(svc.DynamicPageRenderer, svc.Schema, svc.Page)
@@ -98,7 +105,7 @@ func registerPublicPageHelpers(svc Services) {
 }
 
 func SetAdminRoutes(router *gin.Engine, svc Services) {
-	addCommonHandlers(router)
+	addCommonHandlers(router, true)
 
 	router.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, "/admin/page/list")

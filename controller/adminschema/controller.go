@@ -1,5 +1,5 @@
-// Package schema defines the handlers for managing schema
-package schema
+// Package adminschema defines the handlers for managing schema
+package adminschema
 
 import (
 	"errors"
@@ -30,7 +30,7 @@ func NewController(schemaSvc schema.Service) Controller {
 }
 
 func (sc *Controller) Search(c *gin.Context) {
-	output, err := tpl.SchemaorgSearch.Exec(nil)
+	output, err := tpl.AdminSchemaorgSearch.Exec(nil)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return
@@ -104,7 +104,7 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 		"breadcrumbs": sc.classBreadcrumbs(clsName),
 		"components":  []string{"TODO"},
 	}
-	body, err := tpl.SchemaorgEdit.Exec(ctx)
+	body, err := tpl.AdminSchemaorgEdit.Exec(ctx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return "", true

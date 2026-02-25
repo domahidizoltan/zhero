@@ -7,30 +7,42 @@ import (
 	"github.com/aymerick/raymond"
 )
 
+const admin = "admin/"
+
 var (
-	//go:embed *.css *.js *.hbs
-	//go:embed page/* schemaorg/* paging/*
+	//go:embed admin/*
+	//go:embed *.css *.hbs
+	//go:embed paging/*
 	templates embed.FS
 
-	Index           = mustParse("index.hbs")
-	PageNotFound    = mustParse("page_not_found.hbs")
-	AdminIndex      = mustParse("admin_index.hbs")
-	PageMain        = mustParse("page/main.hbs")
-	PageList        = mustParse("page/list.hbs")
-	PageEdit        = mustParse("page/edit.hbs")
-	SchemaorgSearch = mustParse("schemaorg/search.hbs")
-	SchemaorgEdit   = mustParse("schemaorg/edit.hbs")
+	AdminIndex           = mustParse(admin + "index.hbs")
+	AdminPageMain        = mustParse(admin + "page/main.hbs")
+	AdminPageList        = mustParse(admin + "page/list.hbs")
+	AdminPageEdit        = mustParse(admin + "page/edit.hbs")
+	AdminSchemaorgSearch = mustParse(admin + "schemaorg/search.hbs")
+	AdminSchemaorgEdit   = mustParse(admin + "schemaorg/edit.hbs")
 
-	SchemaorgEditPropertyPartial = mustParse("schemaorg/edit-property.partial.hbs")
-	PaginationPartial            = mustParse("paging/pagination.partial.hbs")
+	AdminSchemaorgEditPropertyPartial = mustParse(admin + "schemaorg/edit-property.partial.hbs")
+
+	AdminAssets = map[string][]byte{
+		"/index.js":               mustLoad(admin + "index.js"),
+		"/page/page.js":           mustLoad(admin + "page/page.js"),
+		"/schemaorg/schemaorg.js": mustLoad(admin + "schemaorg/schemaorg.js"),
+	}
+
+	Index             = mustParse("index.hbs")
+	PageNotFound      = mustParse("page_not_found.hbs")
+	PaginationPartial = mustParse("paging/pagination.partial.hbs")
 
 	Assets = map[string][]byte{
-		"/index.css":              mustLoad("index.css"),
-		"/admin_index.js":         mustLoad("admin_index.js"),
-		"/page/page.js":           mustLoad("page/page.js"),
-		"/schemaorg/schemaorg.js": mustLoad("schemaorg/schemaorg.js"),
+		"/index.css": mustLoad("index.css"),
 	}
 )
+
+func mustParse(filename string) *raymond.Template {
+	data := mustLoad(filename)
+	return raymond.MustParse(string(data))
+}
 
 func mustLoad(filename string) []byte {
 	data, err := templates.ReadFile(filename)
@@ -40,12 +52,7 @@ func mustLoad(filename string) []byte {
 	return data
 }
 
-func mustParse(filename string) *raymond.Template {
-	data := mustLoad(filename)
-	return raymond.MustParse(string(data))
-}
-
 func RegisterPartials() {
-	SchemaorgEdit.RegisterPartialTemplate("editProperty", SchemaorgEditPropertyPartial)
+	AdminSchemaorgEdit.RegisterPartialTemplate("editProperty", AdminSchemaorgEditPropertyPartial)
 	raymond.RegisterPartialTemplate("pagination", PaginationPartial)
 }
