@@ -1,0 +1,63 @@
+<div class="mt-6 flex justify-between items-center">
+  {{#if paging}}
+    <div class="join">
+
+      {{#with paging}}
+        {{#if first}}
+          <a
+            {{#if htmxTarget}}
+              hx-get="{{baseURL}}&page={{first}}"
+              hx-target="{{htmxTarget}}"
+              hx-swap="innerHTML"
+            {{else}}
+              href="{{baseURL}}&page={{first}}"
+            {{/if}}
+            class="join-item btn btn-sm"
+          >«</a>
+        {{/if}}
+
+        {{#each prev}}
+          <a
+            {{#if htmxTarget}}
+              hx-get="{{baseURL}}&page={{this}}"
+              hx-target="#page-list-content"
+              hx-swap="innerHTML"
+            {{else}}
+              href="{{baseURL}}&page={{this}}"
+            {{/if}}
+            class="join-item btn btn-sm"
+          >{{this}}</a>
+        {{/each}}
+
+        <a class="join-item btn btn-sm btn-active">{{current}}</a>
+
+        {{#each next}}
+          <a
+            {{#if htmxTarget}}
+              hx-get="{{baseURL}}&page={{this}}"
+              hx-target="#page-list-content"
+              hx-swap="innerHTML"
+            {{else}}
+              href="{{baseURL}}&page={{this}}"
+            {{/if}}
+            class="join-item btn btn-sm"
+          >{{this}}</a>
+        {{/each}}
+
+        {{#if last}}
+          <a
+            {{#if htmxTarget}}
+              hx-get="{{baseURL}}&page={{last}}"
+              hx-target="#page-list-content"
+              hx-swap="innerHTML"
+            {{else}}
+              href="{{baseURL}}&page={{last}}"
+            {{/if}}
+            class="join-item btn btn-sm"
+          >»</a>
+        {{/if}}
+      {{/with}}
+
+    </div>
+  {{/if}}
+</div>

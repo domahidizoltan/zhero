@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/domahidizoltan/zhero/pkg/database"
+	"github.com/domahidizoltan/zhero/pkg/paging"
 )
 
 type (
@@ -11,7 +12,7 @@ type (
 		Insert(context.Context, Page, string) (string, error)
 		Update(context.Context, string, Page, string) error
 		GetPageBySchemaNameAndIdentifier(context.Context, string, string, bool) (*Page, error)
-		List(context.Context, string, ListOptions, bool) ([]Page, PagingMeta, error)
+		List(context.Context, string, ListOptions, bool) ([]Page, paging.Meta, error)
 		Enable(context.Context, string, string, bool) error
 		Delete(context.Context, string, string) error
 		GetEnabledSchemaNames(context.Context) ([]string, error)
@@ -50,7 +51,7 @@ func (s Service) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaNam
 	return s.pageRepo.GetPageBySchemaNameAndIdentifier(ctx, schemaName, identifier, onlyEnabled)
 }
 
-func (s Service) List(ctx context.Context, schemaName string, opts ListOptions, onlyEnabled bool) ([]Page, PagingMeta, error) {
+func (s Service) List(ctx context.Context, schemaName string, opts ListOptions, onlyEnabled bool) ([]Page, paging.Meta, error) {
 	return s.pageRepo.List(ctx, schemaName, opts, onlyEnabled)
 }
 

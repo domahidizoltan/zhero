@@ -18,6 +18,7 @@ import (
 	"github.com/domahidizoltan/zhero/pkg/database"
 	"github.com/domahidizoltan/zhero/pkg/handlebars"
 	"github.com/domahidizoltan/zhero/pkg/logging"
+	"github.com/domahidizoltan/zhero/pkg/paging"
 	"github.com/domahidizoltan/zhero/pkg/session"
 	page_repo "github.com/domahidizoltan/zhero/repository/page"
 	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
@@ -50,6 +51,7 @@ func (s *Server) Start() {
 
 	handlebars.InitHelpers()
 	logging.ConfigureLogging(cfg)
+	paging.SetJump(cfg.App.Pagination.Jump)
 
 	dbFile := s.absolutePath + cfg.DB.SQLite.File
 	if err := database.InitSqliteDB(dbFile); err != nil {
@@ -132,7 +134,7 @@ func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
 
 	metaRepo := meta_repo.NewRepo(db)
 	metaSvc := schema.NewService(metaRepo, schemaorgSvc)
-	pageRepo := page_repo.NewRepo(db)
+	pageRepo := page_repo.NewRepo(db, cfg.App.Pagination.DefaultPageSize)
 	pageSvc := page.NewService(pageRepo)
 
 	return router.Services{

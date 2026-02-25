@@ -1,16 +1,14 @@
 package dynamicpage
 
 import (
-	"net/url"
 	"slices"
-	"strconv"
-	"strings"
 
 	"github.com/domahidizoltan/zhero/controller"
 	"github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/collection"
+	"github.com/domahidizoltan/zhero/pkg/paging"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,26 +29,9 @@ func NewController(pageRenderer controller.UserFacingPageListRenderer, schemaSvc
 func (ctrl *Controller) List(c *gin.Context) {
 	clsName := c.Param("class")
 
-	pageNo, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil || pageNo < 1 {
-		pageNo = 1
-	}
-
+	pageOpts := paging.RequestToPageOpts(c, "identifier")
 	opts := page.ListOptions{
-		Page: uint(pageNo),
-	}
-
-	sortQuery := c.DefaultQuery("sort", "identifier:desc")
-	unescape, err := url.QueryUnescape(sortQuery)
-	if err != nil {
-		controller.BadRequest(c, "failed to parse search query", err)
-		return
-	}
-	sortQuery = unescape
-
-	if sortBy, sortOrder, found := strings.Cut(sortQuery, ":"); found {
-		opts.SortBy = sortBy
-		opts.SortDir = page.SortDir(sortOrder)
+		PageOpts: pageOpts,
 	}
 
 	pages, paging, err := ctrl.pageSvc.List(c, clsName, opts, true)

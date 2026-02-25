@@ -9,18 +9,20 @@ import (
 
 var (
 	//go:embed *.css *.js *.hbs
-	//go:embed page/* schemaorg/*
+	//go:embed page/* schemaorg/* paging/*
 	templates embed.FS
 
-	Index                        = mustParse("index.hbs")
-	PageNotFound                 = mustParse("page_not_found.hbs")
-	AdminIndex                   = mustParse("admin_index.hbs")
-	PageMain                     = mustParse("page/main.hbs")
-	PageList                     = mustParse("page/list.hbs")
-	PageEdit                     = mustParse("page/edit.hbs")
-	SchemaorgSearch              = mustParse("schemaorg/search.hbs")
-	SchemaorgEdit                = mustParse("schemaorg/edit.hbs")
+	Index           = mustParse("index.hbs")
+	PageNotFound    = mustParse("page_not_found.hbs")
+	AdminIndex      = mustParse("admin_index.hbs")
+	PageMain        = mustParse("page/main.hbs")
+	PageList        = mustParse("page/list.hbs")
+	PageEdit        = mustParse("page/edit.hbs")
+	SchemaorgSearch = mustParse("schemaorg/search.hbs")
+	SchemaorgEdit   = mustParse("schemaorg/edit.hbs")
+
 	SchemaorgEditPropertyPartial = mustParse("schemaorg/edit-property.partial.hbs")
+	PaginationPartial            = mustParse("paging/pagination.partial.hbs")
 
 	Assets = map[string][]byte{
 		"/index.css":              mustLoad("index.css"),
@@ -45,4 +47,5 @@ func mustParse(filename string) *raymond.Template {
 
 func RegisterPartials() {
 	SchemaorgEdit.RegisterPartialTemplate("editProperty", SchemaorgEditPropertyPartial)
+	raymond.RegisterPartialTemplate("pagination", PaginationPartial)
 }

@@ -109,43 +109,9 @@
     </table>
   </div>
 
-    <div class="mt-6 flex justify-between items-center">
-      <div class="join">
-
-        {{#with paging}}
-          {{#if first}}
-           <a hx-get="{{baseURL}}&page={{first}}" 
-            hx-target="#page-list-content" 
-            hx-swap="innerHTML" 
-            class="join-item btn btn-sm">«</a>
-          {{/if}}
-
-          {{#each prev}}
-           <a hx-get="{{baseURL}}&page={{this}}" 
-            hx-target="#page-list-content" 
-            hx-swap="innerHTML" 
-            class="join-item btn btn-sm">{{this}}</a>
-          {{/each}}
-
-          <a class="join-item btn btn-sm btn-active">{{current}}</a>
-        
-          {{#each next}}
-           <a hx-get="{{baseURL}}&page={{this}}" 
-            hx-target="#page-list-content" 
-            hx-swap="innerHTML" 
-            class="join-item btn btn-sm">{{this}}</a>
-          {{/each}}
-
-          {{#if last}}
-           <a hx-get="{{baseURL}}&page={{last}}" 
-            hx-target="#page-list-content" 
-            hx-swap="innerHTML" 
-            class="join-item btn btn-sm">»</a>
-          {{/if}}
-        {{/with}}
-
-      </div>
-      <a href="/admin/page/create/{{class}}" class="btn btn-success">
+    <div class="flex justify-between">
+      {{>pagination}}
+      <a href="/admin/page/create/{{class}}" class="btn btn-success mt-6">
         <i class="fas fa-circle-plus"></i>
         Create new page
       </a>

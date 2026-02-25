@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	page_ctrl "github.com/domahidizoltan/zhero/controller/page"
-	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
+	"github.com/domahidizoltan/zhero/pkg/paging"
+	"github.com/domahidizoltan/zhero/template"
 )
 
 type DynamicPageRenderer struct{}
@@ -34,7 +34,7 @@ func (DynamicPageRenderer) Render(meta schema.SchemaMeta, data map[string]any) (
 	return b.String(), nil
 }
 
-func (DynamicPageRenderer) List(meta schema.SchemaMeta, data []map[string]any, paging page.PagingMeta) (string, error) {
+func (DynamicPageRenderer) List(meta schema.SchemaMeta, data []map[string]any, paging paging.Meta) (string, error) {
 	b := strings.Builder{}
 
 	cssClass := strings.ToLower("list-item " + meta.Name)
@@ -51,34 +51,14 @@ func (DynamicPageRenderer) List(meta schema.SchemaMeta, data []map[string]any, p
 	}
 	b.WriteString("</div>")
 
-	if paging.TotalPages <= 1 {
-		return b.String(), nil
-	}
-
 	baseURL := fmt.Sprintf("/%s?", meta.Name)
-	dto := page_ctrl.PagingDtoFrom(paging, baseURL)
+	dto := paging.ToDto(baseURL, "")
 	if dto != nil {
-		b.WriteString(`<div class="pagination mt-6 flex justify-between items-center"><div class="join">`)
-
-		if dto.First != "" {
-			b.WriteString(fmt.Sprintf(`<a href="%s&page=%s" class="join-item btn btn-sm">«</a>`, baseURL, dto.First))
+		if pagination, err := template.PaginationPartial.Exec(map[string]any{"paging": dto}); err != nil {
+			return "", err
+		} else {
+			b.WriteString(pagination)
 		}
-
-		for _, prev := range dto.Prev {
-			b.WriteString(fmt.Sprintf(`<a href="%[1]s&page=%[2]d" class="join-item btn btn-sm">%[2]d</a>`, baseURL, prev))
-		}
-
-		b.WriteString(fmt.Sprintf(`<a class="join-item btn btn-sm btn-active">%d</a>`, dto.Current))
-
-		for _, next := range dto.Next {
-			b.WriteString(fmt.Sprintf(`<a href="%[1]s&page=%[2]d" class="join-item btn btn-sm">%[2]d</a>`, baseURL, next))
-		}
-
-		if dto.Last != "" {
-			b.WriteString(fmt.Sprintf(`<a hx-get="%s&page=%s" class="join-item btn btn-sm">»</a>`, baseURL, dto.Last))
-		}
-
-		b.WriteString("</div></div>")
 	}
 
 	return b.String(), nil

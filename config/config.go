@@ -11,6 +11,7 @@ type (
 		Env    EnvConfig    `mapstructure:"env"`
 		Log    LogConfig    `mapstructure:"log"`
 		DB     DBConfig     `mapstructure:"database"`
+		App    AppConfig    `mapstructure:"app"`
 		Admin  AdminConfig  `mapstructure:"admin"`
 		Public PublicConfig `mapstructure:"public"`
 	}
@@ -28,6 +29,13 @@ type (
 
 	DBConfig struct {
 		SQLite SQLiteConfig `mapstructure:"sqlite"`
+	}
+
+	AppConfig struct {
+		Pagination struct {
+			Jump            uint `mapstructure:"jump"`
+			DefaultPageSize uint `mapstructure:"defaultPageSize"`
+		} `mapstructure:"pagination"`
 	}
 
 	SQLiteConfig struct {

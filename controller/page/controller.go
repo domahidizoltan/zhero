@@ -5,15 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller"
 	"github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
+	"github.com/domahidizoltan/zhero/pkg/paging"
 	tpl "github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -70,28 +68,11 @@ func (pc *Controller) Main(c *gin.Context) {
 
 func (pc *Controller) List(c *gin.Context) {
 	clsName := c.Param("class")
-	pageNo, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil || pageNo < 1 {
-		pageNo = 1
-	}
 
-	search := c.Query("search")
+	pageOpts := paging.RequestToPageOpts(c, "identifier")
 	opts := page.ListOptions{
-		SecondaryIdentifierLike: search,
-		Page:                    uint(pageNo),
-	}
-
-	sortQuery := c.DefaultQuery("sort", "identifier:asc")
-	unescape, err := url.QueryUnescape(sortQuery)
-	if err != nil {
-		controller.BadRequest(c, "failed to parse search query", err)
-		return
-	}
-	sortQuery = unescape
-
-	if sortBy, sortOrder, found := strings.Cut(sortQuery, ":"); found {
-		opts.SortBy = sortBy
-		opts.SortDir = page.SortDir(sortOrder)
+		SecondaryIdentifierLike: pageOpts.SearchParam(),
+		PageOpts:                pageOpts,
 	}
 
 	pages, paging, err := pc.pageSvc.List(c, clsName, opts, false)
@@ -100,15 +81,16 @@ func (pc *Controller) List(c *gin.Context) {
 		return
 	}
 
-	sort := fmt.Sprintf("%s:%s", opts.SortBy, opts.SortDir)
-	urlQuery := fmt.Sprintf("search=%s&sort=%s", search, sort)
+	pagingBaseURL, urlQuery := pageOpts.GetURL("/admin/page/list/" + clsName)
+
 	ctx := map[string]any{
 		"class":    clsName,
-		"paging":   PagingDtoFrom(paging, fmt.Sprintf("/admin/page/list/%s?%s", clsName, urlQuery)),
-		"urlQuery": fmt.Sprintf("%s&page=%d", urlQuery, pageNo),
+		"paging":   paging.ToDto(pagingBaseURL, "#page-list-content"),
+		"urlQuery": urlQuery,
+
 		"pages":    pages,
-		"search":   search,
-		"sort":     sortQuery,
+		"search":   pageOpts.SearchParam(),
+		"sort":     pageOpts.SortQuery(),
 		"listOpts": opts,
 	}
 

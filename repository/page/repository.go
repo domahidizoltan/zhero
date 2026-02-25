@@ -13,6 +13,7 @@ import (
 
 	domain "github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/pkg/database"
+	"github.com/domahidizoltan/zhero/pkg/paging"
 	"github.com/oklog/ulid"
 )
 
@@ -40,11 +41,15 @@ const (
 )
 
 type Repository struct {
-	db *sql.DB
+	db              *sql.DB
+	defaultPageSize uint
 }
 
-func NewRepo(db *sql.DB) *Repository {
-	return &Repository{db: db}
+func NewRepo(db *sql.DB, defaultPageSize uint) *Repository {
+	return &Repository{
+		db:              db,
+		defaultPageSize: defaultPageSize,
+	}
 }
 
 func (r *Repository) Insert(ctx context.Context, page domain.Page, idField string) (string, error) {
@@ -140,22 +145,9 @@ func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schem
 	return &page, nil
 }
 
-const defaultPageSize uint = 20
-
-func (r *Repository) List(ctx context.Context, schemaName string, opts domain.ListOptions, onlyEnabled bool) ([]domain.Page, domain.PagingMeta, error) {
-	pageSize := defaultPageSize
-	if opts.Page < 1 {
-		opts.Page = 1
-	}
-	if opts.PageSize > 0 {
-		pageSize = opts.PageSize
-	}
+func (r *Repository) List(ctx context.Context, schemaName string, opts domain.ListOptions, onlyEnabled bool) ([]domain.Page, paging.Meta, error) {
 	if len(opts.SortBy) == 0 {
 		opts.SortBy = "identifier"
-	}
-	meta := domain.PagingMeta{
-		PageSize:    uint(pageSize),
-		CurrentPage: opts.Page,
 	}
 	pages := []domain.Page{}
 
@@ -178,17 +170,16 @@ func (r *Repository) List(ctx context.Context, schemaName string, opts domain.Li
 	var total int
 	err := r.db.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total)
 	if err != nil {
-		return pages, meta, fmt.Errorf("failed to count pages: %w", err)
+		return pages, paging.Meta{}, fmt.Errorf("failed to count pages: %w", err)
 	}
+
+	meta := opts.ToMeta(total, r.defaultPageSize)
 	if total == 0 {
 		return pages, meta, nil
 	}
 
-	meta.TotalItems = uint(total)
-	meta.TotalPages = uint(meta.TotalItems / meta.PageSize)
-
 	query += " ORDER BY " + opts.SortBy + " " + string(opts.SortDir) + " LIMIT ? OFFSET ?"
-	queryArgs = append(queryArgs, pageSize, (opts.Page-1)*pageSize)
+	queryArgs = append(queryArgs, meta.PageSize, (opts.Page-1)*meta.PageSize)
 
 	rows, err := r.db.QueryContext(ctx, query, queryArgs...)
 	if err != nil {

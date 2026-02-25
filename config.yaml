@@ -6,6 +6,10 @@ log:
 database:
   sqlite:
     file: zhero.db
+app:
+  pagination:
+    jump: 3
+    defaultPageSize: 1
 
 admin:
   server:

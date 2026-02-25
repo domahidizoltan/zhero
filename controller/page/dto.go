@@ -1,7 +1,6 @@
 package page
 
 import (
-	"strconv"
 	"time"
 
 	page_domain "github.com/domahidizoltan/zhero/domain/page"
@@ -30,15 +29,6 @@ type (
 		Type         string
 		Component    string
 		Value        any
-	}
-
-	PagingDto struct {
-		BaseURL string
-		First   string
-		Prev    []uint
-		Current uint
-		Next    []uint
-		Last    string
 	}
 )
 
@@ -110,37 +100,4 @@ func (dto *pageDto) ToModel() page_domain.Page {
 		IsEnabled:           dto.IsEnabled,
 		SearchVals:          searchVals,
 	}
-}
-
-const jump = 3
-
-func PagingDtoFrom(p page_domain.PagingMeta, baseURL string) *PagingDto {
-	if p.TotalPages < 1 {
-		return nil
-	}
-
-	pg := &PagingDto{
-		BaseURL: baseURL,
-		Current: p.CurrentPage,
-	}
-
-	if p.CurrentPage > jump+1 {
-		pg.First = strconv.Itoa(1)
-	}
-	for i := range jump {
-		if this := int(p.CurrentPage) - (jump - i); this > 0 {
-			pg.Prev = append(pg.Prev, uint(this))
-		}
-	}
-
-	if limit := int(p.TotalPages) - jump; limit >= 0 && p.CurrentPage < uint(limit) {
-		pg.Last = strconv.Itoa(int(p.TotalPages))
-	}
-	for i := range jump {
-		if this := p.CurrentPage + uint(i) + 1; this <= p.TotalPages {
-			pg.Next = append(pg.Next, this)
-		}
-	}
-
-	return pg
 }

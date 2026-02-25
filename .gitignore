@@ -15,3 +15,6 @@ zhero-android-app/app/build/
 .serena/
 openspec/
 AGENTS.md
+agent-os/
+.claude/
+CLAUDE.md

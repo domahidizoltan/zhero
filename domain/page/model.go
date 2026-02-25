@@ -1,10 +1,7 @@
 // Package page manages the schema pages.
 package page
 
-var (
-	SortDirAsc  SortDir = "asc"
-	SortDirDesc SortDir = "desc"
-)
+import "github.com/domahidizoltan/zhero/pkg/paging"
 
 const MaxSearchVals = 5
 
@@ -18,20 +15,8 @@ type (
 		SearchVals          [MaxSearchVals]any
 	}
 
-	PagingMeta struct {
-		TotalItems  uint
-		PageSize    uint
-		TotalPages  uint
-		CurrentPage uint
-	}
-
-	SortDir string
-
 	ListOptions struct {
+		paging.PageOpts
 		SecondaryIdentifierLike string
-		SortBy                  string
-		SortDir                 SortDir
-		Page                    uint
-		PageSize                uint
 	}
 )
