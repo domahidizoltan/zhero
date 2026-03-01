@@ -2,6 +2,9 @@
 package session
 
 import (
+	"errors"
+
+	"github.com/domahidizoltan/zhero/pkg/_err"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
@@ -11,6 +14,8 @@ const (
 	flashKey = "_flash"
 )
 
+var ErrSessionSave = errors.New("failed to save session")
+
 func SessionMiddleware() gin.HandlerFunc {
 	store := memstore.NewStore([]byte("zhero"))
 	return sessions.Sessions("zheroSession", store)
@@ -19,7 +24,7 @@ func SessionMiddleware() gin.HandlerFunc {
 func SetFlash(c *gin.Context, flashMsg string) error {
 	s := sessions.Default(c)
 	s.AddFlash(flashMsg)
-	return s.Save()
+	return _err.WrapNotNil(s.Save(), ErrSessionSave)
 }
 
 func GetFlash(c *gin.Context) (string, error) {
@@ -30,7 +35,7 @@ func GetFlash(c *gin.Context) (string, error) {
 	}
 
 	if len(flashes) > 0 {
-		return flashes[0], s.Save()
+		return flashes[0], _err.WrapNotNil(s.Save(), ErrSessionSave)
 	}
-	return "", s.Save()
+	return "", _err.WrapNotNil(s.Save(), ErrSessionSave)
 }

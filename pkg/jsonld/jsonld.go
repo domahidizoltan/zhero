@@ -8,6 +8,8 @@ import (
 	"github.com/domahidizoltan/zhero/domain/page"
 )
 
+var ErrJsonLDSerDe = fmt.Errorf("JSON-LD SerDe operation failed")
+
 func FromPage(page page.Page) ([]byte, error) {
 	jsonLD := make(map[string]any)
 	jsonLD["@context"] = "https://schema.org/"
@@ -24,7 +26,7 @@ func FromPage(page page.Page) ([]byte, error) {
 
 	data, err := json.MarshalIndent(jsonLD, "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal JSON-LD: %w", err)
+		return nil, fmt.Errorf("%w: %w", ErrJsonLDSerDe, err)
 	}
 
 	return data, nil

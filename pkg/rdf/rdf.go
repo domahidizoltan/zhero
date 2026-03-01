@@ -2,6 +2,7 @@
 package rdf
 
 import (
+	"fmt"
 	"os"
 	"sync"
 
@@ -13,7 +14,11 @@ type Graph struct {
 	graph *rdf2go.Graph
 }
 
-var once sync.Once
+var (
+	once                sync.Once
+	ErrRDFFileInit      = fmt.Errorf("RDF file initialization failed")
+	ErrRDFGraphCreation = fmt.Errorf("RDF graph creation failed")
+)
 
 func Init(filePath, downloadURL string, overwrite bool) (*Graph, error) {
 	// log
@@ -25,17 +30,17 @@ func Init(filePath, downloadURL string, overwrite bool) (*Graph, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrRDFFileInit, err)
 	}
 
 	r, err := os.Open(filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrRDFFileInit, err)
 	}
 
 	g := rdf2go.NewGraph("")
 	if err := g.Parse(r, "application/ld+json"); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrRDFGraphCreation, err)
 	}
 
 	return &Graph{

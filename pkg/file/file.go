@@ -2,12 +2,18 @@
 package file
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 
 	"github.com/rs/zerolog/log"
+)
+
+var (
+	ErrFileDownload  = errors.New("file download failed")
+	ErrFileOperation = errors.New("file operation failed")
 )
 
 func DownloadToPath(path, url string, overwrite bool) error {
@@ -18,23 +24,23 @@ func DownloadToPath(path, url string, overwrite bool) error {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return fmt.Errorf("failed to download file from %s: %w", url, err)
+		return fmt.Errorf("%w from %s: %w", ErrFileDownload, url, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to download file from %s: unexpected status code %d", url, resp.StatusCode)
+		return fmt.Errorf("%w from %s: unexpected status code %d", ErrFileDownload, url, resp.StatusCode)
 	}
 
 	out, err := os.Create(path)
 	if err != nil {
-		return fmt.Errorf("failed to create file at %s: %w", path, err)
+		return fmt.Errorf("%w when creating %s: %w", ErrFileOperation, path, err)
 	}
 	defer out.Close()
 
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
-		return fmt.Errorf("failed to write file to %s: %w", path, err)
+		return fmt.Errorf("%w when writing %s: %w", ErrFileOperation, path, err)
 	}
 
 	return nil
