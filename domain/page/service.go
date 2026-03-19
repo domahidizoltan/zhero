@@ -17,15 +17,20 @@ type (
 		Delete(context.Context, string, string) error
 		GetEnabledSchemaNames(context.Context) ([]string, error)
 	}
+	routeSvc interface {
+		AssignRoute(ctx context.Context, customRoute, pageKey string) error
+	}
 )
 
 type Service struct {
 	pageRepo pageRepo
+	routeSvc routeSvc
 }
 
-func NewService(repo pageRepo) Service {
+func NewService(repo pageRepo, routeSvc routeSvc) Service {
 	return Service{
 		pageRepo: repo,
+		routeSvc: routeSvc,
 	}
 }
 
@@ -33,18 +38,44 @@ func (s Service) Create(ctx context.Context, page Page, idField string) (string,
 	createdID := ""
 	if err := database.InTx(ctx, func(ctx context.Context) error {
 		var err error
-		createdID, err = s.pageRepo.Insert(ctx, page, idField)
-		return err
+		if createdID, err = s.pageRepo.Insert(ctx, page, idField); err != nil {
+			return err
+		}
+
+		if page.Route != "" {
+			pageKey := page.SchemaName + "/" + createdID
+			if err := s.routeSvc.AssignRoute(ctx, page.Route, pageKey); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}); err != nil {
 		return "", err
 	}
+
 	return createdID, nil
 }
 
 func (s Service) Update(ctx context.Context, identifier string, page Page, idField string) error {
-	return database.InTx(ctx, func(ctx context.Context) error {
-		return s.pageRepo.Update(ctx, identifier, page, idField)
-	})
+	if err := database.InTx(ctx, func(ctx context.Context) error {
+		if err := s.pageRepo.Update(ctx, identifier, page, idField); err != nil {
+			return err
+		}
+
+		if page.Route != "" {
+			pageKey := page.SchemaName + "/" + identifier
+			if err := s.routeSvc.AssignRoute(ctx, page.Route, pageKey); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s Service) GetPageBySchemaNameAndIdentifier(ctx context.Context, schemaName, identifier string, onlyEnabled bool) (*Page, error) {

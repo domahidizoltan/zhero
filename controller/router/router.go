@@ -15,6 +15,7 @@ import (
 	preview_ctrl "github.com/domahidizoltan/zhero/controller/preview"
 	template_ctrl "github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/page"
+	"github.com/domahidizoltan/zhero/domain/route"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
@@ -25,6 +26,7 @@ type Services struct {
 	Schema              schema.Service
 	Page                page.Service
 	DynamicPageRenderer pagerenderer.DynamicPageRenderer
+	Route               route.Service
 }
 
 var mimeTypes = map[string]string{
@@ -64,9 +66,6 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 	addCommonHandlers(router, false)
 	registerPublicPageHelpers(svc)
 
-	dynamicPageCtrl := dynamicpage_ctrl.NewController(svc.DynamicPageRenderer, svc.Schema, svc.Page)
-	previewCtrl := preview_ctrl.NewController(dynamicPageCtrl)
-
 	router.GET("/", func(c *gin.Context) {
 		schemaNames, err := svc.Page.GetEnabledSchemaNames(context.Background())
 		if err != nil {
@@ -82,10 +81,17 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 		c.Redirect(http.StatusTemporaryRedirect, "/"+schemaNames[0])
 	})
 
-	router.GET("/:class", dynamicPageCtrl.List)
-	router.GET("/:class/:identifier", dynamicPageCtrl.Page)
+	dynamicPageCtrl := dynamicpage_ctrl.NewController(svc.DynamicPageRenderer, svc.Schema, svc.Page)
+	previewCtrl := preview_ctrl.NewController(dynamicPageCtrl)
+
 	router.POST("/preview/:class", previewCtrl.InFlightPage)
 	router.GET("/preview/:class/:identifier", previewCtrl.LoadPage)
+
+	router.Use(CustomRouteMiddleware(svc, dynamicPageCtrl))
+
+	router.NoRoute(func(c *gin.Context) {
+		dynamicPageCtrl.LoadPage(c, true)
+	})
 }
 
 func registerPublicPageHelpers(svc Services) {
@@ -119,12 +125,13 @@ func SetAdminRoutes(router *gin.Engine, svc Services) {
 		admin.POST("/schema/save/:class", schemaorgCtrl.Save)
 		admin.GET("/schema/class-hierarchy", schemaorgCtrl.GetClassHierarchy)
 
-		pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page)
+		pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page, svc.Route)
 		admin.GET("/page/list", pageCtrl.Main)
 		admin.GET("/page/list/:class", pageCtrl.List)
 		admin.GET("/page/create/:class", pageCtrl.Create)
 		admin.POST("/page/edit/:class", pageCtrl.EditAction)
 		admin.GET("/page/edit/:class/:identifier", pageCtrl.Edit)
 		admin.POST("/page/save/:class", pageCtrl.Save)
+		admin.POST("/page/get-valid-slug", pageCtrl.GetValidSlug)
 	}
 }

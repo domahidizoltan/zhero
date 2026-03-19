@@ -10,6 +10,7 @@ import (
 	"github.com/domahidizoltan/zhero/controller"
 	"github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/page"
+	"github.com/domahidizoltan/zhero/domain/route"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/paging"
 	tpl "github.com/domahidizoltan/zhero/template"
@@ -20,12 +21,14 @@ import (
 type Controller struct {
 	schemaSvc schema.Service
 	pageSvc   page.Service
+	routeSvc  route.Service
 }
 
-func NewController(schemaSvc schema.Service, pageSvc page.Service) Controller {
+func NewController(schemaSvc schema.Service, pageSvc page.Service, routeSvc route.Service) Controller {
 	return Controller{
 		schemaSvc: schemaSvc,
 		pageSvc:   pageSvc,
+		routeSvc:  routeSvc,
 	}
 }
 
@@ -216,6 +219,16 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 	}
 	dto.enhanceFromModel(pageModel)
 
+	pageKey := pageModel.SchemaName + "/" + pageModel.Identifier
+	if latestRoute, err := pc.routeSvc.GetLatestVersion(c.Request.Context(), pageKey); err != nil {
+		log.Error().
+			Err(err).
+			Str("pageKey", pageKey).
+			Msg("failed to get latest route")
+	} else if latestRoute != nil {
+		dto.Route = latestRoute.Route
+	}
+
 	ctx := map[string]any{
 		"class":      class,
 		"identifier": identifier,
@@ -239,4 +252,16 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 	}
 
 	return output, false
+}
+
+func (pc *Controller) GetValidSlug(c *gin.Context) {
+	customRoute := c.PostForm("route")
+
+	slug, err := pc.routeSvc.GetValidSlug(c.Request.Context(), customRoute)
+	if err != nil {
+		c.Data(http.StatusBadRequest, "text/plain", []byte(err.Error()))
+		return
+	}
+
+	c.Data(http.StatusOK, "text/plain", []byte(slug))
 }

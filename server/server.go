@@ -13,6 +13,7 @@ import (
 	"github.com/domahidizoltan/zhero/controller/router"
 	"github.com/domahidizoltan/zhero/data/db/sqlite"
 	"github.com/domahidizoltan/zhero/domain/page"
+	"github.com/domahidizoltan/zhero/domain/route"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/domain/schemaorg"
 	"github.com/domahidizoltan/zhero/pkg/database"
@@ -22,6 +23,7 @@ import (
 	"github.com/domahidizoltan/zhero/pkg/session"
 	page_repo "github.com/domahidizoltan/zhero/repository/page"
 	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
+	route_repo "github.com/domahidizoltan/zhero/repository/route"
 	"github.com/gin-gonic/gin"
 
 	"github.com/rs/zerolog/log"
@@ -135,11 +137,14 @@ func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
 	metaRepo := meta_repo.NewRepo(db)
 	metaSvc := schema.NewService(metaRepo, schemaorgSvc)
 	pageRepo := page_repo.NewRepo(db, cfg.App.Pagination.DefaultPageSize)
-	pageSvc := page.NewService(pageRepo)
+	routeRepo := route_repo.NewRepo(db)
+	routeSvc := route.NewService(routeRepo)
+	pageSvc := page.NewService(pageRepo, routeSvc)
 
 	return router.Services{
 		Schema:              metaSvc,
 		Page:                pageSvc,
 		DynamicPageRenderer: pagerenderer.NewDynamicPageRenderer(),
+		Route:               routeSvc,
 	}
 }

@@ -72,6 +72,9 @@ func (ctrl *Controller) Page(c *gin.Context) {
 }
 
 func (ctrl *Controller) LoadPage(c *gin.Context, onlyEnabled bool) {
+	if c.Param("skipLoadPage") != "" {
+		return
+	}
 	class := c.Param("class")
 	identifier := c.Param("identifier")
 

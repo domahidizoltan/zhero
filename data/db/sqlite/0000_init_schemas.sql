@@ -26,3 +26,10 @@ CREATE TABLE IF NOT EXISTS page (
 CREATE INDEX IF NOT EXISTS page_schema_id_idx ON page(schema_name, identifier);
 
 CREATE VIRTUAL TABLE IF NOT EXISTS page_search USING FTS5(schema_name, identifier, col0, col1, col2, col3, col4);
+
+CREATE TABLE IF NOT EXISTS route (
+    route TEXT PRIMARY KEY,
+    page TEXT NOT NULL,
+    version INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_route_page_version ON route(page, version);

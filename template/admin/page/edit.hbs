@@ -23,6 +23,42 @@
       </div>
     </div>
 
+    <div class="mb-6">
+      <details class="collapse collapse-arrow bg-secondary/10 border border-secondary/30 rounded-lg">
+        <summary class="collapse-title text-sm font-semibold text-secondary after:start-5 after:end-auto ps-12">Meta</summary>
+        <div class="collapse-content border-t border-secondary/30">
+          <div class="form-control">
+            <label class="label" for="route">
+              <span class="label-text">route</span>
+            </label>
+            <div id="route-wrapper">
+              <input
+                type="text"
+                id="route"
+                name="route"
+                class="input input-bordered w-full validator"
+                placeholder="/{{class}}/{{identifier}}"
+                value="{{page.route}}"
+                hx-post="/admin/page/get-valid-slug"
+                hx-trigger="blur"
+                hx-on:htmx:before-request="document.getElementById('route').setCustomValidity(''); document.getElementById('route-error').classList.add('hidden');"
+                hx-on:htmx:after-request="if (event.detail.failed) {
+                  document.getElementById('route').setCustomValidity(event.detail.xhr.response);
+                  with (document.getElementById('route-error')) {
+                    innerHTML=event.detail.xhr.response;
+                    classList.remove('hidden');
+                  };
+                } else {
+                  document.getElementById('route').value=event.detail.xhr.response;
+                }"
+              />
+              <div id="route-error" class="validator-hint hidden"></div>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+
     <div class="space-y-4">
       {{#each page.fields}}
         <div class="form-control">
@@ -75,7 +111,8 @@
         </div>
       {{/each}}
     </div>
-    <!--
+
+   <!--
         <textarea
           id="content"
           name="content"

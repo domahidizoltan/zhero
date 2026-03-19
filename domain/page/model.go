@@ -7,6 +7,7 @@ const MaxSearchVals = 5
 
 type (
 	Page struct {
+		Route               string
 		SchemaName          string
 		Identifier          string
 		SecondaryIdentifier string

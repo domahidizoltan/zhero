@@ -10,6 +10,7 @@ import (
 
 type (
 	pageDto struct {
+		Route               string
 		SchemaName          string
 		Fields              []fieldDto
 		Identifier          string
@@ -64,6 +65,7 @@ func (dto *pageDto) EnhanceFromForm(c *gin.Context) {
 		dto.Fields[i].Value = c.PostForm("field-" + f.Name)
 	}
 	dto.IsEnabled = c.PostForm("is-enabled") == "on"
+	dto.Route = c.PostForm("route")
 }
 
 func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
@@ -72,6 +74,7 @@ func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
 	}
 
 	dto.IsEnabled = p.IsEnabled
+	dto.Route = p.Route
 	for i, f := range dto.Fields {
 		if val, ok := p.Data[f.Name]; ok {
 			dto.Fields[i].Value = val
@@ -93,6 +96,7 @@ func (dto *pageDto) ToModel() page_domain.Page {
 	}
 
 	return page_domain.Page{
+		Route:               dto.Route,
 		SchemaName:          dto.SchemaName,
 		Identifier:          data[dto.Identifier].(string),
 		SecondaryIdentifier: data[dto.SecondaryIdentifier].(string),

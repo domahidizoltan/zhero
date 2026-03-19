@@ -40,6 +40,10 @@ func GetTx(ctx context.Context) *sql.Tx {
 
 func InTx(ctx context.Context, fn func(ctx context.Context) error) error {
 	db := GetDB()
+	if tx := GetTx(ctx); tx != nil {
+		return fn(ctx)
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrTransaction, err)
