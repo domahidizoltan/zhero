@@ -10,16 +10,18 @@ import (
 
 type (
 	pageDto struct {
-		Route               string
-		SchemaName          string
-		Fields              []fieldDto
-		Identifier          string
-		SecondaryIdentifier string
-		CreatedBy           string
-		CreatedAt           time.Time
-		UpdatedBy           string
-		UpdatedAt           time.Time
-		IsEnabled           bool
+		Route                    string
+		SchemaName               string
+		Fields                   []fieldDto
+		Identifier               string
+		SecondaryIdentifier      string
+		SecondaryIdentifierValue any
+		CreatedBy                string
+		CreatedAt                time.Time
+		UpdatedBy                string
+		UpdatedAt                time.Time
+		IsEnabled                bool
+		Meta                     pageMeta
 	}
 
 	fieldDto struct {
@@ -30,6 +32,15 @@ type (
 		Type         string
 		Component    string
 		Value        any
+	}
+
+	pageMeta struct {
+		Title         string
+		Description   string
+		OGTitle       string
+		OGDescription string
+		Rating        string
+		Robots        []string
 	}
 )
 
@@ -66,6 +77,24 @@ func (dto *pageDto) EnhanceFromForm(c *gin.Context) {
 	}
 	dto.IsEnabled = c.PostForm("is-enabled") == "on"
 	dto.Route = c.PostForm("route")
+
+	dto.Meta = pageMeta{
+		Title:         c.PostForm("meta-title"),
+		Description:   c.PostForm("meta-description"),
+		OGTitle:       c.PostForm("meta-og-title"),
+		OGDescription: c.PostForm("meta-og-description"),
+	}
+
+	if c.PostForm("meta-robots-noindex") == "on" {
+		dto.Meta.Robots = append(dto.Meta.Robots, "noindex")
+	}
+	if c.PostForm("meta-robots-nofollow") == "on" {
+		dto.Meta.Robots = append(dto.Meta.Robots, "nofollow")
+	}
+
+	if c.PostForm("meta-rating-adult") == "on" {
+		dto.Meta.Rating = "adult"
+	}
 }
 
 func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
@@ -75,6 +104,8 @@ func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
 
 	dto.IsEnabled = p.IsEnabled
 	dto.Route = p.Route
+	dto.Meta.FromModel(p.Meta)
+	dto.SecondaryIdentifierValue = p.SecondaryIdentifier
 	for i, f := range dto.Fields {
 		if val, ok := p.Data[f.Name]; ok {
 			dto.Fields[i].Value = val
@@ -103,5 +134,68 @@ func (dto *pageDto) ToModel() page_domain.Page {
 		Data:                data,
 		IsEnabled:           dto.IsEnabled,
 		SearchVals:          searchVals,
+		Meta:                dto.Meta.ToModel(),
+	}
+}
+
+func (dto *pageDto) ToMap() map[string]any {
+	if dto == nil {
+		return nil
+	}
+
+	fields := make(map[string]any, len(dto.Fields))
+	for _, f := range dto.Fields {
+		fields[f.Name] = f.Value
+	}
+	return map[string]any{
+		"route":                    dto.Route,
+		"schemaName":               dto.SchemaName,
+		"fields":                   fields,
+		"identifier":               dto.Identifier,
+		"secondaryIdentifier":      dto.SecondaryIdentifier,
+		"secondaryIdentifierValue": dto.SecondaryIdentifierValue,
+		"isEnabled":                dto.IsEnabled,
+		"meta":                     dto.Meta.ToMap(),
+	}
+}
+
+func (dm *pageMeta) FromModel(pm page_domain.PageMeta) {
+	*dm = pageMeta{
+		Title:         pm.Title,
+		Description:   pm.Description,
+		OGTitle:       pm.OGTitle,
+		OGDescription: pm.OGDescription,
+		Rating:        pm.Rating,
+		Robots:        pm.Robots,
+	}
+}
+
+func (dm *pageMeta) ToModel() page_domain.PageMeta {
+	if dm == nil {
+		return page_domain.PageMeta{}
+	}
+
+	return page_domain.PageMeta{
+		Title:         dm.Title,
+		Description:   dm.Description,
+		OGTitle:       dm.OGTitle,
+		OGDescription: dm.OGDescription,
+		Rating:        dm.Rating,
+		Robots:        dm.Robots,
+	}
+}
+
+func (dm *pageMeta) ToMap() map[string]any {
+	if dm == nil {
+		return nil
+	}
+
+	return map[string]any{
+		"title":         dm.Title,
+		"description":   dm.Description,
+		"rating":        dm.Rating,
+		"robots":        dm.Robots,
+		"ogTitle":       dm.OGTitle,
+		"ogDescription": dm.OGDescription,
 	}
 }

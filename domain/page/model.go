@@ -14,6 +14,16 @@ type (
 		Data                map[string]any
 		IsEnabled           bool
 		SearchVals          [MaxSearchVals]any
+		Meta                PageMeta
+	}
+
+	PageMeta struct {
+		Title         string   `json:"title,omitempty"`
+		Description   string   `json:"description,omitempty"`
+		OGTitle       string   `json:"ogTitle,omitempty"`
+		OGDescription string   `json:"ogDescription,omitempty"`
+		Rating        string   `json:"rating,omitempty"`
+		Robots        []string `json:"robots,omitempty"`
 	}
 
 	ListOptions struct {
@@ -21,3 +31,14 @@ type (
 		SecondaryIdentifierLike string
 	}
 )
+
+func (pm PageMeta) ToMap() map[string]any {
+	return map[string]any{
+		"title":         pm.Title,
+		"description":   pm.Description,
+		"rating":        pm.Rating,
+		"robots":        pm.Robots,
+		"ogTitle":       pm.OGTitle,
+		"ogDescription": pm.OGDescription,
+	}
+}

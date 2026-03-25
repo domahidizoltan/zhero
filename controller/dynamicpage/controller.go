@@ -9,6 +9,7 @@ import (
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/collection"
 	"github.com/domahidizoltan/zhero/pkg/paging"
+	"github.com/domahidizoltan/zhero/pkg/url"
 	"github.com/gin-gonic/gin"
 )
 
@@ -64,7 +65,9 @@ func (ctrl *Controller) List(c *gin.Context) {
 		return
 	}
 
-	template.WithLayout(c, content)
+	listMeta := map[string]any{} // TODO list page meta
+	listMeta["canonicalURL"] = url.Canonical(c.Request)
+	template.WithLayout(c, listMeta, content)
 }
 
 func (ctrl *Controller) Page(c *gin.Context) {
@@ -90,20 +93,31 @@ func (ctrl *Controller) LoadPage(c *gin.Context, onlyEnabled bool) {
 	}
 
 	dataFn := func(schema.SchemaMeta) map[string]any { return page.Data }
-	ctrl.Render(c, class, dataFn)
+
+	if page.Meta.Title == "" {
+		page.Meta.Title = page.SecondaryIdentifier
+	}
+	if page.Meta.OGTitle == "" {
+		page.Meta.OGTitle = page.SecondaryIdentifier
+	}
+	pageMeta := page.Meta.ToMap()
+	pageMeta["canonicalURL"] = url.Canonical(c.Request)
+
+	ctrl.Render(c, class, pageMeta, dataFn)
 }
 
-func (ctrl *Controller) Render(c *gin.Context, class string, dataFn func(schema.SchemaMeta) map[string]any) {
-	meta, err := ctrl.schemaSvc.GetSchemaMetaByName(c, class)
+func (ctrl *Controller) Render(c *gin.Context, class string, pageMeta map[string]any, dataFn func(schema.SchemaMeta) map[string]any) {
+	schemaMeta, err := ctrl.schemaSvc.GetSchemaMetaByName(c, class)
 	if err != nil {
 		controller.InternalServerError(c, "failed to get schema data", err)
 		return
 	}
 
-	content, err := ctrl.dynamicPageRdr.Render(*meta, dataFn(*meta))
+	body, err := ctrl.dynamicPageRdr.Render(*schemaMeta, dataFn(*schemaMeta))
 	if err != nil {
 		controller.InternalServerError(c, "failed to generate page", err)
 		return
 	}
-	template.WithLayout(c, content)
+
+	template.WithLayout(c, pageMeta, body)
 }

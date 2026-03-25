@@ -33,6 +33,15 @@ func (s Service) AssignRoute(ctx context.Context, customRoute, pageKey string) e
 	}
 
 	return database.InTx(ctx, func(ctx context.Context) error {
+		route, err := s.repo.GetByRoute(ctx, customRoute)
+		if err != nil {
+			return err
+		}
+
+		if route != nil {
+			return nil
+		}
+
 		return s.repo.Create(ctx, slug, pageKey)
 	})
 }

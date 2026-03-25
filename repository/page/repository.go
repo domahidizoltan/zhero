@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	selectPage = `SELECT secondary_identifier, data, enabled FROM page WHERE schema_name = ? AND identifier = ?;`
-	insertPage = `INSERT INTO page (schema_name, identifier, secondary_identifier, data, enabled) VALUES (?, ?, ?, ?, ?);`
+	selectPage = `SELECT secondary_identifier, data, meta, enabled FROM page WHERE schema_name = ? AND identifier = ?;`
+	insertPage = `INSERT INTO page (schema_name, identifier, secondary_identifier, data, meta, enabled) VALUES (?, ?, ?, ?, ?, ?);`
 	updatePage = `UPDATE page
-		SET secondary_identifier = ?, data = ?, enabled = ?
+		SET secondary_identifier = ?, data = ?, meta = ?, enabled = ?
 		WHERE schema_name = ? AND identifier = ?;`
 	enablePage = `UPDATE page SET enabled = ? WHERE schema_name = ? AND identifier = ?;`
 	deletePage = `DELETE FROM page WHERE schema_name = ? AND identifier = ?;`
@@ -73,8 +73,13 @@ func (r *Repository) Insert(ctx context.Context, page domain.Page, idField strin
 		return "", fmt.Errorf("failed to serialize page data to JSON: %w", err)
 	}
 
+	metaJSON, err := json.Marshal(page.Meta)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize page meta to JSON: %w", err)
+	}
+
 	if _, err := tx.ExecContext(ctx, insertPage,
-		page.SchemaName, newID.String(), page.SecondaryIdentifier, dataJSON, page.IsEnabled); err != nil {
+		page.SchemaName, newID.String(), page.SecondaryIdentifier, dataJSON, metaJSON, page.IsEnabled); err != nil {
 		return "", err
 	}
 
@@ -100,8 +105,14 @@ func (r *Repository) Update(ctx context.Context, identifier string, page domain.
 		return fmt.Errorf("failed to serialize page data to JSON: %w", err)
 	}
 
+	metaJSON, err := json.Marshal(page.Meta)
+	if err != nil {
+		return fmt.Errorf("failed to serialize page meta to JSON: %w", err)
+	}
+
 	if _, err := tx.ExecContext(ctx, updatePage,
-		page.SecondaryIdentifier, dataJSON, page.IsEnabled, page.SchemaName, identifier); err != nil {
+		page.SecondaryIdentifier, dataJSON, metaJSON, page.IsEnabled, page.SchemaName, identifier); err != nil {
+		fmt.Println("errrrr", err)
 		return err
 	}
 
@@ -130,16 +141,22 @@ func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schem
 		SchemaName: schemaName,
 		Identifier: identifier,
 	}
-	var dataJSON string
-	if err := row.Scan(&page.SecondaryIdentifier, &dataJSON, &page.IsEnabled); err != nil {
+	var dataJSON, metaJSON sql.NullString
+	if err := row.Scan(&page.SecondaryIdentifier, &dataJSON, &metaJSON, &page.IsEnabled); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
 
-	if err := json.Unmarshal([]byte(dataJSON), &page.Data); err != nil {
+	if err := json.Unmarshal([]byte(dataJSON.String), &page.Data); err != nil {
 		return nil, err
+	}
+
+	if metaJSON.Valid && metaJSON.String != "" {
+		if err := json.Unmarshal([]byte(metaJSON.String), &page.Meta); err != nil {
+			return nil, fmt.Errorf("failed to deserialize page meta: %w", err)
+		}
 	}
 
 	return &page, nil

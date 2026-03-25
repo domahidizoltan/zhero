@@ -191,7 +191,6 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 	}
 
 	dto = PageDtoFrom(meta)
-
 	errorMsg, successMsg := "", ""
 	if hasFormSubmitted {
 		dto.EnhanceFromForm(c)
@@ -215,18 +214,20 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 
 	pageModel, err := pc.pageSvc.GetPageBySchemaNameAndIdentifier(c.Request.Context(), class, identifier, false)
 	if err != nil {
-		controller.InternalServerError(c, "failed to load page date", err)
+		controller.InternalServerError(c, "failed to load page data", err)
+		return "", true
 	}
-	dto.enhanceFromModel(pageModel)
-
-	pageKey := pageModel.SchemaName + "/" + pageModel.Identifier
-	if latestRoute, err := pc.routeSvc.GetLatestVersion(c.Request.Context(), pageKey); err != nil {
-		log.Error().
-			Err(err).
-			Str("pageKey", pageKey).
-			Msg("failed to get latest route")
-	} else if latestRoute != nil {
-		dto.Route = latestRoute.Route
+	if pageModel != nil {
+		dto.enhanceFromModel(pageModel)
+		pageKey := pageModel.SchemaName + "/" + pageModel.Identifier
+		if latestRoute, err := pc.routeSvc.GetLatestVersion(c.Request.Context(), pageKey); err != nil {
+			log.Error().
+				Err(err).
+				Str("pageKey", pageKey).
+				Msg("failed to get latest route")
+		} else if latestRoute != nil {
+			dto.Route = latestRoute.Route
+		}
 	}
 
 	ctx := map[string]any{
@@ -234,6 +235,7 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 		"identifier": identifier,
 		"page":       dto,
 	}
+
 	body, err := tpl.AdminPageEdit.Exec(ctx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)

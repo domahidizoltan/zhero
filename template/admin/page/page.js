@@ -44,3 +44,18 @@ function submitPreview(cls) {
     form.target = restoreTarget;
   }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("[data-soft-limit]").forEach(function (el) {
+    var limit = parseInt(el.getAttribute("data-soft-limit"));
+    var check = function () {
+      if (el.value.length > limit) {
+        el.classList.add("bg-yellow-100");
+      } else {
+        el.classList.remove("bg-yellow-100");
+      }
+    };
+    check();
+    el.addEventListener("input", check);
+  });
+});

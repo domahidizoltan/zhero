@@ -31,8 +31,9 @@ func AdminIndex(c *gin.Context, content Content) (string, error) {
 	return output, nil
 }
 
-func WithLayout(c *gin.Context, body string) {
-	content, err := template.Index.Exec(map[string]any{"body": raymond.SafeString(body)})
+func WithLayout(c *gin.Context, meta map[string]any, body string) {
+	hbCtx := map[string]any{"meta": meta, "body": raymond.SafeString(body)}
+	content, err := template.Index.Exec(hbCtx)
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return
@@ -46,7 +47,7 @@ func PageNotFoundLayout(c *gin.Context) {
 		controller.TemplateRenderError(c, err)
 		return
 	}
-	WithLayout(c, content)
+	WithLayout(c, nil, content)
 }
 
 func handleFlash(c *gin.Context, content *Content) {

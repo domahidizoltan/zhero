@@ -74,7 +74,7 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 		}
 
 		if len(schemaNames) == 0 {
-			template_ctrl.WithLayout(c, "empty")
+			template_ctrl.WithLayout(c, nil, "empty")
 			return
 		}
 
@@ -86,6 +86,7 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 
 	router.POST("/preview/:class", previewCtrl.InFlightPage)
 	router.GET("/preview/:class/:identifier", previewCtrl.LoadPage)
+	router.GET("/:class", dynamicPageCtrl.List)
 
 	router.Use(CustomRouteMiddleware(svc, dynamicPageCtrl))
 

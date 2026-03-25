@@ -27,7 +27,7 @@
       <details class="collapse collapse-arrow bg-secondary/10 border border-secondary/30 rounded-lg">
         <summary class="collapse-title text-sm font-semibold text-secondary after:start-5 after:end-auto ps-12">Meta</summary>
         <div class="collapse-content border-t border-secondary/30">
-          <div class="form-control">
+          <div class="form-control mb-4">
             <label class="label" for="route">
               <span class="label-text">route</span>
             </label>
@@ -55,6 +55,102 @@
               <div id="route-error" class="validator-hint hidden"></div>
             </div>
           </div>
+
+          <div class="divider"></div>
+
+          <!-- Meta Title -->
+          <div class="form-control mb-4">
+            <label class="label" for="meta-title">Meta Title</label>
+            <input
+              type="text"
+              id="meta-title"
+              name="meta-title"
+              class="input input-bordered w-full"
+              placeholder="{{page.secondaryIdentifierValue}}"
+              value="{{page.meta.title}}"
+              data-soft-limit="60"
+            />
+          </div>
+
+          <!-- Meta Description -->
+          <div class="form-control mb-4">
+            <label class="label" for="meta-description">Meta Description</label>
+            <textarea
+              id="meta-description"
+              name="meta-description"
+              class="textarea textarea-bordered w-full"
+              data-soft-limit="160"
+            >{{page.meta.description}}</textarea>
+          </div>
+
+          
+          <!-- Robots -->
+          <div class="form-control mb-4">
+            <label class="label">robots directive</label>
+            <div class="flex gap-4">
+              <label class="label cursor-pointer gap-2">
+                <input
+                  type="checkbox"
+                  name="meta-robots-noindex"
+                  class="checkbox"
+                  {{#contains page.meta.robots "noindex"}}checked{{/contains}}
+                />
+                <span class="label-text">noindex</span>
+              </label>
+              <label class="label cursor-pointer gap-2">
+                <input
+                  type="checkbox"
+                  name="meta-robots-nofollow"
+                  class="checkbox"
+                  {{#contains page.meta.robots "nofollow"}}checked{{/contains}}
+                />
+                <span class="label-text">nofollow</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Rating -->
+          <div class="form-control mb-4">
+            <label class="label cursor-pointer gap-2">
+              <input
+                type="checkbox"
+                name="meta-rating-adult"
+                class="checkbox"
+                {{#equal page.meta.rating "adult"}}checked{{/equal}}
+              />
+              <span class="label-text">Adult content (18+)</span>
+            </label>
+          </div>
+
+          <!-- Open Graph Section -->
+          <div class="divider"></div>
+          <h3 class="text-lg font-bold mb-4">Open Graph</h3>
+
+          <!-- OG Title -->
+          <div class="form-control mb-4">
+            <label class="label" for="meta-og-title">OG Title</label>
+            <input
+              type="text"
+              id="meta-og-title"
+              name="meta-og-title"
+              class="input input-bordered w-full"
+              placeholder="{{page.secondaryIdentifierValue}}"
+              value="{{page.meta.OGTitle}}"
+              data-soft-limit="60"
+            />
+          </div>
+
+          <!-- OG Description -->
+          <div class="form-control mb-4">
+            <label class="label" for="meta-og-description">OG Description</label>
+            <textarea
+              id="meta-og-description"
+              name="meta-og-description"
+              class="textarea textarea-bordered w-full"
+              data-soft-limit="300"
+            >{{page.meta.OGDescription}}</textarea>
+          </div>
+
         </div>
       </details>
     </div>

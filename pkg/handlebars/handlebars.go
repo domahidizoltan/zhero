@@ -22,7 +22,9 @@ var (
 		"beautify":       beautify,
 		"use":            use,
 		"compareAndUse":  compareAndUse,
+		"contains":       contains,
 		"htmxSortButton": htmxSortButton,
+		"join":           join,
 	}
 )
 
@@ -55,6 +57,17 @@ func compareAndUse(use string, enabled bool, optionVal, comparisonVal any) strin
 		return use
 	}
 	return ""
+}
+
+func contains(val, substr string, options *raymond.Options) string {
+	if strings.Contains(val, substr) {
+		return options.Fn()
+	}
+	return ""
+}
+
+func join(val []string, separator string) string {
+	return strings.Join(val, separator)
 }
 
 func htmxSortButton(getURL, targetID, class, label, sortField, actualQuery string) string {

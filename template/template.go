@@ -11,7 +11,7 @@ const admin = "admin/"
 
 var (
 	//go:embed admin/*
-	//go:embed *.css *.hbs
+	//go:embed *.css *.hbs *.js
 	//go:embed paging/*
 	templates embed.FS
 
@@ -35,6 +35,7 @@ var (
 	PaginationPartial = mustParse("paging/pagination.partial.hbs")
 
 	Assets = map[string][]byte{
+		"/index.js":  mustLoad("index.js"),
 		"/index.css": mustLoad("index.css"),
 	}
 )

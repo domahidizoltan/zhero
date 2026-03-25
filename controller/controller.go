@@ -11,12 +11,12 @@ import (
 )
 
 type UserFacingPageRenderer interface {
-	Render(meta schema.SchemaMeta, data map[string]any) (string, error)
+	Render(schemaMeta schema.SchemaMeta, data map[string]any) (string, error)
 }
 
 type UserFacingPageListRenderer interface {
 	UserFacingPageRenderer
-	List(meta schema.SchemaMeta, data []map[string]any, paging paging.Meta) (string, error)
+	List(schemaMeta schema.SchemaMeta, data []map[string]any, paging paging.Meta) (string, error)
 }
 
 func TemplateRenderError(c *gin.Context, err error) {
