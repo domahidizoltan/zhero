@@ -1,7 +1,11 @@
 package adminpage
 
 import (
+	"regexp"
+	"strings"
 	"time"
+
+	"golang.org/x/exp/slices"
 
 	page_domain "github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
@@ -16,6 +20,8 @@ type (
 		Identifier               string
 		SecondaryIdentifier      string
 		SecondaryIdentifierValue any
+		ListableData             map[string]any
+		References               []string
 		CreatedBy                string
 		CreatedAt                time.Time
 		UpdatedBy                string
@@ -29,9 +35,12 @@ type (
 		Order        uint
 		IsMandatory  bool
 		IsSearchable bool
+		IsListable   bool
 		Type         string
 		Component    string
+		InputType    bool
 		Value        any
+		References   []string
 	}
 
 	pageMeta struct {
@@ -58,13 +67,20 @@ func PageDtoFrom(meta *schema.SchemaMeta) pageDto {
 
 	dto.Fields = make([]fieldDto, 0, len(meta.Properties))
 	for _, p := range meta.Properties {
+		component := p.Component
+		// Auto-determine component if empty or legacy "TODO"
+		if component == "" || component == "TODO" {
+			component = determineComponent(p.Type, p.Name)
+		}
 		dto.Fields = append(dto.Fields, fieldDto{
 			Name:         p.Name,
 			Order:        p.Order,
 			IsMandatory:  p.Mandatory,
 			IsSearchable: p.Searchable,
+			IsListable:   p.Listable,
 			Type:         p.Type,
-			Component:    p.Component,
+			Component:    component,
+			InputType:    slices.Contains([]string{"Color", "Email", "File", "Tel", "URL", "Number", "Date", "DateTime", "Time"}, component),
 		})
 	}
 
@@ -106,6 +122,7 @@ func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
 	dto.Route = p.Route
 	dto.Meta.FromModel(p.Meta)
 	dto.SecondaryIdentifierValue = p.SecondaryIdentifier
+	dto.ListableData = p.ListableData
 	for i, f := range dto.Fields {
 		if val, ok := p.Data[f.Name]; ok {
 			dto.Fields[i].Value = val
@@ -117,14 +134,36 @@ func (dto *pageDto) ToModel() page_domain.Page {
 	searchVals := [page_domain.MaxSearchVals]any{}
 	data := make(map[string]any, len(dto.Fields))
 	scIdx := 0
+	listableData := make(map[string]any)
+	references := make([]string, 0)
+
 	for _, f := range dto.Fields {
 		val := f.Value
+		data[f.Name] = val
+
+		if f.IsListable {
+			listableData[f.Name] = val
+		}
+
 		if f.IsSearchable && f.Name != dto.SecondaryIdentifier && scIdx < 5 {
 			searchVals[scIdx] = f.Value
 			scIdx++
 		}
-		data[f.Name] = val
+
+		// Collect references from fields (will be extracted via extractReferences)
+		references = append(references, f.References...)
 	}
+
+	// Deduplicate references
+	refSet := make(map[string]struct{})
+	for _, ref := range references {
+		refSet[ref] = struct{}{}
+	}
+	uniqueRefs := make([]string, 0, len(refSet))
+	for ref := range refSet {
+		uniqueRefs = append(uniqueRefs, ref)
+	}
+	slices.Sort(uniqueRefs)
 
 	return page_domain.Page{
 		Route:               dto.Route,
@@ -135,7 +174,43 @@ func (dto *pageDto) ToModel() page_domain.Page {
 		IsEnabled:           dto.IsEnabled,
 		SearchVals:          searchVals,
 		Meta:                dto.Meta.ToModel(),
+		ListableData:        listableData,
+		References:          uniqueRefs,
 	}
+}
+
+// TODO: extractReferences scans text fields for #ZHERO#... reference patterns
+func (dto *pageDto) extractReferences() {
+	refPattern := regexp.MustCompile(`#ZHERO#([^#]+)#\{([^}]*)\}#`)
+	refSet := make(map[string]struct{})
+
+	for i, f := range dto.Fields {
+		if f.Value == nil {
+			continue
+		}
+		strVal, ok := f.Value.(string)
+		if !ok {
+			continue
+		}
+		// Only extract from Text and TextArea fields
+		if (f.Type == "Text" || f.Type == "TextArea") && strings.Contains(strVal, "#") {
+			matches := refPattern.FindAllStringSubmatch(strVal, -1)
+			fieldRefs := make([]string, 0, len(matches))
+			for _, match := range matches {
+				ref := match[1] // "Thing/123"
+				fieldRefs = append(fieldRefs, ref)
+				refSet[ref] = struct{}{}
+			}
+			dto.Fields[i].References = fieldRefs
+		}
+	}
+
+	// Build global deduplicated references list
+	dto.References = make([]string, 0, len(refSet))
+	for ref := range refSet {
+		dto.References = append(dto.References, ref)
+	}
+	slices.Sort(dto.References)
 }
 
 func (dto *pageDto) ToMap() map[string]any {
@@ -154,6 +229,8 @@ func (dto *pageDto) ToMap() map[string]any {
 		"identifier":               dto.Identifier,
 		"secondaryIdentifier":      dto.SecondaryIdentifier,
 		"secondaryIdentifierValue": dto.SecondaryIdentifierValue,
+		"listableData":             dto.ListableData,
+		"references":               dto.References,
 		"isEnabled":                dto.IsEnabled,
 		"meta":                     dto.Meta.ToMap(),
 	}

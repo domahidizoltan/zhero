@@ -50,8 +50,9 @@ func (ctrl *Controller) List(c *gin.Context) {
 	data := slices.Collect(collection.MapValues(pages, func(p page.Page) map[string]any {
 		id, secID := meta.Identifier, meta.SecondaryIdentifier
 		return map[string]any{
-			id:    p.Identifier,
-			secID: p.SecondaryIdentifier,
+			id:                   p.Identifier,
+			secID:                p.SecondaryIdentifier,
+			"listableProperties": p.ListableData,
 		}
 	}))
 

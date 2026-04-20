@@ -19,17 +19,18 @@ type (
 		SecondaryIdentifier string
 	}
 	schemaPropDto struct {
-		NotUsed       bool
-		Disabled      bool
-		Name          string
-		CanonicalURL  string
-		PossibleTypes []string
-		Description   string
-		Mandatory     bool
-		Searchable    bool
-		SelectedType  string
-		Component     string
-		Order         uint
+		NotUsed           bool
+		Disabled          bool
+		Name              string
+		CanonicalURL      string
+		Description       string
+		Mandatory         bool
+		Searchable        bool
+		Listable          bool
+		SelectedType      string
+		SelectedComponent string
+		PossibleTypes     []string
+		Order             uint
 	}
 )
 
@@ -83,8 +84,9 @@ func schemaPropDtoFrom(orgProp schemaorg.ClassProperty, domain *schema.Property)
 		dto.NotUsed = false
 		dto.Mandatory = domain.Mandatory
 		dto.Searchable = domain.Searchable
+		dto.Listable = domain.Listable
 		dto.SelectedType = domain.Type
-		dto.Component = domain.Component
+		dto.SelectedComponent = domain.Component
 		dto.Order = domain.Order
 	}
 

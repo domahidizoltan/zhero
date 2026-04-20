@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/controller"
@@ -194,6 +196,7 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 	errorMsg, successMsg := "", ""
 	if hasFormSubmitted {
 		dto.EnhanceFromForm(c)
+		dto.extractReferences()
 		page := dto.ToModel()
 
 		var err error
@@ -230,10 +233,25 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 		}
 	}
 
+	// TODO: Build listable properties list for template (slice of {Name, Value})
+	listableProperties := make([]map[string]any, 0)
+	for _, field := range dto.Fields {
+		if field.IsListable {
+			if val, ok := dto.ListableData[field.Name]; ok {
+				listableProperties = append(listableProperties, map[string]any{
+					"name":  field.Name,
+					"value": val,
+				})
+			}
+		}
+	}
+
 	ctx := map[string]any{
-		"class":      class,
-		"identifier": identifier,
-		"page":       dto,
+		"class":              class,
+		"identifier":         identifier,
+		"page":               dto,
+		"listableData":       dto.ListableData,
+		"listableProperties": listableProperties,
 	}
 
 	body, err := tpl.AdminPageEdit.Exec(ctx)
@@ -266,4 +284,117 @@ func (pc *Controller) GetValidSlug(c *gin.Context) {
 	}
 
 	c.Data(http.StatusOK, "text/plain", []byte(slug))
+}
+
+// TODO: Helper to get listable property names for a schema
+func getListablePropertyNames(meta *schema.SchemaMeta) []string {
+	names := []string{}
+	for _, p := range meta.Properties {
+		if p.Listable {
+			names = append(names, p.Name)
+		}
+	}
+	return names
+}
+
+// TODO: determineComponent automatically selects the appropriate HTML component based on Type and Name
+func determineComponent(propType, propName string) string {
+	nameLower := strings.ToLower(propName)
+	switch {
+	case strings.Contains(nameLower, "color"):
+		return "Color"
+	case strings.Contains(nameLower, "email"):
+		return "Email"
+	case strings.Contains(nameLower, "file"):
+		return "File"
+	case strings.Contains(nameLower, "phone") || strings.Contains(nameLower, "tel"):
+		return "Tel"
+	}
+
+	switch propType {
+	case "Boolean":
+		return "Checkbox"
+	case "Date":
+		return "Date"
+	case "DateTime":
+		return "DateTime"
+	case "Number", "Integer", "Float":
+		return "Number"
+	case "Quantity":
+		return "TextInput"
+	case "Text":
+		return "TextInput"
+	case "URL":
+		return "URL"
+	case "Time":
+		return "Time"
+	default:
+		// For any other type (Object, or schema.org types like "Person", "Organization")
+		return "ReferenceSearch"
+	}
+}
+
+// TODO: SearchReferences handles HTMX/JSON search for references
+func (pc *Controller) SearchReferences(c *gin.Context) {
+	schema := c.Query("schema")
+	query := c.Query("q")
+	field := c.Query("field")
+
+	refs, err := pc.pageSvc.SearchReferences(c, schema, query)
+	if err != nil {
+		controller.InternalServerError(c, "search failed", err)
+		return
+	}
+
+	// Render partial HTML for HTMX
+	output, err := tpl.AdminReferenceSearchResults.Exec(map[string]any{
+		"references": refs,
+		"field":      field,
+	})
+	if err != nil {
+		controller.TemplateRenderError(c, err)
+		return
+	}
+	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
+}
+
+// TODO: ReferenceModal returns the reference selection modal
+func (pc *Controller) ReferenceModal(c *gin.Context) {
+	schema := c.Query("schema")
+	field := c.Query("field")
+	output, err := tpl.AdminReferenceModal.Exec(map[string]any{
+		"schema": schema,
+		"field":  field,
+	})
+	if err != nil {
+		controller.TemplateRenderError(c, err)
+		return
+	}
+	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
+}
+
+// TODO: ReferenceSelect inserts reference into field and returns updated input
+func (pc *Controller) ReferenceSelect(c *gin.Context) {
+	field := c.Query("field")
+	identifier := c.Query("identifier")
+	secondary := c.Query("secondary")
+	linkText := c.Query("link-text")
+	altText := c.Query("alt-text")
+
+	// Use secondary identifier as default linkText if not provided
+	if linkText == "" {
+		linkText = secondary
+	}
+	if altText == "" {
+		altText = secondary
+	}
+
+	refPath := fmt.Sprintf("%s/%s", c.Query("schema"), identifier)
+	props := fmt.Sprintf(`{'linkText':'%s','altText':'%s'}`,
+		url.QueryEscape(linkText), url.QueryEscape(altText))
+	reference := fmt.Sprintf("#ZHERO#%s#%s#", refPath, props)
+
+	c.String(http.StatusOK,
+		fmt.Sprintf(`<input type="text" id="field-%s" name="field-%s" class="input input-bordered w-full" value="%s" />`,
+			field, field, reference))
 }

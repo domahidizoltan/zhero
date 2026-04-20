@@ -1,0 +1,16 @@
+<div class="modal modal-open">
+  <div class="modal-box max-w-2xl">
+    <h3 class="font-bold text-lg mb-4">Search Reference</h3>
+    <div class="flex gap-2">
+      <input type="text" name="reference-query" class="input input-bordered w-full"
+        placeholder="Search by Identifier or Secondary Identifier..."
+        hx-get="/admin/page/search-references?schema={{schema}}&field={{field}}"
+        hx-trigger="keyup changed delay:300ms"
+        hx-target="#reference-results" />
+    </div>
+    <div id="reference-results" class="mt-4"></div>
+    <div class="modal-action">
+      <button class="btn" onclick="document.getElementById('modal-container').innerHTML=''">Cancel</button>
+    </div>
+  </div>
+</div>

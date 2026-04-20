@@ -102,7 +102,12 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 	ctx := map[string]any{
 		"class":       dto,
 		"breadcrumbs": sc.classBreadcrumbs(clsName),
-		"components":  []string{"TODO"},
+		"components": []string{
+			"TextInput", "TextArea", "Checkbox", "Select",
+			"Date", "DateTime", "Time", "Number", "Quantity",
+			"Color", "Email", "File", "Tel", "URL",
+			"ReferenceSearch",
+		},
 	}
 	body, err := tpl.AdminSchemaorgEdit.Exec(ctx)
 	if err != nil {
@@ -128,6 +133,7 @@ func (sc *Controller) edit(c *gin.Context, clsName string, hasFormSubmitted bool
 var (
 	setPropMandatory  = func(p schema.Property, v bool) schema.Property { p.Mandatory = v; return p }
 	setPropSearchable = func(p schema.Property, v bool) schema.Property { p.Searchable = v; return p }
+	setPropListable   = func(p schema.Property, v bool) schema.Property { p.Listable = v; return p }
 )
 
 func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) (*schema.SchemaMeta, []string, error) {
@@ -155,11 +161,15 @@ func (sc *Controller) schemaFromForm(c *gin.Context, clsName string) (*schema.Sc
 	}
 	alterMap(c, "property-mandatory", props, func(p schema.Property) schema.Property { return setPropMandatory(p, true) })
 	alterMap(c, "property-searchable", props, func(p schema.Property) schema.Property { return setPropSearchable(p, true) })
+	alterMap(c, "property-listable", props, func(p schema.Property) schema.Property { return setPropListable(p, true) })
 
 	props[schemaToSave.Identifier] = setPropMandatory(props[schemaToSave.Identifier], false)
 	props[schemaToSave.Identifier] = setPropSearchable(props[schemaToSave.Identifier], false)
+	props[schemaToSave.Identifier] = setPropListable(props[schemaToSave.Identifier], false)
+
 	props[schemaToSave.SecondaryIdentifier] = setPropMandatory(props[schemaToSave.SecondaryIdentifier], true)
 	props[schemaToSave.SecondaryIdentifier] = setPropSearchable(props[schemaToSave.SecondaryIdentifier], true)
+	props[schemaToSave.SecondaryIdentifier] = setPropListable(props[schemaToSave.SecondaryIdentifier], true)
 
 	propertyOrder := strings.Split(c.PostForm("property-order"), ",")
 	for i, p := range slices.Collect(collection.Unique(propertyOrder)) {

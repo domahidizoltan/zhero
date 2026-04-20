@@ -12,6 +12,7 @@ type Property struct {
 	Name       string
 	Mandatory  bool
 	Searchable bool
+	Listable   bool
 	Type       string
 	Component  string
 	Order      uint

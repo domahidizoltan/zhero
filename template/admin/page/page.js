@@ -59,3 +59,21 @@ document.addEventListener("DOMContentLoaded", function () {
     el.addEventListener("input", check);
   });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("keyup", function (e) {
+    if (e.key === "#" && e.target.matches('input[name^="field-"]')) {
+      const fieldName = e.target.name.replace("field-", "");
+      const form = e.target.closest("form");
+      const schema = form.action.split("/").pop();
+      htmx.ajax(
+        "GET",
+        `/admin/page/reference-modal?schema=${schema}&field=${fieldName}`,
+        {
+          target: "#modal-container",
+          pushUrl: false,
+        },
+      );
+    }
+  });
+});

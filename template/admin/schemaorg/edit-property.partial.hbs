@@ -31,6 +31,18 @@
         {{use "checked" isLoadedClass searchable}}
       />
     </label>
+    <label class="label cursor-pointer" title="Show in public listings">
+      <span class="label-text mr-2">Listable</span>
+      <input
+        type="checkbox"
+        class="checkbox checkbox-sm"
+        id="listable-prop-{{name}}"
+        name="property-listable"
+        value="{{name}}"
+        {{#if listable}}checked{{/if}}
+        {{#if (eq name ../class.identifier)}}disabled{{/if}}
+      />
+    </label>
   </div>
   <h3 class="text-lg font-semibold">{{name}}<a
       href="{{canonicalURL}}"
@@ -42,7 +54,7 @@
   <div class="grid grid-cols-2 gap-4">
     <div class="flex items-center gap-x-2">
       <label class="label-text" for="prop-type-{{name}}">Type</label>
-      <select id="prop-type-{{name}}" name="property-type" class="select select-bordered w-full">
+      <select id="prop-type-{{name}}" name="property-type" class="select select-bordered w-full" data-selected-component="{{name}}={{selectedComponent}}">
         {{#each possibleTypes}}
           <option {{compareAndUse "selected" isLoadedClass selectedType . }}>{{.}}</option>
         {{/each}}
@@ -58,9 +70,6 @@
         name="property-component"
         class="select select-bordered w-full"
       >
-        {{#each components}}
-          <option {{compareAndUse "selected" isLoadedClass selectedComponent . }}>{{.}}</option>
-        {{/each}}
       </select>
     </div>
   </div>

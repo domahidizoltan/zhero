@@ -23,9 +23,9 @@ const (
 	selectSchemaMetaNames  = `SELECT name FROM schema_meta ORDER BY name asc;`
 
 	deleteSchemaMetaProps             = `DELETE FROM schema_meta_properties WHERE schema_name = ?;`
-	insertSchemaMetaPropsPrefix       = `INSERT INTO schema_meta_properties (schema_name, name, mandatory, searchable, [type], component, [order]) VALUES `
+	insertSchemaMetaPropsPrefix       = `INSERT INTO schema_meta_properties (schema_name, name, mandatory, searchable, listable, [type], component, [order]) VALUES `
 	selectSchemaMetaPropsBySchemaName = `
-		SELECT name, mandatory, searchable, [type], component, [order]
+		SELECT name, mandatory, searchable, listable, [type], component, [order]
 		FROM schema_meta_properties
 		WHERE schema_name = ?
 		ORDER BY [order] ASC;
@@ -54,11 +54,11 @@ func (r *Repository) Upsert(ctx context.Context, schema domain.SchemaMeta) error
 		return err
 	}
 
-	insertProps := insertSchemaMetaPropsPrefix + strings.Repeat("(?, ?, ?, ?, ?, ?, ?),", len(schema.Properties))
+	insertProps := insertSchemaMetaPropsPrefix + strings.Repeat("(?, ?, ?, ?, ?, ?, ?, ?),", len(schema.Properties))
 	insertProps = insertProps[:len(insertProps)-1] + ";"
-	propValues := make([]any, 0, len(schema.Properties)*7)
+	propValues := make([]any, 0, len(schema.Properties)*8)
 	for _, prop := range schema.Properties {
-		propValues = append(propValues, schema.Name, prop.Name, prop.Mandatory, prop.Searchable, prop.Type, prop.Component, prop.Order)
+		propValues = append(propValues, schema.Name, prop.Name, prop.Mandatory, prop.Searchable, prop.Listable, prop.Type, prop.Component, prop.Order)
 	}
 
 	if _, err := tx.ExecContext(ctx, insertProps, propValues...); err != nil {
@@ -89,7 +89,7 @@ func (r *Repository) GetByClassName(ctx context.Context, name string) (*domain.S
 		}
 
 		var prop domain.Property
-		if err := rows.Scan(&prop.Name, &prop.Mandatory, &prop.Searchable, &prop.Type, &prop.Component, &prop.Order); err != nil {
+		if err := rows.Scan(&prop.Name, &prop.Mandatory, &prop.Searchable, &prop.Listable, &prop.Type, &prop.Component, &prop.Order); err != nil {
 			return nil, err
 		}
 		schema.Properties = append(schema.Properties, prop)

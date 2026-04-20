@@ -1,0 +1,31 @@
+{{#if references}}
+  <div class="overflow-x-auto">
+    <table class="table table-zebra">
+      <thead>
+        <tr>
+          <th>Identifier</th>
+          <th>Secondary Identifier</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each references}}
+          <tr>
+            <td>{{this.identifier}}</td>
+            <td>{{this.secondaryIdentifier}}</td>
+            <td>
+              <button class="btn btn-sm btn-primary"
+                hx-get="/admin/page/reference-select?field={{../field}}&identifier={{this.identifier}}&secondary={{this.secondaryIdentifier}}"
+                hx-target="#field-{{../field}}" hx-swap="outerHTML"
+                hx-on:after-request="document.getElementById('modal-container').innerHTML=''">
+                Select
+              </button>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <p class="text-gray-500">No results found.</p>
+{{/if}}

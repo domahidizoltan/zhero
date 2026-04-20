@@ -181,3 +181,101 @@ function initPropertyOrderWidget(evt) {
     });
   }
 }
+
+function countListableProperties(secondaryIdentifierName) {
+  return function (e) {
+    if (e.target.matches('input[name="property-listable"]')) {
+      let max = 3;
+      max += document.querySelector(
+        `input[name="property-listable"][value="${secondaryIdentifierName}"]`,
+      )
+        ? 1
+        : 0;
+      max += document.querySelector(
+        `input[name="property-listable"][value="thumbnail"]`,
+      )
+        ? 1
+        : document.querySelector(
+              `input[name="property-listable"][value="image"]`,
+            )
+          ? 1
+          : 0;
+
+      const checkedCount = document.querySelectorAll(
+        'input[name="property-listable"]:checked',
+      ).length;
+
+      if (checkedCount > max) {
+        alert(
+          `Maximum ${max} additional listable properties allowed (plus SecondaryIdentifier)`,
+        );
+        e.target.checked = false;
+      }
+    }
+  };
+}
+
+function getTypeComponents(targetID, selectedComponent, typ) {
+  let target = document.getElementById("prop-component-" + targetID);
+  if (!target) {
+    return;
+  }
+
+  let components = [];
+  const t = typ.toLowerCase();
+  if (t.includes("image") || t.includes("thumbnail")) {
+    components = ["URL", "File"];
+  } else if (t.includes("phone") || t.includes("fax")) {
+    components = ["Tel", "TextInput"];
+  } else if (t.includes("email")) {
+    components = ["Email", "TextInput"];
+  } else if (t.includes("color")) {
+    components = ["Color", "TextInput"];
+  } else if (t.includes("url") || t.includes("web")) {
+    components = ["URL", "TextInput"];
+  } else {
+    switch (typ) {
+      case "Boolean":
+        components = ["Checkbox"];
+        break;
+      case ("Date", "DateTime", "Number", "Quantity", "Time"):
+        components = [typ];
+        break;
+      case "Text":
+        components = [
+          "TextInput",
+          "TextArea",
+          "Color",
+          "Email",
+          "Tel",
+          "URL",
+          "Select",
+          "File",
+        ];
+        break;
+      default:
+        components = ["TextInput", "URL", "ReferenceSearch"];
+        break;
+    }
+  }
+
+  while (target.firstChild) {
+    target.removeChild(target.lastChild);
+  }
+  components.forEach((item) => {
+    target.appendChild(new Option(item, item, true, selectedComponent == item));
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("[data-selected-component]").forEach(function (el) {
+    let vals = el.getAttribute("data-selected-component").split("=");
+    let name = vals[0];
+    let selectedComponent = vals[1];
+    getTypeComponents(name, selectedComponent, el.value);
+
+    el.addEventListener("change", function (e) {
+      getTypeComponents(name, selectedComponent, el.value);
+    });
+  });
+});

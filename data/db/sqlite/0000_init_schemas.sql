@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS schema_meta_properties (
     name TEXT NOT NULL,
     mandatory INTEGER DEFAULT 0,
     searchable INTEGER default 0,
+    listable INTEGER DEFAULT 0,
     "type" TEXT NOT NULL,
     component TEXT,
     "order" INTEGER NOT NULL DEFAULT 0
@@ -20,8 +21,10 @@ CREATE TABLE IF NOT EXISTS page (
     schema_name TEXT NOT NULL,
     identifier TEXT NOT NULL,
     secondary_identifier TEXT NOT NULL,
+    listable_data TEXT,
     data TEXT,
     meta TEXT,
+    "references" TEXT,
     enabled INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS page_schema_id_idx ON page(schema_name, identifier);

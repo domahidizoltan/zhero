@@ -18,11 +18,10 @@ import (
 )
 
 const (
-	selectPage = `SELECT secondary_identifier, data, meta, enabled FROM page WHERE schema_name = ? AND identifier = ?;`
-	insertPage = `INSERT INTO page (schema_name, identifier, secondary_identifier, data, meta, enabled) VALUES (?, ?, ?, ?, ?, ?);`
+	selectPage = `SELECT secondary_identifier, listable_data, data, meta, "references", enabled FROM page WHERE schema_name = ? AND identifier = ?;`
+	insertPage = `INSERT INTO page (schema_name, identifier, secondary_identifier, listable_data, data, meta, "references", enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`
 	updatePage = `UPDATE page
-		SET secondary_identifier = ?, data = ?, meta = ?, enabled = ?
-		WHERE schema_name = ? AND identifier = ?;`
+		SET secondary_identifier = ?, listable_data = ?, data = ?, meta = ?, "references" = ?, enabled = ?		WHERE schema_name = ? AND identifier = ?;`
 	enablePage = `UPDATE page SET enabled = ? WHERE schema_name = ? AND identifier = ?;`
 	deletePage = `DELETE FROM page WHERE schema_name = ? AND identifier = ?;`
 
@@ -34,10 +33,17 @@ const (
 
 	// selectPageSearch = `SELECT col0,col1,col2,col3,col4 FROM page_search WHERE schema_name = ? AND identifier = ?;`
 
-	listPagesBase  = `SELECT identifier, secondary_identifier, enabled FROM page WHERE schema_name = ?`
+	listPagesBase  = `SELECT identifier, secondary_identifier, enabled, listable_data FROM page WHERE schema_name = ?`
 	countPagesBase = `SELECT COUNT(*) FROM page WHERE schema_name = ?`
 
 	selectEnabledSchemaNames = `SELECT DISTINCT(schema_name) FROM page WHERE enabled = TRUE ORDER BY schema_name ASC`
+
+	searchReferencesQuery = `
+		SELECT identifier, secondary_identifier
+		FROM page
+		WHERE schema_name = ? AND (identifier LIKE ? OR secondary_identifier LIKE ?) AND enabled = TRUE
+		LIMIT 20
+	`
 )
 
 type Repository struct {
@@ -78,8 +84,18 @@ func (r *Repository) Insert(ctx context.Context, page domain.Page, idField strin
 		return "", fmt.Errorf("failed to serialize page meta to JSON: %w", err)
 	}
 
+	listableDataJSON, err := json.Marshal(page.ListableData)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize page listable data to JSON: %w", err)
+	}
+
+	referencesJSON, err := json.Marshal(page.References)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize page references to JSON: %w", err)
+	}
+
 	if _, err := tx.ExecContext(ctx, insertPage,
-		page.SchemaName, newID.String(), page.SecondaryIdentifier, dataJSON, metaJSON, page.IsEnabled); err != nil {
+		page.SchemaName, newID.String(), page.SecondaryIdentifier, listableDataJSON, dataJSON, metaJSON, referencesJSON, page.IsEnabled); err != nil {
 		return "", err
 	}
 
@@ -110,9 +126,18 @@ func (r *Repository) Update(ctx context.Context, identifier string, page domain.
 		return fmt.Errorf("failed to serialize page meta to JSON: %w", err)
 	}
 
+	listableDataJSON, err := json.Marshal(page.ListableData)
+	if err != nil {
+		return fmt.Errorf("failed to serialize page listable data to JSON: %w", err)
+	}
+
+	referencesJSON, err := json.Marshal(page.References)
+	if err != nil {
+		return fmt.Errorf("failed to serialize page references to JSON: %w", err)
+	}
+
 	if _, err := tx.ExecContext(ctx, updatePage,
-		page.SecondaryIdentifier, dataJSON, metaJSON, page.IsEnabled, page.SchemaName, identifier); err != nil {
-		fmt.Println("errrrr", err)
+		page.SecondaryIdentifier, listableDataJSON, dataJSON, metaJSON, referencesJSON, page.IsEnabled, page.SchemaName, identifier); err != nil {
 		return err
 	}
 
@@ -141,8 +166,8 @@ func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schem
 		SchemaName: schemaName,
 		Identifier: identifier,
 	}
-	var dataJSON, metaJSON sql.NullString
-	if err := row.Scan(&page.SecondaryIdentifier, &dataJSON, &metaJSON, &page.IsEnabled); err != nil {
+	var dataJSON, metaJSON, listableDataJSON, referencesJSON sql.NullString
+	if err := row.Scan(&page.SecondaryIdentifier, &listableDataJSON, &dataJSON, &metaJSON, &referencesJSON, &page.IsEnabled); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
@@ -156,6 +181,18 @@ func (r *Repository) GetPageBySchemaNameAndIdentifier(ctx context.Context, schem
 	if metaJSON.Valid && metaJSON.String != "" {
 		if err := json.Unmarshal([]byte(metaJSON.String), &page.Meta); err != nil {
 			return nil, fmt.Errorf("failed to deserialize page meta: %w", err)
+		}
+	}
+
+	if listableDataJSON.Valid && listableDataJSON.String != "" {
+		if err := json.Unmarshal([]byte(listableDataJSON.String), &page.ListableData); err != nil {
+			return nil, fmt.Errorf("failed to deserialize page listable data: %w", err)
+		}
+	}
+
+	if referencesJSON.Valid && referencesJSON.String != "" {
+		if err := json.Unmarshal([]byte(referencesJSON.String), &page.References); err != nil {
+			return nil, fmt.Errorf("failed to deserialize page references: %w", err)
 		}
 	}
 
@@ -206,8 +243,14 @@ func (r *Repository) List(ctx context.Context, schemaName string, opts domain.Li
 
 	for rows.Next() {
 		var p domain.Page
-		if err := rows.Scan(&p.Identifier, &p.SecondaryIdentifier, &p.IsEnabled); err != nil {
+		var listableDataJSON sql.NullString
+		if err := rows.Scan(&p.Identifier, &p.SecondaryIdentifier, &p.IsEnabled, &listableDataJSON); err != nil {
 			return pages, meta, fmt.Errorf("failed to scan listed page row: %w", err)
+		}
+		if listableDataJSON.Valid && listableDataJSON.String != "" {
+			if err := json.Unmarshal([]byte(listableDataJSON.String), &p.ListableData); err != nil {
+				return pages, meta, fmt.Errorf("failed to deserialize listable data: %w", err)
+			}
 		}
 		pages = append(pages, p)
 	}
@@ -262,4 +305,27 @@ func (r *Repository) GetEnabledSchemaNames(ctx context.Context) ([]string, error
 	}
 
 	return names, nil
+}
+
+func (r *Repository) SearchReferences(ctx context.Context, schemaName, query string) ([]domain.ReferenceMatch, error) {
+	query = "%" + query + "%"
+	rows, err := r.db.QueryContext(ctx, searchReferencesQuery, schemaName, query, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	results := []domain.ReferenceMatch{}
+	for rows.Next() {
+		var ref domain.ReferenceMatch
+		if err := rows.Scan(&ref.Identifier, &ref.SecondaryIdentifier); err != nil {
+			return nil, err
+		}
+		results = append(results, ref)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return results, nil
 }

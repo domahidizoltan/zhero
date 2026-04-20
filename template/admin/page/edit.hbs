@@ -178,29 +178,59 @@
               {{#if isMandatory}}
                 <span class="text-error">*</span>
               {{/if}}
+              {{#if isListable}}
+                <i class="fa-solid fa-list"></i>
+              {{/if}}
               {{#if isSearchable}}
                 <i class="fa-solid fa-magnifying-glass searchable-icon"></i>
               {{/if}}
             </span>
           </label>
-          <input
-            type="text"
-            id="field-{{name}}"
-            name="field-{{name}}"
-            class="input input-bordered w-full
-              {{use 'validator' true isMandatory}}
-              {{compareAndUse 'bg-primary/10' true page.identifier name}}
-              {{compareAndUse
-                'bg-secondary/10'
-                true
-                page.secondaryIdentifier
-                name
-              }}
-              "
-            value="{{value}}"
-            {{compareAndUse "disabled" true page.identifier name}}
-            {{use "required" true isMandatory}}
-          />
+
+          {{#equal component "TextArea"}}
+            <textarea id="field-{{name}}" name="field-{{name}}"
+              class="textarea textarea-bordered w-full {{use 'validator' true isMandatory}}"
+              {{use "required" true isMandatory}}>{{value}}</textarea>
+          {{/equal}}
+          {{#equal component "Checkbox"}}
+            {{#if isMandatory}}
+              <input type="checkbox" id="field-{{name}}" name="field-{{name}}" {{use 'checked' true value}}/>
+            {{else}}
+              <select name="field-{{name}}" class="select select-bordered w-full">
+               <option value="" {{#unless value}}selected{{/unless}}>—</option>
+               <option value="true" {{use 'selected' true value}}>True</option>
+               <option value="false" {{use 'selected' false value}}>False</option>
+              </select>
+            {{/if}}
+          {{/equal}}  
+          {{#equal component "ReferenceSearch"}}
+            <div class="flex gap-2">
+              <input type="text" id="field-{{name}}" name="field-{{name}}"
+                value="{{value}}" class="input input-bordered w-full"
+                placeholder="#ZHERO#Type/123#{'linkText':'...','altText':'...'}#"
+                data-field-name="{{name}}" data-schema="{{class}}" />
+              <button type="button" class="btn btn-secondary"
+                hx-get="/admin/page/reference-modal?schema={{class}}&field={{name}}"
+                hx-target="#modal-container" hx-push-url="false">
+                Search
+              </button>
+            </div>
+            {{#if references}}
+              <div class="text-sm text-info mt-1">References: {{references.length}}</div>
+            {{/if}}
+          {{/equal}}
+          {{#if inputType}} 
+            <input type="{{component}}" id="field-{{name}}" name="field-{{name}}"
+              class="input input-bordered w-full {{use 'validator' true isMandatory}}"
+              value="{{value}}" {{use "required" true isMandatory}} />
+          {{/if}}
+          {{#equal component "TextInput"}}
+            <input type="text" id="field-{{name}}" name="field-{{name}}"
+              class="input input-bordered w-full {{use 'validator' true isMandatory}}"
+              value="{{value}}" {{use "required" true isMandatory}}
+              data-field-name="{{name}}" data-schema="{{class}}" />
+          {{/equal}}
+
           {{#if isMandatory}}
             <div class="validator-hint">{{name}} is required.</div>
           {{/if}}
@@ -209,12 +239,6 @@
     </div>
 
    <!--
-        <textarea
-          id="content"
-          name="content"
-          class="textarea textarea-bordered w-full h-32"
-          required
-        >This is the main content of the page.</textarea>
         <input
           type="file"
           id="featured-image"
