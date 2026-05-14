@@ -2,7 +2,7 @@
 .avante
 
 tmp/
-zhero.db
+zhero.db*
 *.jsonld
 .aider*
 .env*

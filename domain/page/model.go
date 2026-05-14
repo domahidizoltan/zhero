@@ -6,11 +6,6 @@ import "github.com/domahidizoltan/zhero/pkg/paging"
 const MaxSearchVals = 5
 
 type (
-	ReferenceMatch struct {
-		Identifier          string
-		SecondaryIdentifier string
-	}
-
 	Page struct {
 		Route               string
 		SchemaName          string

@@ -27,7 +27,7 @@ function fillSchemaClasses(classHierarchy) {
     searchField: "breadcrumb",
     options: opts,
     maxOptions: opts.length,
-    maxItesm: 1,
+    maxItems: 1,
     render: {
       option: function (data, escape) {
         return `<div>
@@ -236,10 +236,26 @@ function getTypeComponents(targetID, selectedComponent, typ) {
   } else {
     switch (typ) {
       case "Boolean":
+      case "False":
+      case "True":
         components = ["Checkbox"];
         break;
-      case ("Date", "DateTime", "Number", "Quantity", "Time"):
-        components = [typ];
+      case "Integer":
+      case "Float":
+        components = ["Number", "TextInput"];
+        break;
+      case "Distance":
+      case "Duration":
+      case "Energy":
+      case "Mass":
+        components = ["Quantity", "TextInput"];
+        break;
+      case "Date":
+      case "DateTime":
+      case "Number":
+      case "Quantity":
+      case "Time":
+        components = [typ, "TextInput"];
         break;
       case "Text":
         components = [

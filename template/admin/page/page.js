@@ -60,20 +60,161 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+let refPattern = /#ZHERO#([^#]+)#\{([^}]*)\}#/gim;
+let modalContainerFor = "";
+let selectionPos = 0;
 document.addEventListener("DOMContentLoaded", function () {
+  let openRefModal = function (e) {
+    if (e.key && e.key !== "#") {
+      return;
+    }
+
+    modalContainerFor = e.target.name;
+    if (selectionPos == 0) {
+      selectionPos = e.target.selectionStart;
+    }
+
+    let fieldType = e.target.getAttribute("data-field-type");
+    if (e.target.tagName === "TEXTAREA") {
+      fieldType = "";
+    }
+    [typeID, linkText, altText] = ["", "", ""];
+    if (e.target.value.length > 0) {
+      while ((match = refPattern.exec(e.target.value))) {
+        if (refPattern.lastIndex < e.target.selectionStart) {
+          continue;
+        }
+
+        [fieldType, typeID] = match[1].split("/");
+        const meta = JSON.parse(`{${match[2]}}`);
+        linkText = meta.linkText || "";
+        altText = meta.altText || "";
+      }
+    }
+
+    htmx.ajax(
+      "GET",
+      `/admin/page/reference:search?type=${fieldType}&id=${typeID}&linkText=${linkText}&altText=${altText}`,
+      {
+        target: "#modal-container",
+        push: false,
+      },
+    );
+  };
+
   document.addEventListener("keyup", function (e) {
-    if (e.key === "#" && e.target.matches('input[name^="field-"]')) {
-      const fieldName = e.target.name.replace("field-", "");
-      const form = e.target.closest("form");
-      const schema = form.action.split("/").pop();
-      htmx.ajax(
-        "GET",
-        `/admin/page/reference-modal?schema=${schema}&field=${fieldName}`,
-        {
-          target: "#modal-container",
-          pushUrl: false,
-        },
-      );
+    if (e.key === "Escape" && modalContainerFor !== "") {
+      closeSearchReferenceModal();
     }
   });
+
+  document.querySelectorAll("[ref-hook=true]").forEach((item) => {
+    item.addEventListener("dblclick", openRefModal);
+    item.addEventListener("keyup", openRefModal);
+  });
 });
+
+function initTypeSelect() {
+  if (document.getElementById("select-ref")) {
+    let select = new TomSelect("#select-ref", {
+      create: false,
+      sortField: { field: "text", direction: "asc" },
+      render: {
+        option: function (data, escape) {
+          let cls = "";
+          if (data.enabled == "false") {
+            cls = 'class="text-neutral-content"';
+          }
+          return `<div ${cls}>${data.text}</div>`;
+        },
+        item: function (item, escape) {
+          return `<div>${item.text}</div>`;
+        },
+      },
+    });
+
+    select.on("change", function (e) {
+      const label = select.getItem(e).innerHTML;
+      document.getElementsByName("link-text")[0].value = label;
+      document.getElementsByName("alt-text")[0].value = label;
+    });
+  } else if (document.getElementById("select-ref-type")) {
+    new TomSelect("#select-ref-type", {
+      create: false,
+      sortField: { field: "text", direction: "asc" },
+    });
+  }
+}
+
+function closeSearchReferenceModal() {
+  let modal = document.getElementById("search-reference");
+  if (modal) {
+    modal.close();
+    modal.classList.remove("modal-open");
+  }
+  modalContainerFor = "";
+  selectionPos = 0;
+}
+
+function setReferenceType() {
+  let refType = document.getElementById("select-ref-type");
+  const fieldType = refType.value;
+
+  htmx.ajax("GET", `/admin/page/reference:search?type=${fieldType}`, {
+    target: "#modal-container",
+    push: false,
+  });
+}
+
+function setReference(type) {
+  const form = document.getElementById("set-reference-form");
+  const formData = new FormData(form);
+  const formProps = Object.fromEntries(formData);
+
+  let identifier;
+  if (formProps["page"]) {
+    identifier = formProps["page"];
+  }
+
+  let meta = {};
+  if (formProps["link-text"]) {
+    meta["linkText"] = formProps["link-text"];
+  }
+  if (formProps["alt-text"]) {
+    meta["altText"] = formProps["alt-text"];
+  }
+
+  const val = `#ZHERO#${type}/${identifier}#${JSON.stringify(meta)}#`;
+  let cont = document.getElementById(modalContainerFor);
+
+  if (selectionPos > 0 && cont.value.indexOf("#", selectionPos - 1) > -1) {
+    selectionPos--;
+  }
+
+  let replaced = false;
+  if (cont.value.length == 0) {
+    replaced = true;
+    cont.value = val;
+  } else {
+    while ((match = refPattern.exec(cont.value))) {
+      const pos = match.index;
+      const len = match[0].length;
+      if (pos + len < selectionPos) {
+        continue;
+      }
+
+      cont.value = cont.value.slice(0, pos) + val + cont.value.slice(pos + len);
+      replaced = true;
+      break;
+    }
+  }
+
+  if (cont.value.length != 0 && !replaced) {
+    cont.value =
+      cont.value.slice(0, selectionPos) +
+      val +
+      cont.value.slice(selectionPos + val.length);
+  }
+
+  closeSearchReferenceModal();
+}

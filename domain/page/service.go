@@ -15,8 +15,8 @@ type (
 		List(context.Context, string, ListOptions, bool) ([]Page, paging.Meta, error)
 		Enable(context.Context, string, string, bool) error
 		Delete(context.Context, string, string) error
-		GetEnabledSchemaNames(context.Context) ([]string, error)
-		SearchReferences(ctx context.Context, schemaName, query string) ([]ReferenceMatch, error)
+		GetPageSchemaNames(context.Context, bool) ([]string, error)
+		ListReferencesByType(ctx context.Context, schemaName string) ([]Page, error)
 	}
 	routeSvc interface {
 		AssignRoute(ctx context.Context, customRoute, pageKey string) error
@@ -99,10 +99,10 @@ func (s Service) Delete(ctx context.Context, schemaName, identifier string) erro
 	})
 }
 
-func (s Service) GetEnabledSchemaNames(ctx context.Context) ([]string, error) {
-	return s.pageRepo.GetEnabledSchemaNames(ctx)
+func (s Service) GetPageSchemaNames(ctx context.Context, onlyEnabled bool) ([]string, error) {
+	return s.pageRepo.GetPageSchemaNames(ctx, onlyEnabled)
 }
 
-func (s Service) SearchReferences(ctx context.Context, schemaName, query string) ([]ReferenceMatch, error) {
-	return s.pageRepo.SearchReferences(ctx, schemaName, query)
+func (s Service) ListReferencesByType(ctx context.Context, schemaName string) ([]Page, error) {
+	return s.pageRepo.ListReferencesByType(ctx, schemaName)
 }

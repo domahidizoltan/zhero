@@ -38,12 +38,8 @@ const (
 
 	selectEnabledSchemaNames = `SELECT DISTINCT(schema_name) FROM page WHERE enabled = TRUE ORDER BY schema_name ASC`
 
-	searchReferencesQuery = `
-		SELECT identifier, secondary_identifier
-		FROM page
-		WHERE schema_name = ? AND (identifier LIKE ? OR secondary_identifier LIKE ?) AND enabled = TRUE
-		LIMIT 20
-	`
+	listReferencesByTypeQuery = `SELECT identifier, secondary_identifier, enabled FROM page 
+	WHERE schema_name = ? ORDER BY identifier, secondary_identifier`
 )
 
 type Repository struct {
@@ -286,8 +282,13 @@ func (r *Repository) Delete(ctx context.Context, schemaName, identifier string) 
 	return err
 }
 
-func (r *Repository) GetEnabledSchemaNames(ctx context.Context) ([]string, error) {
-	rows, err := r.db.QueryContext(ctx, selectEnabledSchemaNames)
+func (r *Repository) GetPageSchemaNames(ctx context.Context, onlyEnabled bool) ([]string, error) {
+	query := selectEnabledSchemaNames
+	if !onlyEnabled {
+		query = strings.ReplaceAll(query, "WHERE enabled = TRUE ", "")
+	}
+
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -307,18 +308,17 @@ func (r *Repository) GetEnabledSchemaNames(ctx context.Context) ([]string, error
 	return names, nil
 }
 
-func (r *Repository) SearchReferences(ctx context.Context, schemaName, query string) ([]domain.ReferenceMatch, error) {
-	query = "%" + query + "%"
-	rows, err := r.db.QueryContext(ctx, searchReferencesQuery, schemaName, query, query)
+func (r *Repository) ListReferencesByType(ctx context.Context, schemaName string) ([]domain.Page, error) {
+	rows, err := r.db.QueryContext(ctx, listReferencesByTypeQuery, schemaName)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	results := []domain.ReferenceMatch{}
+	results := []domain.Page{}
 	for rows.Next() {
-		var ref domain.ReferenceMatch
-		if err := rows.Scan(&ref.Identifier, &ref.SecondaryIdentifier); err != nil {
+		var ref domain.Page
+		if err := rows.Scan(&ref.Identifier, &ref.SecondaryIdentifier, &ref.IsEnabled); err != nil {
 			return nil, err
 		}
 		results = append(results, ref)

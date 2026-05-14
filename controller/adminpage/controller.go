@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
+	"slices"
 	"strings"
 
 	"github.com/aymerick/raymond"
@@ -14,6 +14,7 @@ import (
 	"github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/route"
 	"github.com/domahidizoltan/zhero/domain/schema"
+	"github.com/domahidizoltan/zhero/pkg/collection"
 	"github.com/domahidizoltan/zhero/pkg/paging"
 	tpl "github.com/domahidizoltan/zhero/template"
 	"github.com/gin-gonic/gin"
@@ -334,67 +335,51 @@ func determineComponent(propType, propName string) string {
 	}
 }
 
-// TODO: SearchReferences handles HTMX/JSON search for references
-func (pc *Controller) SearchReferences(c *gin.Context) {
-	schema := c.Query("schema")
-	query := c.Query("q")
-	field := c.Query("field")
+func (pc *Controller) SearchReference(c *gin.Context) {
+	fieldType := c.Query("type")
 
-	refs, err := pc.pageSvc.SearchReferences(c, schema, query)
-	if err != nil {
-		controller.InternalServerError(c, "search failed", err)
+	if fieldType == "" {
+		names, err := pc.pageSvc.GetPageSchemaNames(c.Request.Context(), false)
+		if err != nil {
+			controller.InternalServerError(c, "reference type listing failed", err)
+		}
+		output, err := tpl.AdminPageSearchReference.Exec(map[string]any{
+			"types": names,
+		})
+		if err != nil {
+			controller.TemplateRenderError(c, err)
+			return
+		}
+		c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
 		return
 	}
 
-	// Render partial HTML for HTMX
-	output, err := tpl.AdminReferenceSearchResults.Exec(map[string]any{
-		"references": refs,
-		"field":      field,
+	selectedID := c.Query("id")
+	linkText := c.Query("linkText")
+	altText := c.Query("altText")
+
+	pages, err := pc.pageSvc.ListReferencesByType(c, fieldType)
+	if err != nil {
+		controller.InternalServerError(c, "reference listing failed", err)
+		return
+	}
+
+	refs := slices.Collect(collection.MapValues(pages, func(p page.Page) pageDto {
+		dto := &pageDto{Identifier: p.Identifier}
+		dto.enhanceFromModel(&p)
+		return *dto
+	}))
+
+	output, err := tpl.AdminPageSearchReference.Exec(map[string]any{
+		"type":       fieldType,
+		"refs":       refs,
+		"selectedID": selectedID,
+		"linkText":   linkText,
+		"altText":    altText,
 	})
 	if err != nil {
 		controller.TemplateRenderError(c, err)
 		return
 	}
 	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
-}
-
-// TODO: ReferenceModal returns the reference selection modal
-func (pc *Controller) ReferenceModal(c *gin.Context) {
-	schema := c.Query("schema")
-	field := c.Query("field")
-	output, err := tpl.AdminReferenceModal.Exec(map[string]any{
-		"schema": schema,
-		"field":  field,
-	})
-	if err != nil {
-		controller.TemplateRenderError(c, err)
-		return
-	}
-	c.Data(http.StatusOK, gin.MIMEHTML, []byte(output))
-}
-
-// TODO: ReferenceSelect inserts reference into field and returns updated input
-func (pc *Controller) ReferenceSelect(c *gin.Context) {
-	field := c.Query("field")
-	identifier := c.Query("identifier")
-	secondary := c.Query("secondary")
-	linkText := c.Query("link-text")
-	altText := c.Query("alt-text")
-
-	// Use secondary identifier as default linkText if not provided
-	if linkText == "" {
-		linkText = secondary
-	}
-	if altText == "" {
-		altText = secondary
-	}
-
-	refPath := fmt.Sprintf("%s/%s", c.Query("schema"), identifier)
-	props := fmt.Sprintf(`{'linkText':'%s','altText':'%s'}`,
-		url.QueryEscape(linkText), url.QueryEscape(altText))
-	reference := fmt.Sprintf("#ZHERO#%s#%s#", refPath, props)
-
-	c.String(http.StatusOK,
-		fmt.Sprintf(`<input type="text" id="field-%s" name="field-%s" class="input input-bordered w-full" value="%s" />`,
-			field, field, reference))
 }

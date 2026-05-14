@@ -1,6 +1,7 @@
 package adminpage
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -21,7 +22,7 @@ type (
 		SecondaryIdentifier      string
 		SecondaryIdentifierValue any
 		ListableData             map[string]any
-		References               []string
+		References               []string // TODO: is this needed?
 		CreatedBy                string
 		CreatedAt                time.Time
 		UpdatedBy                string
@@ -122,12 +123,33 @@ func (dto *pageDto) enhanceFromModel(p *page_domain.Page) {
 	dto.Route = p.Route
 	dto.Meta.FromModel(p.Meta)
 	dto.SecondaryIdentifierValue = p.SecondaryIdentifier
-	dto.ListableData = p.ListableData
+	dto.ListableData = make(map[string]any, len(p.ListableData))
+
+	refs := make(map[string]string, len(p.References))
+	for idx, ref := range p.References {
+		refs[fmt.Sprintf("#ref%d", idx)] = ref
+	}
+
+	for k, v := range p.ListableData {
+		dto.ListableData[k] = replaceShortRefs(v, refs)
+	}
+
 	for i, f := range dto.Fields {
 		if val, ok := p.Data[f.Name]; ok {
-			dto.Fields[i].Value = val
+			dto.Fields[i].Value = replaceShortRefs(val, refs)
 		}
 	}
+}
+
+func replaceShortRefs(field any, refs map[string]string) any {
+	vString, ok := field.(string)
+	if ok {
+		for k, v := range refs {
+			vString = strings.ReplaceAll(vString, k, v)
+		}
+		field = vString
+	}
+	return field
 }
 
 func (dto *pageDto) ToModel() page_domain.Page {
@@ -179,11 +201,9 @@ func (dto *pageDto) ToModel() page_domain.Page {
 	}
 }
 
-// TODO: extractReferences scans text fields for #ZHERO#... reference patterns
-func (dto *pageDto) extractReferences() {
-	refPattern := regexp.MustCompile(`#ZHERO#([^#]+)#\{([^}]*)\}#`)
-	refSet := make(map[string]struct{})
+var refPattern = regexp.MustCompile(`#ZHERO#([^#]+)#\{([^}]*)\}#`)
 
+func (dto *pageDto) extractReferences() {
 	for i, f := range dto.Fields {
 		if f.Value == nil {
 			continue
@@ -192,25 +212,18 @@ func (dto *pageDto) extractReferences() {
 		if !ok {
 			continue
 		}
-		// Only extract from Text and TextArea fields
-		if (f.Type == "Text" || f.Type == "TextArea") && strings.Contains(strVal, "#") {
+
+		if strings.Contains(strVal, "#") {
 			matches := refPattern.FindAllStringSubmatch(strVal, -1)
 			fieldRefs := make([]string, 0, len(matches))
-			for _, match := range matches {
-				ref := match[1] // "Thing/123"
+			for idx, match := range matches {
+				ref := match[0]
 				fieldRefs = append(fieldRefs, ref)
-				refSet[ref] = struct{}{}
+				dto.Fields[i].Value = any(strings.Replace(strVal, ref, fmt.Sprintf("#ref%d", idx), 1))
 			}
 			dto.Fields[i].References = fieldRefs
 		}
 	}
-
-	// Build global deduplicated references list
-	dto.References = make([]string, 0, len(refSet))
-	for ref := range refSet {
-		dto.References = append(dto.References, ref)
-	}
-	slices.Sort(dto.References)
 }
 
 func (dto *pageDto) ToMap() map[string]any {

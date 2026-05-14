@@ -15,16 +15,16 @@ var (
 	//go:embed paging/*
 	templates embed.FS
 
-	AdminIndex           = mustParse(admin + "index.hbs")
-	AdminPageMain        = mustParse(admin + "page/main.hbs")
-	AdminPageList        = mustParse(admin + "page/list.hbs")
-	AdminPageEdit        = mustParse(admin + "page/edit.hbs")
-	AdminSchemaorgSearch = mustParse(admin + "schemaorg/search.hbs")
-	AdminSchemaorgEdit   = mustParse(admin + "schemaorg/edit.hbs")
+	AdminIndex = mustParse(admin + "index.hbs")
 
+	AdminPageMain            = mustParse(admin + "page/main.hbs")
+	AdminPageList            = mustParse(admin + "page/list.hbs")
+	AdminPageEdit            = mustParse(admin + "page/edit.hbs")
+	AdminPageSearchReference = mustParse(admin + "page/search-reference.hbs")
+
+	AdminSchemaorgSearch              = mustParse(admin + "schemaorg/search.hbs")
+	AdminSchemaorgEdit                = mustParse(admin + "schemaorg/edit.hbs")
 	AdminSchemaorgEditPropertyPartial = mustParse(admin + "schemaorg/edit-property.partial.hbs")
-	AdminReferenceModal               = mustParse(admin + "reference/modal.hbs")
-	AdminReferenceSearchResults       = mustParse(admin + "reference/search-results.partial.hbs")
 
 	AdminAssets = map[string][]byte{
 		"/index.js":               mustLoad(admin + "index.js"),
@@ -57,7 +57,5 @@ func mustLoad(filename string) []byte {
 
 func RegisterPartials() {
 	AdminSchemaorgEdit.RegisterPartialTemplate("editProperty", AdminSchemaorgEditPropertyPartial)
-	AdminSchemaorgEdit.RegisterPartialTemplate("referenceSearchResults", AdminReferenceSearchResults)
-	AdminSchemaorgEdit.RegisterPartialTemplate("referenceModal", AdminReferenceModal)
 	raymond.RegisterPartialTemplate("pagination", PaginationPartial)
 }

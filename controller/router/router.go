@@ -67,7 +67,7 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 	registerPublicPageHelpers(svc)
 
 	router.GET("/", func(c *gin.Context) {
-		schemaNames, err := svc.Page.GetEnabledSchemaNames(context.Background())
+		schemaNames, err := svc.Page.GetPageSchemaNames(context.Background(), true)
 		if err != nil {
 			controller.InternalServerError(c, "failed to load page", err)
 			return
@@ -98,7 +98,7 @@ func SetPublicRoutes(router *gin.Engine, svc Services) {
 func registerPublicPageHelpers(svc Services) {
 	raymond.RegisterHelper("eachMenuItem", func(options *raymond.Options) raymond.SafeString {
 		b := strings.Builder{}
-		names, err := svc.Page.GetEnabledSchemaNames(context.Background())
+		names, err := svc.Page.GetPageSchemaNames(context.Background(), true)
 		if err != nil {
 			log.Err(err).Msg("failed to get menu items")
 		}
@@ -126,16 +126,15 @@ func SetAdminRoutes(router *gin.Engine, svc Services) {
 		admin.POST("/schema/save/:class", schemaorgCtrl.Save)
 		admin.GET("/schema/class-hierarchy", schemaorgCtrl.GetClassHierarchy)
 
-	pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page, svc.Route)
-	admin.GET("/page/list", pageCtrl.Main)
-	admin.GET("/page/list/:class", pageCtrl.List)
-	admin.GET("/page/create/:class", pageCtrl.Create)
-	admin.POST("/page/edit/:class", pageCtrl.EditAction)
-	admin.GET("/page/edit/:class/:identifier", pageCtrl.Edit)
-	admin.POST("/page/save/:class", pageCtrl.Save)
-	admin.POST("/page/get-valid-slug", pageCtrl.GetValidSlug)
-	admin.GET("/page/search-references", pageCtrl.SearchReferences)
-	admin.GET("/page/reference-modal", pageCtrl.ReferenceModal)
-	admin.GET("/page/reference-select", pageCtrl.ReferenceSelect)
+		pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page, svc.Route)
+		admin.GET("/page/list", pageCtrl.Main)
+		admin.GET("/page/list/:class", pageCtrl.List)
+		admin.GET("/page/create/:class", pageCtrl.Create)
+		admin.POST("/page/edit/:class", pageCtrl.EditAction)
+		admin.GET("/page/edit/:class/:identifier", pageCtrl.Edit)
+		admin.POST("/page/save/:class", pageCtrl.Save)
+		admin.POST("/page/get-valid-slug", pageCtrl.GetValidSlug)
+
+		admin.GET("/page/reference:search", pageCtrl.SearchReference)
 	}
 }
