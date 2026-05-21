@@ -3,11 +3,17 @@ package controller
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/paging"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+)
+
+var (
+	RefPattern      = regexp.MustCompile(`#ZHERO#([^#]+)#\{([^}]*)\}#`)
+	ShortRefPattern = regexp.MustCompile(`#ref(\d+)`)
 )
 
 type UserFacingPageRenderer interface {

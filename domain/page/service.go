@@ -17,6 +17,7 @@ type (
 		Delete(context.Context, string, string) error
 		GetPageSchemaNames(context.Context, bool) ([]string, error)
 		ListReferencesByType(ctx context.Context, schemaName string) ([]Page, error)
+		ListEnabledRoutesByRef(ctx context.Context, refs []string) (map[string]Page, error)
 	}
 	routeSvc interface {
 		AssignRoute(ctx context.Context, customRoute, pageKey string) error
@@ -105,4 +106,8 @@ func (s Service) GetPageSchemaNames(ctx context.Context, onlyEnabled bool) ([]st
 
 func (s Service) ListReferencesByType(ctx context.Context, schemaName string) ([]Page, error) {
 	return s.pageRepo.ListReferencesByType(ctx, schemaName)
+}
+
+func (s Service) ListEnabledRoutesByRef(ctx context.Context, refs []string) (map[string]Page, error) {
+	return s.pageRepo.ListEnabledRoutesByRef(ctx, refs)
 }

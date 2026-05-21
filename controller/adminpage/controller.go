@@ -287,18 +287,6 @@ func (pc *Controller) GetValidSlug(c *gin.Context) {
 	c.Data(http.StatusOK, "text/plain", []byte(slug))
 }
 
-// TODO: Helper to get listable property names for a schema
-func getListablePropertyNames(meta *schema.SchemaMeta) []string {
-	names := []string{}
-	for _, p := range meta.Properties {
-		if p.Listable {
-			names = append(names, p.Name)
-		}
-	}
-	return names
-}
-
-// TODO: determineComponent automatically selects the appropriate HTML component based on Type and Name
 func determineComponent(propType, propName string) string {
 	nameLower := strings.ToLower(propName)
 	switch {
@@ -330,7 +318,6 @@ func determineComponent(propType, propName string) string {
 	case "Time":
 		return "Time"
 	default:
-		// For any other type (Object, or schema.org types like "Person", "Organization")
 		return "ReferenceSearch"
 	}
 }

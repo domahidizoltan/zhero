@@ -8,10 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"slices"
 	"strings"
 	"time"
 
 	domain "github.com/domahidizoltan/zhero/domain/page"
+	"github.com/domahidizoltan/zhero/pkg/collection"
 	"github.com/domahidizoltan/zhero/pkg/database"
 	"github.com/domahidizoltan/zhero/pkg/paging"
 	"github.com/oklog/ulid"
@@ -33,13 +35,22 @@ const (
 
 	// selectPageSearch = `SELECT col0,col1,col2,col3,col4 FROM page_search WHERE schema_name = ? AND identifier = ?;`
 
-	listPagesBase  = `SELECT identifier, secondary_identifier, enabled, listable_data FROM page WHERE schema_name = ?`
+	listPagesBase  = `SELECT identifier, secondary_identifier, enabled, listable_data, "references" FROM page WHERE schema_name = ?`
 	countPagesBase = `SELECT COUNT(*) FROM page WHERE schema_name = ?`
 
 	selectEnabledSchemaNames = `SELECT DISTINCT(schema_name) FROM page WHERE enabled = TRUE ORDER BY schema_name ASC`
 
 	listReferencesByTypeQuery = `SELECT identifier, secondary_identifier, enabled FROM page 
 	WHERE schema_name = ? ORDER BY identifier, secondary_identifier`
+
+	listEnabledRoutesByRef = `
+SELECT rt.page, rt.route, p.enabled FROM (
+  SELECT route, page, ROW_NUMBER() OVER (
+    PARTITION BY page ORDER BY version DESC
+  ) AS rn FROM route WHERE page IN (?)
+) rt 
+RIGHT JOIN page p ON rt.page = CONCAT(p.schema_name,'/',p.identifier)
+WHERE rt.rn=1`
 )
 
 type Repository struct {
@@ -239,13 +250,18 @@ func (r *Repository) List(ctx context.Context, schemaName string, opts domain.Li
 
 	for rows.Next() {
 		var p domain.Page
-		var listableDataJSON sql.NullString
-		if err := rows.Scan(&p.Identifier, &p.SecondaryIdentifier, &p.IsEnabled, &listableDataJSON); err != nil {
+		var listableDataJSON, referencesJSON sql.NullString
+		if err := rows.Scan(&p.Identifier, &p.SecondaryIdentifier, &p.IsEnabled, &listableDataJSON, &referencesJSON); err != nil {
 			return pages, meta, fmt.Errorf("failed to scan listed page row: %w", err)
 		}
 		if listableDataJSON.Valid && listableDataJSON.String != "" {
 			if err := json.Unmarshal([]byte(listableDataJSON.String), &p.ListableData); err != nil {
 				return pages, meta, fmt.Errorf("failed to deserialize listable data: %w", err)
+			}
+		}
+		if referencesJSON.Valid && referencesJSON.String != "" {
+			if err := json.Unmarshal([]byte(referencesJSON.String), &p.References); err != nil {
+				return pages, meta, fmt.Errorf("failed to deserialize page references: %w", err)
 			}
 		}
 		pages = append(pages, p)
@@ -322,6 +338,48 @@ func (r *Repository) ListReferencesByType(ctx context.Context, schemaName string
 			return nil, err
 		}
 		results = append(results, ref)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+func (r *Repository) ListEnabledRoutesByRef(ctx context.Context, refs []string) (map[string]domain.Page, error) {
+	if len(refs) == 0 {
+		return map[string]domain.Page{}, nil
+	}
+
+	query := listEnabledRoutesByRef
+	if len(refs) > 1 {
+		query = strings.Replace(query, "?", "?"+strings.Repeat(", ?", len(refs)-1), 1)
+	}
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	defer stmt.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	anyRefs := slices.Collect(collection.MapValues(refs, func(in string) any {
+		return any(in)
+	}))
+
+	rows, err := stmt.Query(anyRefs...)
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	results := map[string]domain.Page{}
+	for rows.Next() {
+		var pg domain.Page
+		var ref string
+		if err := rows.Scan(&ref, &pg.Route, &pg.IsEnabled); err != nil {
+			return nil, err
+		}
+		results[ref] = pg
 	}
 
 	if err = rows.Err(); err != nil {

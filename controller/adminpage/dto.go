@@ -2,12 +2,11 @@ package adminpage
 
 import (
 	"fmt"
-	"regexp"
+	"slices"
 	"strings"
 	"time"
 
-	"golang.org/x/exp/slices"
-
+	"github.com/domahidizoltan/zhero/controller"
 	page_domain "github.com/domahidizoltan/zhero/domain/page"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,7 @@ type (
 		SecondaryIdentifier      string
 		SecondaryIdentifierValue any
 		ListableData             map[string]any
-		References               []string // TODO: is this needed?
+		References               []string
 		CreatedBy                string
 		CreatedAt                time.Time
 		UpdatedBy                string
@@ -41,7 +40,6 @@ type (
 		Component    string
 		InputType    bool
 		Value        any
-		References   []string
 	}
 
 	pageMeta struct {
@@ -69,7 +67,6 @@ func PageDtoFrom(meta *schema.SchemaMeta) pageDto {
 	dto.Fields = make([]fieldDto, 0, len(meta.Properties))
 	for _, p := range meta.Properties {
 		component := p.Component
-		// Auto-determine component if empty or legacy "TODO"
 		if component == "" || component == "TODO" {
 			component = determineComponent(p.Type, p.Name)
 		}
@@ -157,7 +154,6 @@ func (dto *pageDto) ToModel() page_domain.Page {
 	data := make(map[string]any, len(dto.Fields))
 	scIdx := 0
 	listableData := make(map[string]any)
-	references := make([]string, 0)
 
 	for _, f := range dto.Fields {
 		val := f.Value
@@ -171,21 +167,7 @@ func (dto *pageDto) ToModel() page_domain.Page {
 			searchVals[scIdx] = f.Value
 			scIdx++
 		}
-
-		// Collect references from fields (will be extracted via extractReferences)
-		references = append(references, f.References...)
 	}
-
-	// Deduplicate references
-	refSet := make(map[string]struct{})
-	for _, ref := range references {
-		refSet[ref] = struct{}{}
-	}
-	uniqueRefs := make([]string, 0, len(refSet))
-	for ref := range refSet {
-		uniqueRefs = append(uniqueRefs, ref)
-	}
-	slices.Sort(uniqueRefs)
 
 	return page_domain.Page{
 		Route:               dto.Route,
@@ -197,13 +179,13 @@ func (dto *pageDto) ToModel() page_domain.Page {
 		SearchVals:          searchVals,
 		Meta:                dto.Meta.ToModel(),
 		ListableData:        listableData,
-		References:          uniqueRefs,
+		References:          dto.References,
 	}
 }
 
-var refPattern = regexp.MustCompile(`#ZHERO#([^#]+)#\{([^}]*)\}#`)
-
 func (dto *pageDto) extractReferences() {
+	fieldRefs := map[string]int{}
+	refCounter := 0
 	for i, f := range dto.Fields {
 		if f.Value == nil {
 			continue
@@ -214,15 +196,26 @@ func (dto *pageDto) extractReferences() {
 		}
 
 		if strings.Contains(strVal, "#") {
-			matches := refPattern.FindAllStringSubmatch(strVal, -1)
-			fieldRefs := make([]string, 0, len(matches))
-			for idx, match := range matches {
+			matches := controller.RefPattern.FindAllStringSubmatch(strVal, -1)
+			for _, match := range matches {
 				ref := match[0]
-				fieldRefs = append(fieldRefs, ref)
-				dto.Fields[i].Value = any(strings.Replace(strVal, ref, fmt.Sprintf("#ref%d", idx), 1))
+				replaceRef := ""
+				if r, found := fieldRefs[ref]; found {
+					replaceRef = fmt.Sprintf("#ref%d", r)
+				} else {
+					replaceRef = fmt.Sprintf("#ref%d", refCounter)
+					fieldRefs[ref] = refCounter
+					refCounter++
+				}
+				strVal = strings.ReplaceAll(strVal, ref, replaceRef)
 			}
-			dto.Fields[i].References = fieldRefs
 		}
+		dto.Fields[i].Value = any(strVal)
+	}
+
+	dto.References = make([]string, len(fieldRefs))
+	for link, idx := range fieldRefs {
+		dto.References[idx] = link
 	}
 }
 
@@ -243,9 +236,9 @@ func (dto *pageDto) ToMap() map[string]any {
 		"secondaryIdentifier":      dto.SecondaryIdentifier,
 		"secondaryIdentifierValue": dto.SecondaryIdentifierValue,
 		"listableData":             dto.ListableData,
-		"references":               dto.References,
-		"isEnabled":                dto.IsEnabled,
-		"meta":                     dto.Meta.ToMap(),
+		// "references":               dto.References,
+		"isEnabled": dto.IsEnabled,
+		"meta":      dto.Meta.ToMap(),
 	}
 }
 

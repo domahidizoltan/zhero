@@ -2,10 +2,9 @@ package pagerenderer
 
 import (
 	"fmt"
-	"html"
-	"regexp"
 	"strings"
 
+	"github.com/domahidizoltan/zhero/controller"
 	"github.com/domahidizoltan/zhero/domain/schema"
 	"github.com/domahidizoltan/zhero/pkg/paging"
 	"github.com/domahidizoltan/zhero/template"
@@ -19,6 +18,7 @@ func NewDynamicPageRenderer() DynamicPageRenderer {
 
 func (DynamicPageRenderer) Render(meta schema.SchemaMeta, data map[string]any) (string, error) {
 	b := strings.Builder{}
+	refs := data["references"].(map[string]string)
 	for _, prop := range meta.Properties {
 		if prop.Name == meta.Identifier || strings.HasPrefix(prop.Name, "@") {
 			continue
@@ -35,10 +35,13 @@ func (DynamicPageRenderer) Render(meta schema.SchemaMeta, data map[string]any) (
 			continue
 		}
 
-		// TODO: Check if value is a string with references
-		if strVal, ok := v.(string); ok && strings.Contains(strVal, "#ZHERO#") {
-			rendered := renderReferences(strVal)
-			b.WriteString(fmt.Sprintf("<p class=\"%s\">%s</p>", cssClass, rendered))
+		if strVal, ok := v.(string); ok {
+			for _, s := range controller.RefPattern.FindAllString(strVal, -1) {
+				if link, found := refs[s]; found {
+					strVal = strings.ReplaceAll(strVal, s, link)
+				}
+			}
+			b.WriteString(fmt.Sprintf("<p class=\"%s\">%s</p>", cssClass, strVal))
 		} else {
 			b.WriteString(fmt.Sprintf("<p class=\"%s\">%s</p>", cssClass, v))
 		}
@@ -55,12 +58,22 @@ func (DynamicPageRenderer) List(listable schema.SchemaMeta, data []map[string]an
 		link := fmt.Sprintf("/%s/%s", listable.Name, d[listable.Identifier])
 		secID := d[listable.SecondaryIdentifier]
 		listableProperties := d["listableProperties"].(map[string]any)
+		refs := listableProperties["references"].(map[string]string)
 		delete(listableProperties, listable.SecondaryIdentifier)
 		delete(listableProperties, listable.Identifier)
+		delete(listableProperties, "references")
 
 		var image string
 		details := strings.Builder{}
 		for k, v := range listableProperties {
+			if strVal, ok := v.(string); ok {
+				for _, s := range controller.RefPattern.FindAllString(strVal, -1) {
+					if link, found := refs[s]; found {
+						strVal = strings.ReplaceAll(strVal, s, link)
+					}
+				}
+				v = strVal
+			}
 			key := strings.ToLower(k)
 			if strings.Contains(key, "thumbnail") || strings.Contains(key, "image") {
 				delete(listableProperties, key)
@@ -92,40 +105,4 @@ func (DynamicPageRenderer) List(listable schema.SchemaMeta, data []map[string]an
 	}
 
 	return b.String(), nil
-}
-
-// TODO: static page renderer and preview page
-
-func renderReferences(text string) string {
-	re := regexp.MustCompile(`#ZHERO#([^#]+)#\{([^}]*)\}#`)
-	return re.ReplaceAllStringFunc(text, func(match string) string {
-		submatches := re.FindStringSubmatch(match)
-		if len(submatches) < 3 {
-			return match
-		}
-		refPath := submatches[1]   // "Thing/123"
-		propsJSON := submatches[2] // "{'linkText':'...','altText':'...'}"
-
-		// Parse properties (simple single-quoted JS object)
-		altText := extractProp(propsJSON, "altText")
-		linkText := extractProp(propsJSON, "linkText")
-		if linkText == "" {
-			linkText = refPath // fallback
-		}
-
-		// HTML escape for safety
-		linkText = html.EscapeString(linkText)
-		altText = html.EscapeString(altText)
-
-		return fmt.Sprintf(`<a href="/%s" title="%s">%s</a>`, refPath, altText, linkText)
-	})
-}
-
-func extractProp(props, key string) string {
-	pattern := fmt.Sprintf(`%s:\s*'([^']*)'`, key)
-	re := regexp.MustCompile(pattern)
-	if m := re.FindStringSubmatch(props); len(m) > 1 {
-		return m[1]
-	}
-	return ""
 }

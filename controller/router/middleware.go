@@ -49,6 +49,10 @@ func CustomRouteMiddleware(svc Services, dynamicPageCtrl dynamicpage.Controller)
 				c.Redirect(http.StatusMovedPermanently, route.Route)
 				c.Abort()
 				return
+			} else {
+				parts := strings.Split(requestPath[1:], "/")
+				schemaName, identifier := parts[0], parts[1]
+				setParams(c, map[string]string{"class": schemaName, "identifier": identifier})
 			}
 
 			c.Next()
