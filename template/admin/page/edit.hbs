@@ -228,6 +228,108 @@
               value="{{value}}" {{use "required" true isMandatory}}
               {{compareAndUse "disabled" true page.identifier name}}/>
           {{/equal}}
+          {{#equal component "URL"}}
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <input type="text" id="field-{{name}}" name="field-{{name}}" value="{{value}}" class="input input-bordered w-full" />
+              </div>
+              <div class="form-control">
+                <input type="text" id="alt-text-{{name}}" name="alt-text-{{name}}"
+                class="input input-bordered w-full" 
+                value="{{mapValue page.meta.fieldMeta '$name:altText'}}" 
+                placeholder="Alt text"
+                  {{compareAndUse "disabled" true page.identifier name}} />
+              </div>
+            </div>
+          {{/equal}}
+          {{#equal component "File"}}
+            <div class="file-upload-container grid grid-cols-2 gap-4">
+            <div>
+              <input type="file" id="file-input-{{name}}" name="{{name}}-file"
+              class="file-input file-input-bordered w-full"
+              accept="{{supportedFileTypes}}"
+                {{compareAndUse "disabled" true page.identifier name}}
+                hx-post="/admin/file"
+                hx-headers='{"X-File-Dir":"{{class}}/{{identifier}}", "X-File-Name-Prefix":"{{name}}","X-Form-File-Name":"{{name}}-file" }'
+                hx-trigger="change" hx-encoding="multipart/form-data"
+                hx-target="#file-result-{{name}}" hx-swap="innerHTML"
+                hx-indicator="#file-progress-{{name}}" />
+              <div id="file-progress-{{name}}" class="htmx-indicator mt-2">
+                <span class="loading loading-ring loading-md"></span>
+              </div>
+              <div id="file-result-{{name}}" class="mt-2">
+                {{#if value}}
+                  <a href="/zhero-content/uploads/{{class}}/{{identifier}}/{{value}}" target="_blank" class="text-info link">{{value}}</a>
+                  <button type="button" class="btn btn-xs btn-error ml-2"
+                    hx-trigger="click"
+                    hx-delete="/admin/file"
+                    hx-headers='{"X-File-Dir":"{{class}}/{{identifier}}", "X-File-Name-Prefix":"{{name}}" }'
+                    hx-confirm="Delete '{{name}}' file '{{value}}'?"
+                    hx-target="#file-result-{{name}}" 
+                    hx-swap="innerHTML">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                {{/if}}
+              </div>
+            </div>
+            <div>
+              <input type="hidden" id="field-{{name}}" name="field-{{name}}" value="{{value}}" />
+              <div class="form-control">
+                <input type="text" id="alt-text-{{name}}" name="alt-text-{{name}}"
+                class="input input-bordered w-full" 
+                value="{{mapValue page.meta.fieldMeta '$name:altText'}}" 
+                placeholder="Alt text"
+                  {{compareAndUse "disabled" true page.identifier name}} />
+              </div>
+            </div>
+            </div>
+          {{/equal}}
+          {{#equal component "Image"}}
+            <div class="file-upload-container grid grid-cols-2 gap-4">
+            <div>
+              <input type="file" id="file-input-{{name}}" name="{{name}}-file"
+              class="file-input file-input-bordered w-full"
+              accept="{{supportedImageTypes}}"
+                {{compareAndUse "disabled" true page.identifier name}}
+                hx-post="/admin/file"
+                hx-headers='{"X-File-Dir":"{{class}}/{{identifier}}", "X-File-Name-Prefix":"{{name}}","X-Form-File-Name":"{{name}}-file" }'
+                hx-trigger="change" hx-encoding="multipart/form-data"
+                hx-target="#file-result-{{name}}" hx-swap="innerHTML"
+                hx-indicator="#file-progress-{{name}}" />
+              <div id="file-progress-{{name}}" class="htmx-indicator mt-2">
+                <span class="loading loading-ring loading-md"></span>
+              </div>
+              <div id="file-result-{{name}}" class="mt-2">
+                {{#if value}}
+                  <a href="/zhero-content/uploads/{{class}}/{{identifier}}/{{value}}" target="_blank" class="text-info link">
+                    
+                    <img class="w-20 h-20 object-cover rounded" src="/zhero-content/uploads/{{class}}/{{identifier}}/{{replace value '.' '_thumb.'}}" width="100" height="100"/><br/>
+                    {{value}}
+                  </a>
+                  <button type="button" class="btn btn-xs btn-error ml-2"
+                    hx-trigger="click"
+                    hx-delete="/admin/file"
+                    hx-headers='{"X-File-Dir":"{{class}}/{{identifier}}", "X-File-Name-Prefix":"{{name}}" }'
+                    hx-confirm="Delete '{{name}}' file '{{value}}'?"
+                    hx-target="#file-result-{{name}}" 
+                    hx-swap="innerHTML">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                {{/if}}
+              </div>
+            </div>
+            <div>
+              <input type="hidden" id="field-{{name}}" name="field-{{name}}" value="{{value}}" />
+              <div class="form-control">
+                <input type="text" id="alt-text-{{name}}" name="alt-text-{{name}}"
+                class="input input-bordered w-full" 
+                value="{{mapValue page.meta.fieldMeta '$name:altText'}}" 
+                placeholder="Alt text"
+                  {{compareAndUse "disabled" true page.identifier name}} />
+              </div>
+            </div>
+            </div>
+          {{/equal}}
 
           {{#if isMandatory}}
             <div class="validator-hint">{{name}} is required.</div>
@@ -235,15 +337,6 @@
         </div>
       {{/each}}
     </div>
-
-   <!--
-        <input
-          type="file"
-          id="featured-image"
-          name="featured-image"
-          class="file-input file-input-bordered w-full"
-        />
--->
 
     <div class="flex justify-end space-x-2 mt-6">
       <button
@@ -272,4 +365,14 @@
     </div>
   </form>
   <div id="modal-container"></div>
+  <dialog id="file-delete-modal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">Confirm file delete</h3>
+      <p class="py-4" id="file-delete-description"></p>
+      <div class="modal-action">
+        <button type="button" id="confirm-file-delete-button" class="btn btn-success"><i class="fa-solid fa-check"></i>Confirm</button>
+        <button class="btn btn-error" onclick="document.getElementById('file-delete-modal').close()"><i class="fa-solid fa-x"></i>Cancel</button>
+      </div>
+    </div>
+  </dialog>
 </div>

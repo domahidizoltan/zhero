@@ -2,8 +2,15 @@ package config
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/viper"
+)
+
+const (
+	defaultThumbnailWidth  = 360
+	defaultThumbnailHeight = 180
 )
 
 type (
@@ -43,8 +50,18 @@ type (
 	}
 
 	AdminConfig struct {
-		Server ServerConfig `mapstructure:"server"`
-		RDF    RdfConfig    `mapstructure:"rdf"`
+		Server  ServerConfig  `mapstructure:"server"`
+		RDF     RdfConfig     `mapstructure:"rdf"`
+		Uploads UploadsConfig `mapstructure:"uploads"`
+	}
+
+	size struct {
+		Width, Height int
+	}
+	UploadsConfig struct {
+		ThumbnailSize       string   `mapstructure:"thumbnailSize"`
+		SupportedFileTypes  []string `mapstructure:"supportedFileTypes"`
+		SupportedImageTypes []string `mapstructure:"supportedImageTypes"`
 	}
 
 	PublicConfig struct {
@@ -76,4 +93,26 @@ func LoadConfig(absolutePath string) (*Config, error) {
 
 	cfg.Env.AbsolutePath = absolutePath
 	return &cfg, nil
+}
+
+func (u UploadsConfig) GetThumbnailSize() (size, error) {
+	wS, hS, found := strings.Cut(strings.ToLower(u.ThumbnailSize), "x")
+	if !found {
+		return size{
+			Width:  defaultThumbnailWidth,
+			Height: defaultThumbnailHeight,
+		}, fmt.Errorf("invalid thumbnail_size format: %s, expected WxH", u.ThumbnailSize)
+	}
+
+	w, err := strconv.Atoi(wS)
+	if err != nil {
+		return size{}, fmt.Errorf("invalid thumbnail width: %w", err)
+	}
+
+	h, err := strconv.Atoi(hS)
+	if err != nil {
+		return size{}, fmt.Errorf("invalid thumbnail height: %w", err)
+	}
+
+	return size{Width: w, Height: h}, nil
 }

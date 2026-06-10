@@ -17,6 +17,10 @@ admin:
   rdf:
     file: "rdf_schema.jsonld"
     source: "https://raw.githubusercontent.com/schemaorg/schemaorg/refs/heads/main/data/releases/29.2/schemaorg-all-https.jsonld"
+  uploads:
+    thumbnailSize: "360x180"
+    supportedFileTypes: ["pdf", "doc", "docx", "xls", "xlsx", "csv", "txt"]
+    supportedImageTYpes: ["jpg", "jpeg", "png", "gif"]
 
 public:
   server:

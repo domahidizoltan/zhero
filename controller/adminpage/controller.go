@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/aymerick/raymond"
+	"github.com/domahidizoltan/zhero/config"
 	"github.com/domahidizoltan/zhero/controller"
 	"github.com/domahidizoltan/zhero/controller/template"
 	"github.com/domahidizoltan/zhero/domain/page"
@@ -25,13 +26,26 @@ type Controller struct {
 	schemaSvc schema.Service
 	pageSvc   page.Service
 	routeSvc  route.Service
+	fileExts  string
+	imageExts string
 }
 
-func NewController(schemaSvc schema.Service, pageSvc page.Service, routeSvc route.Service) Controller {
+func NewController(schemaSvc schema.Service, pageSvc page.Service, routeSvc route.Service, uploadsCfg config.UploadsConfig) Controller {
+	var fileExts string
+	if len(uploadsCfg.SupportedFileTypes) > 0 {
+		fileExts = "." + strings.Join(uploadsCfg.SupportedFileTypes, ",.")
+	}
+	var imageExts string
+	if len(uploadsCfg.SupportedImageTypes) > 0 {
+		imageExts = "." + strings.Join(uploadsCfg.SupportedImageTypes, ",.")
+	}
+
 	return Controller{
 		schemaSvc: schemaSvc,
 		pageSvc:   pageSvc,
 		routeSvc:  routeSvc,
+		fileExts:  fileExts,
+		imageExts: imageExts,
 	}
 }
 
@@ -234,7 +248,6 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 		}
 	}
 
-	// TODO: Build listable properties list for template (slice of {Name, Value})
 	listableProperties := make([]map[string]any, 0)
 	for _, field := range dto.Fields {
 		if field.IsListable {
@@ -248,11 +261,13 @@ func (pc *Controller) edit(c *gin.Context, hasFormSubmitted bool) (string, bool)
 	}
 
 	ctx := map[string]any{
-		"class":              class,
-		"identifier":         identifier,
-		"page":               dto,
-		"listableData":       dto.ListableData,
-		"listableProperties": listableProperties,
+		"class":               class,
+		"identifier":          identifier,
+		"page":                dto,
+		"listableData":        dto.ListableData,
+		"listableProperties":  listableProperties,
+		"supportedFileTypes":  pc.fileExts,
+		"supportedImageTypes": pc.imageExts,
 	}
 
 	body, err := tpl.AdminPageEdit.Exec(ctx)
@@ -296,6 +311,8 @@ func determineComponent(propType, propName string) string {
 		return "Email"
 	case strings.Contains(nameLower, "file"):
 		return "File"
+	case strings.Contains(nameLower, "image") || strings.Contains(nameLower, "thumbnail"):
+		return "Image"
 	case strings.Contains(nameLower, "phone") || strings.Contains(nameLower, "tel"):
 		return "Tel"
 	}

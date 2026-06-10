@@ -11,6 +11,7 @@ zhero.db*
 build/
 zhero-android-app/app/libs/
 zhero-android-app/app/build/
+zhero-content/
 
 .serena/
 openspec/

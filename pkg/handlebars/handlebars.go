@@ -2,6 +2,7 @@
 package handlebars
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/aymerick/raymond"
 	"github.com/domahidizoltan/zhero/template"
+	"github.com/rs/zerolog/log"
 	"github.com/russross/blackfriday"
 )
 
@@ -25,6 +27,8 @@ var (
 		"contains":       contains,
 		"htmxSortButton": htmxSortButton,
 		"join":           join,
+		"mapValue":       mapValue,
+		"replace":        strings.ReplaceAll,
 	}
 )
 
@@ -92,4 +96,29 @@ func htmxSortButton(getURL, targetID, class, label, sortField, actualQuery strin
 	output := fmt.Sprintf("<a hx-get=\"%s&sort=%s\" hx-target=\"#%s\" hx-swap=\"innerHTML\" class=\"%s\">%s%s</a>",
 		getURL, sortField, targetID, class, label, sort)
 	return output
+}
+
+func mapValue(m map[string]string, key string, opts *raymond.Options) string {
+	key, suffix, found := strings.Cut(key, ":")
+	if strings.HasPrefix(key, "$") {
+		b, err := json.Marshal(opts.Ctx())
+		if err != nil {
+			log.Err(err).Msg("failed to parse Handlebars context")
+			return ""
+		}
+
+		var ctxMap map[string]any
+		if err := json.Unmarshal(b, &ctxMap); err != nil {
+			log.Err(err).Msg("failed to convert Handlebars context to map")
+			return ""
+		}
+
+		key = strings.ToUpper(key[1:2]) + key[2:]
+		key = fmt.Sprintf("%s", ctxMap[key])
+	}
+
+	if found {
+		return m[key+":"+suffix]
+	}
+	return m[key]
 }

@@ -224,7 +224,7 @@ function getTypeComponents(targetID, selectedComponent, typ) {
   let components = [];
   const t = typ.toLowerCase();
   if (t.includes("image") || t.includes("thumbnail")) {
-    components = ["URL", "File"];
+    components = ["URL", "File", "Image"];
   } else if (t.includes("phone") || t.includes("fax")) {
     components = ["Tel", "TextInput"];
   } else if (t.includes("email")) {

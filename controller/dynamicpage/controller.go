@@ -126,6 +126,7 @@ func (ctrl *Controller) Render(c *gin.Context, class string, pageMeta map[string
 	}
 
 	data := dataFn(*schemaMeta)
+	data["fieldMeta"] = pageMeta["fieldMeta"]
 	if err := ctrl.transformReferences(c.Request.Context(), data, false); err != nil {
 		controller.InternalServerError(c, "failed to transform references", err)
 		return
@@ -141,6 +142,10 @@ func (ctrl *Controller) Render(c *gin.Context, class string, pageMeta map[string
 }
 
 func (ctrl *Controller) transformReferences(ctx context.Context, data map[string]any, disableAllLinks bool) error {
+	if data == nil {
+		return nil
+	}
+
 	dataRefs := map[string]string{}
 	refs := map[string]string{}
 	for k, v := range data {

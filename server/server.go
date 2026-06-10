@@ -22,8 +22,8 @@ import (
 	"github.com/domahidizoltan/zhero/pkg/paging"
 	"github.com/domahidizoltan/zhero/pkg/session"
 	page_repo "github.com/domahidizoltan/zhero/repository/page"
-	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
 	route_repo "github.com/domahidizoltan/zhero/repository/route"
+	meta_repo "github.com/domahidizoltan/zhero/repository/schema"
 	"github.com/gin-gonic/gin"
 
 	"github.com/rs/zerolog/log"
@@ -146,5 +146,6 @@ func getRouterServices(db *sql.DB, cfg config.Config) router.Services {
 		Page:                pageSvc,
 		DynamicPageRenderer: pagerenderer.NewDynamicPageRenderer(),
 		Route:               routeSvc,
+		UploadsCfg:          cfg.Admin.Uploads,
 	}
 }

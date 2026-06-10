@@ -218,3 +218,70 @@ function setReference(type) {
 
   closeSearchReferenceModal();
 }
+
+document.addEventListener("htmx:afterRequest", (e) => {
+  if (!e.detail.successful) return;
+  const triggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
+  if (!triggerHeader) return;
+  try {
+    const triggerData = JSON.parse(triggerHeader);
+    if (triggerData.fileUploaded) {
+      const { field, fileName } = triggerData.fileUploaded;
+      const hiddenField = document.getElementById(`field-${field}`);
+      if (hiddenField) hiddenField.value = fileName;
+
+      const thumbnail = document.getElementById("field-thumbnail");
+      if (thumbnail) {
+        thumbnail.value = fileName.replaceAll(".", "_thumb.");
+      }
+    }
+  } catch (err) {
+    console.error("Failed to parse file upload response:", err);
+  }
+});
+
+document.addEventListener("htmx:responseError", (e) => {
+  const container = e.target.closest(".file-upload-container");
+  if (container) {
+    popup(
+      "<i class='fa-solid fa-circle-xmark text-error'></i> " +
+        e.detail.xhr.responseText,
+    );
+    const input = container.querySelector('input[type="file"]');
+    if (input) input.value = "";
+  }
+});
+
+let deleteFilePattern = /'([^']+)'/gim;
+document.addEventListener("htmx:confirm", function (e) {
+  if (!e.detail.question) return;
+
+  e.preventDefault();
+  let matches = e.detail.question.match(deleteFilePattern);
+
+  document.getElementById("file-delete-description").textContent =
+    e.detail.question;
+  const fileDeleteModal = document.getElementById("file-delete-modal");
+  document
+    .getElementById("confirm-file-delete-button")
+    .addEventListener("click", (_) => {
+      e.detail.issueRequest(true);
+      fileDeleteModal.close();
+
+      if (matches != null && matches.length > 0) {
+        const fieldName = matches[0].replaceAll("'", "");
+        const fields = ["file-input", "alt-text", "field"];
+        fields.forEach((prefix) => {
+          document.getElementById(prefix + "-" + fieldName).value = "";
+        });
+        document.getElementById("field-" + fieldName).value = "";
+
+        const thumbnail = document.getElementById("field-thumbnail");
+        if (thumbnail) {
+          thumbnail.value = "";
+          document.getElementById("alt-text-thumbnail").value = "";
+        }
+      }
+    });
+  fileDeleteModal.showModal();
+});

@@ -49,6 +49,7 @@ type (
 		OGDescription string
 		Rating        string
 		Robots        []string
+		FieldMeta     map[string]string
 	}
 )
 
@@ -78,7 +79,7 @@ func PageDtoFrom(meta *schema.SchemaMeta) pageDto {
 			IsListable:   p.Listable,
 			Type:         p.Type,
 			Component:    component,
-			InputType:    slices.Contains([]string{"Color", "Email", "File", "Tel", "URL", "Number", "Date", "DateTime", "Time"}, component),
+			InputType:    slices.Contains([]string{"Color", "Email", "Tel", "Number", "Date", "DateTime", "Time"}, component),
 		})
 	}
 
@@ -86,9 +87,6 @@ func PageDtoFrom(meta *schema.SchemaMeta) pageDto {
 }
 
 func (dto *pageDto) EnhanceFromForm(c *gin.Context) {
-	for i, f := range dto.Fields {
-		dto.Fields[i].Value = c.PostForm("field-" + f.Name)
-	}
 	dto.IsEnabled = c.PostForm("is-enabled") == "on"
 	dto.Route = c.PostForm("route")
 
@@ -97,6 +95,7 @@ func (dto *pageDto) EnhanceFromForm(c *gin.Context) {
 		Description:   c.PostForm("meta-description"),
 		OGTitle:       c.PostForm("meta-og-title"),
 		OGDescription: c.PostForm("meta-og-description"),
+		FieldMeta:     map[string]string{},
 	}
 
 	if c.PostForm("meta-robots-noindex") == "on" {
@@ -108,6 +107,14 @@ func (dto *pageDto) EnhanceFromForm(c *gin.Context) {
 
 	if c.PostForm("meta-rating-adult") == "on" {
 		dto.Meta.Rating = "adult"
+	}
+
+	for i, f := range dto.Fields {
+		fieldValue := c.PostForm("field-" + f.Name)
+		dto.Fields[i].Value = fieldValue
+		if altText, found := c.GetPostForm("alt-text-" + f.Name); found && fieldValue != "" {
+			dto.Meta.FieldMeta[f.Name+":altText"] = altText
+		}
 	}
 }
 
@@ -228,6 +235,7 @@ func (dto *pageDto) ToMap() map[string]any {
 	for _, f := range dto.Fields {
 		fields[f.Name] = f.Value
 	}
+
 	return map[string]any{
 		"route":                    dto.Route,
 		"schemaName":               dto.SchemaName,
@@ -236,9 +244,8 @@ func (dto *pageDto) ToMap() map[string]any {
 		"secondaryIdentifier":      dto.SecondaryIdentifier,
 		"secondaryIdentifierValue": dto.SecondaryIdentifierValue,
 		"listableData":             dto.ListableData,
-		// "references":               dto.References,
-		"isEnabled": dto.IsEnabled,
-		"meta":      dto.Meta.ToMap(),
+		"isEnabled":                dto.IsEnabled,
+		"meta":                     dto.Meta.ToMap(),
 	}
 }
 
@@ -250,6 +257,7 @@ func (dm *pageMeta) FromModel(pm page_domain.PageMeta) {
 		OGDescription: pm.OGDescription,
 		Rating:        pm.Rating,
 		Robots:        pm.Robots,
+		FieldMeta:     pm.FieldMeta,
 	}
 }
 
@@ -265,6 +273,7 @@ func (dm *pageMeta) ToModel() page_domain.PageMeta {
 		OGDescription: dm.OGDescription,
 		Rating:        dm.Rating,
 		Robots:        dm.Robots,
+		FieldMeta:     dm.FieldMeta,
 	}
 }
 

@@ -20,12 +20,13 @@ type (
 	}
 
 	PageMeta struct {
-		Title         string   `json:"title,omitempty"`
-		Description   string   `json:"description,omitempty"`
-		OGTitle       string   `json:"ogTitle,omitempty"`
-		OGDescription string   `json:"ogDescription,omitempty"`
-		Rating        string   `json:"rating,omitempty"`
-		Robots        []string `json:"robots,omitempty"`
+		Title         string            `json:"title,omitempty"`
+		Description   string            `json:"description,omitempty"`
+		OGTitle       string            `json:"ogTitle,omitempty"`
+		OGDescription string            `json:"ogDescription,omitempty"`
+		Rating        string            `json:"rating,omitempty"`
+		Robots        []string          `json:"robots,omitempty"`
+		FieldMeta     map[string]string `json:"fieldMeta,omitempty"`
 	}
 
 	ListOptions struct {
@@ -42,5 +43,6 @@ func (pm PageMeta) ToMap() map[string]any {
 		"robots":        pm.Robots,
 		"ogTitle":       pm.OGTitle,
 		"ogDescription": pm.OGDescription,
+		"fieldMeta":     pm.FieldMeta,
 	}
 }

@@ -7,10 +7,13 @@ import (
 	"strings"
 
 	"github.com/aymerick/raymond"
+	"github.com/domahidizoltan/zhero/config"
 	"github.com/domahidizoltan/zhero/controller"
 	page_ctrl "github.com/domahidizoltan/zhero/controller/adminpage"
 	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/adminschema"
 	dynamicpage_ctrl "github.com/domahidizoltan/zhero/controller/dynamicpage"
+	"github.com/domahidizoltan/zhero/controller/file"
+	file_ctrl "github.com/domahidizoltan/zhero/controller/file"
 	"github.com/domahidizoltan/zhero/controller/pagerenderer"
 	preview_ctrl "github.com/domahidizoltan/zhero/controller/preview"
 	template_ctrl "github.com/domahidizoltan/zhero/controller/template"
@@ -27,6 +30,7 @@ type Services struct {
 	Page                page.Service
 	DynamicPageRenderer pagerenderer.DynamicPageRenderer
 	Route               route.Service
+	UploadsCfg          config.UploadsConfig
 }
 
 var mimeTypes = map[string]string{
@@ -43,6 +47,7 @@ func addCommonHandlers(router *gin.Engine, isAdmin bool) {
 	}
 
 	router.Static("/static", staticRoot)
+	router.Static(file.UploadsPath, "./"+file.UploadsPath)
 
 	router.GET("/asset/*path", func(ctx *gin.Context) {
 		assetPath := ctx.Param("path")
@@ -126,7 +131,7 @@ func SetAdminRoutes(router *gin.Engine, svc Services) {
 		admin.POST("/schema/save/:class", schemaorgCtrl.Save)
 		admin.GET("/schema/class-hierarchy", schemaorgCtrl.GetClassHierarchy)
 
-		pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page, svc.Route)
+		pageCtrl := page_ctrl.NewController(svc.Schema, svc.Page, svc.Route, svc.UploadsCfg)
 		admin.GET("/page/list", pageCtrl.Main)
 		admin.GET("/page/list/:class", pageCtrl.List)
 		admin.GET("/page/create/:class", pageCtrl.Create)
@@ -134,7 +139,10 @@ func SetAdminRoutes(router *gin.Engine, svc Services) {
 		admin.GET("/page/edit/:class/:identifier", pageCtrl.Edit)
 		admin.POST("/page/save/:class", pageCtrl.Save)
 		admin.POST("/page/get-valid-slug", pageCtrl.GetValidSlug)
-
 		admin.GET("/page/reference:search", pageCtrl.SearchReference)
+
+		fileCtrl := file_ctrl.NewController(svc.UploadsCfg)
+		admin.POST("/file", fileCtrl.Upload)
+		admin.DELETE("/file", fileCtrl.Delete)
 	}
 }
