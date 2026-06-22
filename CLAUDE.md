@@ -72,3 +72,4 @@ Each layer has its own detailed `CLAUDE.md` — consult them for specifics: `con
 
 - No CI/CD and no app Dockerfile (only a dev Adminer compose file).
 - Use Context7 to get up-to-date technical documentations.
+- See the project knowledgebase table of contents in `wiki/index.md`
