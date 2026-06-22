@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Presentation layer
 
 ## What this is
 
@@ -14,16 +12,6 @@ module builds. Templates are validated at parent-init time (see "How `template.g
 
 Rendering uses **`github.com/aymerick/raymond`** (a Go Handlebars engine), not Go's
 `html/template`.
-
-## Commands
-
-```bash
-gofmt -w template.go        # format the Go file
-go vet ./...                # vet (run from the parent module root)
-go build ./...              # build (run from the parent module root)
-```
-
-There are no tests in this directory.
 
 ## How `template.go` works (read this before adding/renaming files)
 
@@ -64,7 +52,7 @@ The CMS domain model is **Schema.org-driven**:
 
 ## Conventions and gotchas
 
-- **Custom Handlebars helpers are defined in the parent module, not here.** Templates depend on
+- **Custom Handlebars helpers are defined in ../pkg/handlebars/, not here.** Templates depend on
   them being registered on the raymond engine: `join`, `eq`, `equal`, `contains`, `concat`,
   `use`, `compareAndUse`, `mapValue`, `replace`, `beautify`, `htmxSortButton`, and the
   `eachMenuItem` block helper (exposes `@menu`). When adding a helper-like construct, register

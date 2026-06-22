@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Data
 
 ## Scope
 
@@ -15,6 +13,8 @@ The package implements a **schema-driven CMS** persisted in SQLite. Content type
 SQL files are compiled into the binary with `//go:embed` and exposed as an ordered `Scripts []string` slice. The slice order is the execution order — the consumer (in the parent module) runs each script in sequence. There is no rollback/down-migration concept; every script is written to be idempotent (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, etc.).
 
 ### Adding a migration
+
+Note: At this phase this is an MVP, so instead of adding new migration files we only extend the `0000_init_schemas.sql`.
 
 1. Create `db/sqlite/NNNN_description.sql` using the next zero-padded ordinal (existing: `0000_init_schemas.sql`).
 2. Add a matching `//go:embed NNNN_description.sql` directive and `var` in `sqlite.go`.

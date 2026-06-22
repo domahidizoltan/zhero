@@ -1,3 +1,6 @@
+gradle/
+localdev/
+
 .tool-versions
 .avante
 
@@ -15,6 +18,3 @@ zhero-content/
 
 .serena/
 openspec/
-AGENTS.md
-agent-os/
-.planning/

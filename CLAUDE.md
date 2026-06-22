@@ -1,10 +1,8 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
-Zhero is a Schema.org-driven, SEO-first headless CMS written in Go. Users define content models ("schemas") by picking a Schema.org class and configuring its properties, then create content instances ("pages") persisted as JSON-LD in SQLite and served on public pages with structured data. It compiles to a single self-contained binary (embedded templates/assets) targeting low-resource hardware (Raspberry Pi Zero) and Android (via a gomobile AAR).
+Zhero is a Schema.org-driven, SEO-first headless CMS written in Go. It is designed for non-technical users to create, manage, and deliver structured content effortlessly. The system leverages Schema.org's vocabulary to ensure all content is machine-readable and optimized for search engines, generating JSON-LD for rich results. The application is a single self-contained executable, making it easy to deploy on various platforms, including low-resource hardware (e.g. Raspberry Pi Zero, or Android phones).
 
 ## Commands
 
@@ -32,15 +30,23 @@ Single Go module, layered (clean architecture). Dependencies flow inward:
 
 - **`main.go`** — process entry; starts/stops the server, waits on SIGINT/SIGTERM.
 - **`server/server.go`** — composition root (DI wiring); inits SQLite, runs migrations, wires repos→services→router, starts the two Gin servers.
-- **`controller/`** — HTTP layer (Gin) split into `router`, `adminschema`, `adminpage`, `dynamicpage`, `pagerenderer`, `preview`, `file`, `template`.
-- **`domain/`** — business logic in `schemaorg`, `schema`, `page`, `route`; ports-and-adapters (each Service declares private collaborator interfaces, never imports concrete DB/HTTP types).
+- **`controller/`** — HTTP layer (Gin) handlers and DTOs split into `router`, `adminschema`, `adminpage`, `dynamicpage`, `pagerenderer`, `preview`, `file`, `template`.
+- **`domain/`** — entities and business logic in `schemaorg`, `schema`, `page`, `route`; ports-and-adapters (each Service declares private collaborator interfaces, never imports concrete DB/HTTP types).
 - **`repository/`** — hand-written `database/sql` queries (no ORM) for `page`, `route`, `schema`.
 - **`pkg/`** — shared libs (database/tx, handlebars, paging, rdf, jsonld, session, url, …).
 - **`data/db/sqlite/`** — embedded SQL migrations + ordered `Scripts` slice.
 - **`template/`** — embedded `.hbs`/`.css`/`.js` (Handlebars via `aymerick/raymond`, NOT html/template); frontend uses HTMX + Tailwind/DaisyUI (admin) via CDN.
 - **`zhero-android-app/`** — Kotlin wrapper hosting the Go server via the gomobile AAR.
 
-Tech stack: Gin, Handlebars (raymond), SQLite, rdf2go (Schema.org vocabulary → JSON-LD), Viper (config), zerolog, go-playground/validator, ULID, blackfriday. Config in `config.yaml`.
+## Tech stack
+
+- **Backend:** [Go](https://go.dev/), [Gin Web Framework](https://gin-gonic.com/)
+- **Frontend:** [HTMX](https://htmx.org/), JavaScript, [Tailwind CSS](https://tailwindcss.com/), [DaisyUI CSS Framework](https://daisyui.com/)
+- **Templating:** [Handlebars](https://github.com/aymerick/raymond) (via `aymerick/raymond`)
+- **Database:** [SQLite](https://sqlite.org/index.html) (via [modernc.org/sqlite](https://pkg.go.dev/modernc.org/sqlite))
+- **Data Formats:** [JSON-LD](https://json-ld.org/) for structured data, RDF for [Schema.org](https://schema.org/) graph processing.
+- **Logging:** [Zerolog](https://github.com/rs/zerolog)
+- **Configuration:** [Viper](https://github.com/spf13/viper)
 
 ## Critical Cross-Cutting Concerns
 
@@ -54,12 +60,9 @@ Tech stack: Gin, Handlebars (raymond), SQLite, rdf2go (Schema.org vocabulary →
 
 ## Database
 
-SQLite, no ORM. Migrations live in `data/db/sqlite/` and run automatically at startup (`database.Migrate`).
-
-- **Add a migration:** create `data/db/sqlite/NNNN_description.sql` (next zero-padded ordinal), add a matching `//go:embed` + var in `sqlite.go`, append it to `Scripts` in order.
-- **Idempotent only:** there are no down-migrations; the full list re-runs every startup, so use `CREATE TABLE/INDEX IF NOT EXISTS`.
-- **FTS5 `page_search` has exactly 5 generic columns** (`col0..col4`), filled positionally from `Page.SearchVals` (`MaxSearchVals = 5`). Searchable properties map into the 5 slots by position.
-- **Routes are versioned:** `route.Create` auto-increments version; `CustomRouteMiddleware` issues 301s for outdated slugs.
+- SQLite, no ORM.
+- See database migration specific details in `data/CLAUDE.md`
+- See data persistence and repository layer specific details in `repository/CLAUDE.md`
 
 ## Per-Layer Docs
 
@@ -67,6 +70,5 @@ Each layer has its own detailed `CLAUDE.md` — consult them for specifics: `con
 
 ## Notes
 
-- `go.mod` declares Go 1.26; older docs say 1.24+ (prefer `go.mod`).
-- `config.yaml` key `supportedImageTYpes` mismatches the struct tag `supportedImageTypes` — image types likely don't load from YAML.
 - No CI/CD and no app Dockerfile (only a dev Adminer compose file).
+- Use Context7 to get up-to-date technical documentations.

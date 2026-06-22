@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Data persistence and repository
 
 ## Scope
 
@@ -8,21 +6,6 @@ This directory is the **data-persistence (repository) layer** of the `github.com
 Go module — a schema-driven CMS. The module root (`go.mod`, `main.go`) and the packages these
 files depend on (`pkg/database`, `pkg/paging`, `pkg/collection`, `domain/*`) live **outside this
 directory**, one or more levels up. Import paths here are `github.com/domahidizoltan/zhero/repository/{page,route,schema}`.
-
-## Commands
-
-Go resolves the module by walking up to the parent `go.mod`, so these run from this directory:
-
-```sh
-go build ./...                 # build the three repository packages
-go vet ./...
-staticcheck ./...              # linter in use (emits SA#### diagnostics)
-go test ./...                  # no test files exist here yet
-go test -run TestName ./page/  # run a single test in a package
-```
-
-Cross-platform driver selection is done with build tags (see below). To exercise the Android
-path: `go build -tags android ./...` (requires cgo — `CGO_ENABLED=1` and a C toolchain).
 
 ## Architecture
 
@@ -39,6 +22,7 @@ and backed by SQLite. They model a CMS where users define **schemas** (content t
   `page_search` row in sync for full-text search.
 - **`route/`** — maps a URL `route` to a `page`, **versioned**. `Create` auto-increments version via
   `MAX(version)+1` per page; `GetByRoute` resolves a URL, `GetLatestVersion` finds newest route for a page.
+- Shared helper functions are in the `../pkg/database/`. The `pkg/` directory has it's own documentation.
 
 ### Critical convention: transactions live in the context
 

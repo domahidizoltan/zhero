@@ -1,30 +1,8 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Domain
 
 ## Scope
 
 This directory is the **domain layer** of the larger `github.com/domahidizoltan/zhero` Go module. There is no `go.mod` here — the module root (and `go.mod`, `config`, `pkg/`, `rdf_schema.jsonld`) lives two levels up, at the `zhero/` root. Import paths like `github.com/domahidizoltan/zhero/pkg/...` resolve against that root.
-
-## Commands
-
-Run from the module root (`zhero/`), not from this directory:
-
-```bash
-# Test the whole domain layer
-go test ./domain/...
-
-# Test a single package
-go test ./domain/schemaorg/
-
-# Run a single test / subtest (subtests use t.Run names)
-go test ./domain/schemaorg/ -run TestSchemaorg
-go test ./domain/schemaorg/ -run 'TestSchemaorg/gets_schema_class'
-
-# Vet + build
-go vet ./domain/...
-go build ./domain/...
-```
 
 Note: `schemaorg/service_test.go` reads the RDF schema from `../../rdf_schema.jsonld` (relative to the package), falling back to downloading from the Schema.org release URL in `config.RdfConfig.Source`. The file must exist at the module root or be fetchable for tests to pass.
 

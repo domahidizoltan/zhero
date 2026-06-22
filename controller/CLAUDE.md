@@ -1,24 +1,8 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Controller layer
 
 ## Scope
 
 This directory is the **controller (HTTP) layer** of Zhero, a schema-driven CMS. It is one package tree inside the larger Go module `github.com/domahidizoltan/zhero`, whose root (with `go.mod`, `main`, `domain/`, `template/`, `pkg/`, `config/`) lives in the parent directory. Code here imports those siblings via the full module path (e.g. `github.com/domahidizoltan/zhero/domain/page`).
-
-## Commands
-
-Go commands must run from the **module root** (parent dir), since `go.mod` lives there. Target this layer with the `./controller/...` pattern:
-
-```bash
-go build ./controller/...                         # build this layer
-go test ./controller/...                          # test this layer
-go test ./controller/dynamicpage/ -run TestName   # single package / single test
-go vet ./controller/...
-golangci-lint run ./controller/...                # linter (staticcheck-style QF/fmtappendf hints are enforced)
-```
-
-There are currently no `_test.go` files in this layer.
 
 ## Architecture
 

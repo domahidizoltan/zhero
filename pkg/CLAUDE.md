@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Helpers and Shared utilities
 
 ## Scope
 
@@ -8,32 +6,6 @@ This directory (`pkg/`) holds the shared, reusable library packages for the **zh
 (module `github.com/domahidizoltan/zhero`). There is no `go.mod` here — the module root is the
 parent directory. These packages are consumed by the app's sibling packages (`config`, `template`,
 `domain/page`) which live outside `pkg/`.
-
-zhero is a schema.org-driven web CMS: pages are typed by schema.org schemas, structured data is
-emitted as JSON-LD, and schema definitions are loaded from an RDF graph.
-
-## Commands
-
-```bash
-go test ./...                      # test all pkg packages (only ./url has tests today)
-go test ./url -run TestSlugify     # run a single test
-go vet ./...                       # vet all pkg packages
-go build ./...                     # build all pkg packages (default/non-android)
-go build -tags android ./...       # build the android variant (requires cgo)
-```
-
-Wildcard commands (`./...`) are run from this `pkg/` directory and only cover `pkg/*` packages.
-Use the parent module root to exercise the whole application.
-
-## Build tags & platform
-
-- **SQLite driver is swapped by build tag**, and the driver *name string* differs:
-  - default (`//go:build !android`) → `modernc.org/sqlite`, driver name `"sqlite"` (pure Go, no cgo)
-  - `//go:build android` → `github.com/mattn/go-sqlite3`, driver name `"sqlite3"` (cgo)
-  See `database/database.go` vs `database/database_android.go`.
-- Android targets build via gomobile and **require cgo** (the `android/386 requires external (cgo)
-  linking` diagnostic is expected when cgo is off — it is not a code bug).
-- `logging.ConfigureLogging` force-disables colored output when `cfg.Env.Platform == "android"`.
 
 ## Gotchas
 
