@@ -27,10 +27,16 @@ Schema.org data is stored in a RDF (Resource Description Framework) triple forma
 
 #### Define schema class
 
-Once the Schema.org schema is selected, the next step is to define the class. Here we define how a schema instance (class) will look like, what later will be a blueprint for creating pages.
+Once the Schema.org schema is selected, the next step is to define the class. Here we define how a schema instance (class) will look like including the properties, what later will be a blueprint for creating pages.
+Here we define the following terms:
+- Schema name: the Schema.org name of the class type what will be used as a technical reference
+- Identifier: a generated unique ID of a page
+- Secondary Identifier: a human readable unique name, like the title of the page what would be used in URL slugs and search references
 
 See [feature/define-schema.md](feature/define-schema.md) for more details about schema definition feature.  
 See [feature/define-schema.md#data-mapping](feature/define-schema.md#data-mapping) for schema definition data mapping details.
+
+Note: this is a combined feature where we can also update the defined schemas.
 
 #### Create page
 
@@ -39,8 +45,11 @@ Here we can define specific values for the given page:
 - HTML meta values
 - field values of the properties
 - enable or disable a page (in case we don't want to show them on the public facing page)
-!! TODO: reference search, file upload, etc
-Pages are listed in the Admin panel in a table with filtering and paging capabilities.
+
+See [feature/create-page.md](feature/create-page.md) for more details about page creation feature.  
+See [feature/create-page.md#data-mapping](feature/create-page.md#data-mapping) for page creation data mapping details.
+
+Note: this is a combined feature where we can also update the created pages.
 
 #### Preview page
 
@@ -70,6 +79,7 @@ When a page is requested, first we check the URL. There is a routing table where
 When the URL is not found in the routing table we try to load the page by matching the schema name and the identifier from the URL.
 If there is no match, a 404 Not Found page is returned. 
 
+See [feature/routing.md](feature/routing.md) for more details about page routing feature.  
 
 ---
 

@@ -38,7 +38,7 @@ The **Schema** is organized in 2 database tables:
   - `listable`: shows if the property appears on the listing pages
 
 The **Schema Properties** have the following attributes:
-- Name: the Schema.org name of the property
+- **Name**: the Schema.org name of the property  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit-property.partial.hbs`| `property-name` name 
@@ -46,7 +46,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.Property` | `Name` | 
   SQL | `schema_meta_properties` | `name`
 
-- Hidden: shows is the property is hidden on the Admin edit page, and will not be used in pages
+- **Hidden**: shows is the property is hidden on the Admin edit page, and will not be used in pages  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit-property.partial.hbs`| | checkbox is checked when `NotUsed` is true for `adminschema.schemaPropDto` 
@@ -54,7 +54,7 @@ The **Schema Properties** have the following attributes:
   domain | | | loaded only when it is not marked as hidden
   SQL | | | saved in `schema_meta_properties` only when it is not marked as hidden
 
-- Mandatory: shows if the property is mandatory for the page
+- **Mandatory**: shows if the property is mandatory for the page  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit-property.partial.hbs`| `property-mandatory` name
@@ -62,7 +62,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.Property` | `Mandatory` | 
   SQL | `schema_meta_properties` | `mandatory`
 
-- Searchable: shows if the property value is available for search
+- **Searchable**: shows if the property value is available for search  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit-property.partial.hbs`| `property-searchable` name 
@@ -70,7 +70,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.Property` | `Searchable` | 
   SQL | `schema_meta_properties` | `searchable`
 
-- Listable: shows if the property appears on the listing pages
+- **Listable**: shows if the property appears on the listing pages  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit-property.partial.hbs`| `property-listable` name 
@@ -78,7 +78,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.Property` | `Listable` | 
   SQL | `schema_meta_properties` | `listable`
 
-- Type: the Schema.org type of the property
+- **Type**: the Schema.org type of the property  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit-property.partial.hbs`| `property-type` name | a select list of possible types from `PossibleTypes` of `adminschema.schemaPropDto`
@@ -86,7 +86,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.Property` | `Type` | 
   SQL | `schema_meta_properties` | `type`
 
-- HTML Component: how to render the property as HTML
+- **HTML Component**: how to render the property as HTML  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit-property.partial.hbs`| `property-component` name | a select list of possible components
@@ -94,7 +94,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.Property` | `Component` | 
   SQL | `schema_meta_properties` | `component`
 
-- Order: the position of the property
+- **Order**: the position of the property  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit.hbs` | `property-order` name | this is an ordered comma separated list of property names
@@ -102,7 +102,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.Property` | `Order` | 
   SQL | `schema_meta_properties` | `order` | 
 
-- Identifier: the property used as Identifier
+- **Identifier**: the property used as Identifier  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit.hbs`| `identifier` name
@@ -110,7 +110,7 @@ The **Schema Properties** have the following attributes:
   domain | `schema.SchemaMeta` | `Identifier` | 
   SQL | `schema_meta` | `secondary_identifier`
 
-- Secondary Identifier: the property used as Secondary Identifier
+- **Secondary Identifier**: the property used as Secondary Identifier  
   type | location | mapping | note
   -|-|-|-
   HTML | `template/admin/schemaorg/edit.hbs` | `secondary-identifier` name
