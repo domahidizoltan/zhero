@@ -108,7 +108,7 @@ The **Schema Properties** have the following attributes:
   HTML | `template/admin/schemaorg/edit.hbs`| `identifier` name
   DTO | `adminschema.schemaDto` | `Identifier`
   domain | `schema.SchemaMeta` | `Identifier` | 
-  SQL | `schema_meta` | `secondary_identifier`
+  SQL | `schema_meta` | `identifier`
 
 - **Secondary Identifier**: the property used as Secondary Identifier  
   type | location | mapping | note
@@ -116,5 +116,5 @@ The **Schema Properties** have the following attributes:
   HTML | `template/admin/schemaorg/edit.hbs` | `secondary-identifier` name
   DTO | `adminschema.schemaDto` | `SecondaryIdentifier`
   domain | `schema.SchemaMeta` | `SecondaryIdentifier` | 
-  SQL | `schema_meta` | `identifier`
+  SQL | `schema_meta` | `secondary_identifier`
 
