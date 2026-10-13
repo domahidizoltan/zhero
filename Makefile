@@ -5,6 +5,26 @@ all: build
 build:
 	go build -o zhero main.go
 
+# --- Verification (fmt + vet + lint + test) ---
+.PHONY: check
+check: fmt-check vet lint test
+
+.PHONY: fmt-check
+fmt-check:
+	@files=$$(gofmt -l .); if [ -n "$$files" ]; then echo "gofmt needed on:"; echo "$$files"; exit 1; fi
+
+.PHONY: vet
+vet:
+	go vet ./...
+
+.PHONY: lint
+lint:
+	golangci-lint run ./...
+
+.PHONY: test
+test:
+	go test ./...
+
 # Cross-compile for Raspberry Pi Zero W (armv6l)
 .PHONY: build-rpi-zero
 build-rpi-zero:

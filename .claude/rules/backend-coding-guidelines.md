@@ -3,7 +3,7 @@ paths:
   - "**/*.go"
 ---
 
-# Backend coding guidlines
+# Backend coding guidelines
 
 - Follow [Effective Go](https://go.dev/doc/effective_go).
 - Interfaces are defined on the consumer side (e.g. service defines the repository interface before injection).

@@ -1,4 +1,4 @@
-# Coding guidlines
+# Coding guidelines
 
 - Keep responses and modifications minimal; avoid speculative changes.
 - Focus on relevant code areas; avoid unrelated changes.
@@ -8,5 +8,6 @@
 - Explain "why" not "what" for complex logic.
 - Avoid global state; use constructor functions for dependency injection.
 - Ensure code is environment-aware (dev, test, prod).
-- Use Context7 to get the most up-to-date documentations.- Avoid introducing new patterns or technologies without necessity.
+- Use Context7 to get the most up-to-date documentations.
+- Avoid introducing new patterns or technologies without necessity.
 - File names support fuzzy search (e.g. `page/repository.go`, `controller/router`, `schema/controller.go`, `page/model.go`, `schema/service.go`, `page/edit.hbs`).

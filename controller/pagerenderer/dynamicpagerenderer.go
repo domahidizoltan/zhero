@@ -42,7 +42,7 @@ func (DynamicPageRenderer) Render(meta schema.SchemaMeta, data map[string]any) (
 		cssClass := strings.ToLower(meta.Name + "-" + prop.Name)
 
 		if prop.Name == meta.SecondaryIdentifier {
-			b.WriteString(fmt.Sprintf("<h1 class=\"%s\">%s</h1>", cssClass, v))
+			fmt.Fprintf(&b, "<h1 class=\"%s\">%s</h1>", cssClass, v)
 			continue
 		}
 
@@ -67,12 +67,12 @@ func (DynamicPageRenderer) Render(meta schema.SchemaMeta, data map[string]any) (
 			fmt.Println("file")
 
 			filePath := fmt.Sprintf("%s/%s/%s/%s", file.UploadsPath, meta.Name, data["identifier"], strVal)
-			b.WriteString(fmt.Sprintf("<p class=\"%s\"><a href=\"%s\" alt=\"%s\" target=\"_blank\">%s</a></p>", cssClass, filePath, altText, altText))
+			fmt.Fprintf(&b, "<p class=\"%s\"><a href=\"%s\" alt=\"%s\" target=\"_blank\">%s</a></p>", cssClass, filePath, altText, altText)
 		case "Image":
 			filePath := fmt.Sprintf("%s/%s/%s/%s", file.UploadsPath, meta.Name, data["identifier"], strVal)
-			b.WriteString(fmt.Sprintf("<p class=\"%s\"><img src=\"%s\" alt=\"%s\" /></p>", cssClass, filePath, altText))
+			fmt.Fprintf(&b, "<p class=\"%s\"><img src=\"%s\" alt=\"%s\" /></p>", cssClass, filePath, altText)
 		default:
-			b.WriteString(fmt.Sprintf("<p class=\"%s\">%s</p>", cssClass, strVal))
+			fmt.Fprintf(&b, "<p class=\"%s\">%s</p>", cssClass, strVal)
 		}
 	}
 	return b.String(), nil
@@ -129,20 +129,20 @@ func (DynamicPageRenderer) List(listable schema.SchemaMeta, data []map[string]an
 					}
 					delete(listableProperties, k+"_alt")
 				}
-				details.WriteString(fmt.Sprintf("<br/><span><a href=\"/%s\" target=\"_blank\">%s</a></span>", strVal, linkText))
+				fmt.Fprintf(&details, "<br/><span><a href=\"/%s\" target=\"_blank\">%s</a></span>", strVal, linkText)
 				continue
 			}
 
-			details.WriteString(fmt.Sprintf("<br/><span>%s</span>", v))
+			fmt.Fprintf(&details, "<br/><span>%s</span>", v)
 		}
 
-		b.WriteString(fmt.Sprintf(`<div class="%[1]s">
+		fmt.Fprintf(&b, `<div class="%[1]s">
     <div class="img skeleton" onclick="window.location.href='%[2]s'">%[4]s</div>
     <div class="content">
 			<b><a href="%[2]s">%[3]s</a></b>
 			%[5]v
 		</div>
-</div>`, cssClass, link, secID, image, details.String()))
+</div>`, cssClass, link, secID, image, details.String())
 	}
 	b.WriteString("</div>")
 

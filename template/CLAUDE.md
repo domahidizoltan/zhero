@@ -63,7 +63,7 @@ The CMS domain model is **Schema.org-driven**:
   token `#ZHERO#<type>/<id>#{json meta}#` (meta carries `linkText`/`altText`). Parsing/insertion
   lives in `admin/page/page.js` (`refPattern`, `setReference`); the picker UI is
   `admin/page/search-reference.hbs`. Keep the token format identical across JS and any Go that
-  parses it.
+  parses it. Go stages: `controller/CLAUDE.md`.
 - **File uploads** — `File`/`Image` fields POST to `/admin/file` via HTMX with
   `X-File-Dir`, `X-File-Name-Prefix`, `X-Form-File-Name` headers. Stored files are served from
   `/zhero-content/uploads/<class>/<identifier>/<file>`; image thumbnails use the `_thumb`

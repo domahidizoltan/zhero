@@ -28,8 +28,8 @@ The domain layer never imports DB/HTTP types; repositories map domain↔SQL by h
 
 ## The source of truth and its four projections
 
-`page.data` (JSON-LD) is the source of truth for a page. Three sibling columns and one FTS
-table are **denormalized from it** and must all be rewritten on every page write
+`page.data` (JSON-LD) is the source of truth for a page. Four sibling columns/tables are
+**denormalized from it** and must all be rewritten on every page write
 (`repository/page` `Insert`/`Update`):
 
 | Projection | SQL | Derived from | Purpose |
@@ -37,6 +37,7 @@ table are **denormalized from it** and must all be rewritten on every page write
 | Canonical data | `page.data` | the field map + `@id`/`@type`/id-field injected on write | JSON-LD read model, SEO/API output |
 | Listable data | `page.listable_data` | fields flagged `listable` | fast listing tiles without loading full data |
 | Meta | `page.meta` | `PageMeta` (SEO/OpenGraph, `fieldMeta`) | header rendering, avoids SQL joins |
+| References | `page.references` | long-form targets from `extractReferences` | cross-page links, index = `#refN` |
 | Search | `page_search.col0..col4` | first 5 `searchable` field values (`MaxSearchVals`) | FTS5 full-text search |
 
 Notes:
@@ -48,27 +49,17 @@ Notes:
 
 ## Reference lifecycle (4 stages)
 
-Cross-page links round-trip through four representations; changing one regex/token format
-breaks the others. Regexes live in `controller/controller.go`
-(`RefPattern`, `ShortRefPattern`) and mirror `template/admin/page/page.js`.
-
-1. **Author** — field embeds `#ZHERO#<schema_name>/<identifier>#{<json meta>}#`
-   (`meta`: `linkText`, `altText`).
-2. **Persist** — `adminpage/dto.go extractReferences` swaps each long ref for compact `#refN`
-   and stores the targets in `Page.References` (index = N) → `page.references` column.
-3. **Load** — `replaceShortRefs` expands `#refN` back to the long form for the editor.
-4. **Resolve** — `dynamicpage.transformReferences` looks up targets via
-   `pageSvc.ListEnabledRoutesByRef` and rewrites to `<a href>` (plain text when the target is
-   disabled/missing or `disableAllLinks` is set, e.g. previews).
+Cross-page links round-trip through four representations: authoring token → `#refN` on persist
+→ expand on load → resolve to `<a href>`. Full detail incl. functions: `controller/CLAUDE.md`.
+Token formats: `wiki/dynamic-data-conventions.md` §4.
 
 ## Write atomicity
 
-Multi-step domain writes run in one context-propagated transaction (`database.InTx`).
-Repository write methods pull the active `*sql.Tx` off the context and return
-`ErrTransactionNotFound` if absent — they never open their own. Example: `page.Create`
-inserts the page **and** assigns its route inside a single `InTx`.
+Multi-step domain writes run in one context-propagated `database.InTx`; repo writes return
+`ErrTransactionNotFound` without one. Mechanics: `pkg/CLAUDE.md`; repo-side contract:
+`repository/CLAUDE.md`.
 
 ## The `onlyEnabled` flag
 
-Page read paths take `onlyEnabled bool`: `true` for public-facing queries (published pages
-only), `false` for admin/editing. Preserve this distinction when adding read paths.
+Page read paths take `onlyEnabled bool`: `true` = public/published only, `false` = admin.
+Details: `domain/CLAUDE.md`.

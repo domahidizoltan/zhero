@@ -1,6 +1,7 @@
 package schemaorg
 
 import (
+	"os"
 	"testing"
 
 	"github.com/domahidizoltan/zhero/config"
@@ -14,7 +15,15 @@ func TestSchemaorg(t *testing.T) {
 		Source: jsonldURL,
 		File:   "../../rdf_schema.jsonld",
 	})
-	assert.NoError(t, err)
+	if err != nil {
+		// rdf_schema.jsonld is gitignored; on fresh clone without network this fails.
+		// Skip the test rather than fail - the real value (unstable-node filtering)
+		// only matters when the graph loads.
+		if _, statErr := os.Stat("../../rdf_schema.jsonld"); os.IsNotExist(statErr) {
+			t.Skipf("rdf_schema.jsonld absent and download failed: %v", err)
+		}
+		t.Fatalf("NewService failed: %v", err)
+	}
 
 	t.Run("gets_all_classes", func(t *testing.T) {
 		res := so.GetAllClasses()

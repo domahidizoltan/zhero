@@ -12,7 +12,6 @@ import (
 	page_ctrl "github.com/domahidizoltan/zhero/controller/adminpage"
 	schemaorg_ctrl "github.com/domahidizoltan/zhero/controller/adminschema"
 	dynamicpage_ctrl "github.com/domahidizoltan/zhero/controller/dynamicpage"
-	"github.com/domahidizoltan/zhero/controller/file"
 	file_ctrl "github.com/domahidizoltan/zhero/controller/file"
 	"github.com/domahidizoltan/zhero/controller/pagerenderer"
 	preview_ctrl "github.com/domahidizoltan/zhero/controller/preview"
@@ -47,7 +46,7 @@ func addCommonHandlers(router *gin.Engine, isAdmin bool) {
 	}
 
 	router.Static("/static", staticRoot)
-	router.Static(file.UploadsPath, "./"+file.UploadsPath)
+	router.Static(file_ctrl.UploadsPath, "./"+file_ctrl.UploadsPath)
 
 	router.GET("/asset/*path", func(ctx *gin.Context) {
 		assetPath := ctx.Param("path")

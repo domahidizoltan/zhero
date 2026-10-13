@@ -42,7 +42,7 @@ This is the most subtle mechanism and spans several files. References let a page
 3. **Loading** (`dto.go` `replaceShortRefs`, `dynamicpage` `transformShortRef`): `#refN` tokens are expanded back to long refs using the stored slice.
 4. **Resolving** (`dynamicpage` `transformReferences`): long refs are looked up via `pageSvc.ListEnabledRoutesByRef` and rewritten to `<a href>` anchors (or plain text when the target is disabled/missing, or when `disableAllLinks` is set, e.g. in previews). Resolved links land in `data["references"]`, which the renderer substitutes into field values.
 
-When touching references, keep all four stages in sync — changing one regex or token format breaks round-tripping.
+When touching references, keep all four stages in sync — changing one regex or token format breaks round-tripping. Go regexes (`RefPattern`, `ShortRefPattern` in `controller.go`) mirror `template/admin/page/page.js` (`refPattern`, `setReference`) — Go and JS must stay in sync.
 
 ### Package map
 
@@ -61,5 +61,5 @@ When touching references, keep all four stages in sync — changing one regex or
 ## Conventions
 
 - **Logging** is structured via `zerolog` (`log.Error().Err(err).Str(...).Msg(...)`). Error helpers in `controller.go` already log; don't double-log.
-- **Components** are derived by name/type heuristics in `adminpage.determineComponent` and consumed by `pagerenderer`. Adding a new component means updating both, plus the component list in `adminschema/controller.go`.
+- **Components** are derived by name/type heuristics in `adminpage.determineComponent` and consumed by `pagerenderer`. Adding a new component means updating `adminpage.determineComponent`, `pagerenderer`, the component list in `adminschema/controller.go`, and `getTypeComponents` in `template/admin/schemaorg/schemaorg.js`. Mapping table: `wiki/dynamic-data-conventions.md` §5.
 - DTO structs (`adminpage/dto.go`, `adminschema/dto.go`) are the boundary between domain models and templates; convert through `…From`/`ToModel`/`ToMap` rather than passing domain types to templates directly.

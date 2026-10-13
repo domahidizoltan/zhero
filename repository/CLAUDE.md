@@ -58,3 +58,5 @@ page(schema_name, identifier, secondary_identifier, listable_data, data, meta, r
 page_search(schema_name, identifier, col0, col1, col2, col3, col4)   -- FTS-style mirror of page
 route(route, page, version)                                          -- (page, version) is the natural key
 ```
+
+Four-projection overview: `wiki/data-mapping-overview.md`.

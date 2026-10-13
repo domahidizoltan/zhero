@@ -73,8 +73,11 @@ func (p Meta) ToDto(baseURL, htmxTarget string) *Dto {
 		}
 	}
 
-	if limit := p.TotalPages - jump; limit >= 0 && p.CurrentPage < limit {
-		pg.Last = strconv.Itoa(int(p.TotalPages))
+	if p.TotalPages > jump {
+		limit := p.TotalPages - jump
+		if p.CurrentPage < limit {
+			pg.Last = strconv.Itoa(int(p.TotalPages))
+		}
 	}
 	for i := range jump {
 		if this := p.CurrentPage + uint(i) + 1; this <= p.TotalPages {

@@ -29,6 +29,15 @@ Each package is a focused, mostly-stateless helper layer. Cross-cutting themes:
 - **Persistence:** `database` owns a package-level `*sql.DB` singleton plus **context-based
   transactions** — `InTx` stores a `*sql.Tx` under a context key, nested `InTx` calls reuse the
   existing tx, and `GetTx` retrieves it. Migrations are applied as a slice of raw SQL strings.
+
+### Transactions (context-propagated)
+
+`database.InTx(ctx, fn)` stores a `*sql.Tx` on the context; nested `InTx` calls reuse the
+existing tx, and `GetTx` retrieves it. Repository WRITE methods (`Insert`, `Update`, `Delete`,
+`Enable`, `Upsert`, `route.Create`) require an ambient transaction and return
+`database.ErrTransactionNotFound` when absent — they never open their own. Read methods call the
+repo directly using the package-level `db`. Wrap multi-step domain writes (e.g. `page.Create`
+inserts page + assigns route) in a single `InTx` so they commit or roll back atomically.
 - **Session/flash:** `session` wraps `gin-contrib/sessions` (in-memory `memstore`) for flash messages.
 
 ## Conventions

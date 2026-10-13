@@ -17,4 +17,7 @@ zhero-content/
 openspec/
 AGENTS.md
 agent-os/
-.planning/
+.planning
+#temp
+.claude/skills
+.claude/settings.json

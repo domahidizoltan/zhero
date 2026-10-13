@@ -208,5 +208,7 @@ func (ctrl *Controller) transformShortRef(ctx context.Context, data map[string]a
 		}
 		data[k] = v
 	}
-	ctrl.transformReferences(ctx, data, disableAllLinks)
+	if err := ctrl.transformReferences(ctx, data, disableAllLinks); err != nil {
+		log.Err(err).Msg("failed to transform references")
+	}
 }

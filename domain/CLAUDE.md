@@ -32,7 +32,8 @@ This is why `page.Service` depends on a `routeSvc` interface (not `route.Service
 
 ### Transactions
 
-Write operations wrap their repo calls in `database.InTx(ctx, func(ctx) error { ... })` from `pkg/database`. The transaction is propagated through `context.Context` — repo methods pull the active tx off the context. Any multi-step write (e.g. `page.Create` inserting a page **and** assigning a route) must run inside a single `InTx` so it commits or rolls back atomically. Read methods call the repo directly without `InTx`.
+Write ops wrap repo calls in `database.InTx` — mechanics: `pkg/CLAUDE.md`. Multi-step writes
+(e.g. `page.Create` = insert + assign route) must be one `InTx`; reads skip it.
 
 ### `onlyEnabled` flag
 

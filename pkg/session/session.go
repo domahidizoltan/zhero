@@ -10,10 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	flashKey = "_flash"
-)
-
 var ErrSessionSave = errors.New("failed to save session")
 
 func SessionMiddleware() gin.HandlerFunc {

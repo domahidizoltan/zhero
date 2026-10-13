@@ -31,4 +31,4 @@ The tables form a content-modeling system rather than a fixed domain schema:
 - **`page_search`** — FTS5 virtual table for full-text search. Columns are generic (`col0`–`col4`), so a schema's `searchable` properties are mapped positionally into these five slots rather than by name.
 - **`route`** — custom URL routing. Maps a `route` string to a `page` with a `version`, enabling redirect middleware and versioned addressing.
 
-When changing how content is stored, keep the four projections consistent: a write to `page.data` (JSON-LD) must be reflected into `listable_data`, the `page_search` columns, and `route` as applicable — these are derived views of the same content, not independent sources of truth.
+When changing how content is stored, keep the four projections consistent: a write to `page.data` must be reflected into `listable_data`, `meta`, `references`, and the `page_search` rows — projection sync rules: `wiki/data-mapping-overview.md`.

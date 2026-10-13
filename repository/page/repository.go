@@ -357,20 +357,20 @@ func (r *Repository) ListEnabledRoutesByRef(ctx context.Context, refs []string) 
 	}
 
 	stmt, err := r.db.PrepareContext(ctx, query)
-	defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer stmt.Close()
 
 	anyRefs := slices.Collect(collection.MapValues(refs, func(in string) any {
 		return any(in)
 	}))
 
 	rows, err := stmt.Query(anyRefs...)
-	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	results := map[string]domain.Page{}
 	for rows.Next() {
